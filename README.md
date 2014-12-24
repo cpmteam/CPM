@@ -1,7 +1,7 @@
 CPM
 ===
 
-Cache Package Manager
+Caché Package Manager
 
 1. Need any container - XML ok
 2. at the moment using xml for metainfo: i.e. metainfo.xml
