@@ -26,32 +26,48 @@ THE SOFTWARE.
 */
 
 SHELL
+	new
     #; here goes interactive entry
     set pattern=##class(%Regex.Matcher).%New("\b[^ ]+\b|\""([^\""]+)\""")
+    #; aliases for commands
+    f i=1:1 {
+	    set line=$text(ALIASES+i)
+	    quit:$e(line)'=" "
+	    set command=$zstrip($piece(line,";",2),"<>WCP")
+    	f j=3:1:$l(line,";") {
+	    	set alias=$zcvt($piece(line,";",j),"U")
+	    	continue:alias=""
+	    	continue:$data(aliases(alias))
+	    	set aliases(alias)=command
+    	}
+    }
     for {
 	    write !,"CPM>> "
 	    read line
 	    set line=$zstrip(line,"<>WC")
 	    
+	    set command=$piece(line," ")
+	    set line=$extract(line,$find(line," ")+1,*)
 	    kill args
 	    set args=0
 	    set pattern.Text=line
 	    while pattern.Locate() {
-		    set args($increment(args))=$zstrip(pattern.Group,"<>WCP")
+		    set argument=$zstrip(pattern.Group,"<>WC")
+		    set args($increment(args))=$zstrip(argument,"<>","""")
 	    }
 	    
-	    continue:args=0
-	    set command=args(1)
+	    continue:command=""
 	    set command=$zconvert(command,"U")
+	    if $d(aliases(command),command) zw command
 	    
 	    quit:command="QUIT"
-	    quit:command="Q"
 	    
 	    if $text(@command)="" {
 		    write !,"Unrecognized command: ",command,!
 		    continue
 		}
 		try {
+			set command=command_"(args...)"
 			do @command
 		} catch {
 			write !,"Error occured: ",$zerror
@@ -61,8 +77,23 @@ SHELL
 BATCH(args...)
     ; here goes batch entry
     quit
+ALIASES
+ ;QUIT;Q
+ ;INSTALL;I
+ ;HELP;?
+ ;LIST;L
 COMMANDS
-INSTALL(args...) ;;install package
+INSTALL(packages...) ;;install package
+	if '$d(packages) {
+		write !,"Nothing to install"
+		quit
+	}
+	
+	write !,"Installing packages: "
+	for i=1:1:packages {
+		set package=packages(i)
+		write !?3,package
+	}
 	quit
 LIST(args...) ;;list of installed packages
 	quit
