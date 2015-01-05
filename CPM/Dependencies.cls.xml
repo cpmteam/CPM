@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.Dependencies">
+<Super>%Installer.Sequence</Super>
+<TimeCreated>63557,46571.639673</TimeCreated>
+</Class>
+</Export>
