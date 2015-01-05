@@ -27,10 +27,24 @@ THE SOFTWARE.
 
 SHELL
     ; here goes interactive entry
+    for {
+	    write !,"CPM>> "
+	    read line
+	    set line=$zstrip(line,"<>WC")
+	    set command=$zcvt($piece(line," "),"L")
+	    quit:command="quit"
+	    quit:command="q"
+	    
+	}
     quit
-
+HELP
+	write !,"Cache Package Manager"
+	write !!,"Available commands:"
+	write !?3,"install        "
+	quit
 BATCH(args...)
     ; here goes batch entry
     quit
+
 ]]></Routine>
 </Export>
