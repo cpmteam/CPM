@@ -10,6 +10,8 @@ Simple example of installation instructions (Manifest)</Description>
 <XMLNamespace>INSTALLER</XMLNamespace>
 <Data><![CDATA[
 <Manifest>
+<Package Name="CPM-Installer-Sample" Version = "0.5.0" 
+         License="MIT" Path="https://github.com/intersystems/monlbl-viewer.git" />
 <Namespace Name="MyNamespace" Create="yes" Code="MyRoutinesDB" Data="MyDataDB">
 <Configuration>
 <Database Name="MyRoutinesDB" Create="yes" Dir="C:\MyInstallerDir\MyRoutinesDB"/>
