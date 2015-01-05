@@ -58,24 +58,25 @@ SHELL
 	    
 	    continue:command=""
 	    set command=$zconvert(command,"U")
-	    if $d(aliases(command),command) zw command
+	    if $d(aliases(command),command)
 	    
 	    quit:command="QUIT"
 	    
-	    if $text(@command)="" {
-		    write !,"Unrecognized command: ",command,!
-		    continue
-		}
-		try {
-			set command=command_"(args...)"
-			do @command
-		} catch {
-			write !,"Error occured: ",$zerror
-		}
+	    d BATCH(command, args...)
 	}
     quit
-BATCH(args...)
+BATCH(command, args...)
     ; here goes batch entry
+    if $text(@command)="" {
+	    write !,"Unrecognized command: ",command,!
+	    quit
+	}
+	try {
+		set command=command_"(args...)"
+		do @command
+	} catch {
+		write !,"Error occured: ",$zerror
+	}
     quit
 ALIASES
  ;QUIT;Q
