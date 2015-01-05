@@ -10,6 +10,8 @@ Simple example of installation instructions (Manifest)</Description>
 <XMLNamespace>INSTALLER</XMLNamespace>
 <Data><![CDATA[
 <Manifest>
+<Package Name="CPM-Installer-Sample" Version = "0.5.0" 
+         License="MIT" Path="https://github.com/intersystems/monlbl-viewer.git" />
 <Namespace Name="MyNamespace" Create="yes" Code="MyRoutinesDB" Data="MyDataDB">
 <Configuration>
 <Database Name="MyRoutinesDB" Create="yes" Dir="C:\MyInstallerDir\MyRoutinesDB"/>
@@ -18,6 +20,9 @@ Simple example of installation instructions (Manifest)</Description>
 <GlobalMapping Global="t*" From="MyMappingDB"/>
 </Configuration>
 <Dependencies>
+<Dependency Name="async" Version=">= 0.2.10"/>
+<Dependency Name="fsplus" Version=">= 0.1.0"/>
+<Dependency Name="language-cos" Path="https://github.com/UGroup/atom-language-cos.git"/>
 </Dependencies>
 </Namespace>
 </Manifest>

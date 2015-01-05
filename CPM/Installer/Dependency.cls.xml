@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.Installer.Dependency">
+<Super>%Installer.Activity</Super>
+<TimeCreated>63557,56248.520964</TimeCreated>
+
+<Property name="PackageName">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="Name"/>
+</Property>
+
+<Property name="Version">
+<Type>%String</Type>
+</Property>
+
+<Property name="Path">
+<Type>%String</Type>
+</Property>
+</Class>
+</Export>
