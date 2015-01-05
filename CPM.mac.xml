@@ -26,25 +26,62 @@ THE SOFTWARE.
 */
 
 SHELL
-    ; here goes interactive entry
+    #; here goes interactive entry
+    set pattern=##class(%Regex.Matcher).%New("\b[^ ]+\b|\""([^\""]+)\""")
     for {
 	    write !,"CPM>> "
 	    read line
 	    set line=$zstrip(line,"<>WC")
-	    set command=$zcvt($piece(line," "),"L")
-	    quit:command="quit"
-	    quit:command="q"
 	    
+	    kill args
+	    set args=0
+	    set pattern.Text=line
+	    while pattern.Locate() {
+		    set args($increment(args))=$zstrip(pattern.Group,"<>WCP")
+	    }
+	    
+	    continue:args=0
+	    set command=args(1)
+	    set command=$zconvert(command,"U")
+	    
+	    quit:command="QUIT"
+	    quit:command="Q"
+	    
+	    if $text(@command)="" {
+		    write !,"Unrecognized command: ",command,!
+		    continue
+		}
+		try {
+			do @command
+		} catch {
+			write !,"Error occured: ",$zerror
+		}
 	}
     quit
-HELP
-	write !,"Cache Package Manager"
-	write !!,"Available commands:"
-	write !?3,"install        "
-	quit
 BATCH(args...)
     ; here goes batch entry
     quit
+COMMANDS
+INSTALL(args...) ;;install package
+	quit
+LIST(args...) ;;list of installed packages
+	quit
+HELP(args...) ;;this help
+	write !,"Cache Package Manager"
+	write !!,"Available commands:"
+    for i=1:1 {
+	    set line=$text(COMMANDS+i)
+	    quit:line=""
 
+	    continue:$zstrip($extract(line),"*WCP")=""
+	    set help=$piece(line,";;",2)
+	    continue:help=""
+	    set command=$zcvt($piece(line,"("),"L")
+	    write !?3,command,?15,help
+    }
+    w !?3,"quit",?15,"quit from shell"
+    w !
+	quit
+	
 ]]></Routine>
 </Export>
