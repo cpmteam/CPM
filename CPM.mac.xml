@@ -25,6 +25,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+#include %occInclude
+
 SHELL
 	new
     #; here goes interactive entry
@@ -85,6 +87,7 @@ ALIASES
  ;LIST;L
 COMMANDS
 INSTALL(packages...) ;;install package
+	new (packages)
 	if '$d(packages) {
 		write !,"Nothing to install"
 		quit
@@ -97,8 +100,17 @@ INSTALL(packages...) ;;install package
 	}
 	quit
 LIST(args...) ;;list of installed packages
+	new (args)
+	set sql=##class(%SQL.Statement).%New()
+	set tSC=sql.%Prepare("SELECT Name, Version, Description FROM CPM.Package")
+	quit:'$$$ISOK(tSC)
+	set tRS=sql.%Execute()
+	while tRS.%Next() {
+		w !?3,tRS.Name,?15,tRS.Version,?25,tRS.Description
+	}
 	quit
 HELP(args...) ;;this help
+	new (args)
 	write !,"Cache Package Manager"
 	write !!,"Available commands:"
     for i=1:1 {
@@ -114,6 +126,5 @@ HELP(args...) ;;this help
     w !?3,"quit",?15,"quit from shell"
     w !
 	quit
-	
 ]]></Routine>
 </Export>
