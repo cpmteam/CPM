@@ -1,0 +1,23 @@
+#!/bin/bash
+
+_instances() 
+{
+    if [ $# == 0 ] || [ $1 == "all" ]; then
+    	echo $(ccontrol qlist | cut -d'^' -f1 | tr '\n' ',')
+    else 
+    	echo $(ccontrol qlist | grep "\^$1\," | cut -d'^' -f1 | tr '\n' ',')
+    fi
+}
+
+instances=$(_instances running)
+instances_count="${instances//[^,]}"
+if [ ${#instances_count} -gt 1 ]; then
+	echo ''
+elif [ ${#instances_count} -eq 1 ]; then
+	echo ''
+else 
+	echo 'No one instances running'
+	exit 1
+fi
+
+# csession ensemble14 -U samples BATCH^CPM(1,2)
