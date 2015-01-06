@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2014.1 (Build 608U)" ts="2015-01-06 15:24:04">
+<Class name="CPM.Utils.FileBinaryTar">
+<Super>%RegisteredObject,%ArrayOfDataTypes</Super>
+<TimeChanged>63542,80593.560476</TimeChanged>
+<TimeCreated>63525,80330.114251</TimeCreated>
+
+<Property name="name">
+<Description>
+name of file</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="100"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="mode">
+<Description>
+file mode</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="8"/>
+</Property>
+
+<Property name="uid">
+<Description>
+owner user ID</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="8"/>
+</Property>
+
+<Property name="gid">
+<Description>
+owner group ID</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="8"/>
+</Property>
+
+<Property name="size">
+<Description>
+length of file in bytes</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="12"/>
+</Property>
+
+<Property name="mtime">
+<Description>
+modify time of file</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="12"/>
+</Property>
+
+<Property name="chksum">
+<Description>
+checksum for header</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="8"/>
+</Property>
+
+<Property name="typeflag">
+<Description>
+type of file</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="DISPLAYLIST" value=",REGULAR,LINK,RESERVED,CHARACTER SPECIAL,BLOCK SPECIAL,DIRECTORY,FIFO SPECIAL,RESERVED"/>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="VALUELIST" value=",0,1,2,3,4,5,6,7,x,g,L,K"/>
+</Property>
+
+<Property name="linkname">
+<Description>
+name of linked file</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="100"/>
+</Property>
+
+<Property name="magic">
+<Description>
+USTAR indicator</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="6"/>
+</Property>
+
+<Property name="version">
+<Description>
+USTAR version</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="2"/>
+</Property>
+
+<Property name="uname">
+<Description>
+owner user name</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="32"/>
+</Property>
+
+<Property name="gname">
+<Description>
+owner group name</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="32"/>
+</Property>
+
+<Property name="devmajor">
+<Description>
+device major number</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="8"/>
+</Property>
+
+<Property name="devminor">
+<Description>
+device minor number</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="8"/>
+</Property>
+
+<Property name="prefix">
+<Description>
+prefix for file name</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Header"/>
+<Parameter name="MAXLEN" value="155"/>
+</Property>
+
+<Property name="fileData">
+<Description>
+file data</Description>
+<Type>%Stream.Object</Type>
+</Property>
+
+<Method name="nameGet">
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	quit i%prefix_i%name
+]]></Implementation>
+</Method>
+
+<Method name="sizeGet">
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[	quit $$oct2dec^%Wmdc(i%size)
+]]></Implementation>
+</Method>
+
+<Method name="sizeSet">
+<FormalSpec>pSize:%Integer</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set i%size=$tr($j($$dec2oct^%Wmdc(pSize),11)," ",0)
+	quit:$l(i%size)>11 $$$ERROR(5001, "Size too big")
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="CompactFolder">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>aFolder:%String=""</FormalSpec>
+</Method>
+
+<Method name="ExtractFileToArray">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>aFileName:%String=""</FormalSpec>
+<ReturnType>%ArrayOfDataTypes</ReturnType>
+<Implementation><![CDATA[
+	set fileStream=##class(%Stream.FileBinary).%New()
+	set fileStream.Filename=aFileName
+	quit ..ExtractStreamToArray(fileStream)
+]]></Implementation>
+</Method>
+
+<Method name="ExtractStreamToArray">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>aFileStream:%Stream.Object</FormalSpec>
+<ReturnType>%ArrayOfDataTypes</ReturnType>
+<Implementation><![CDATA[
+	#dim blockSize As %Integer = 512
+	set result=##class(%ArrayOfDataTypes).%New()
+	while 'aFileStream.AtEnd {
+		s tFile=..%New()
+		s longLink4Name=""
+		s longLink4Link=""
+		do {
+			set tHeader=aFileStream.Read(blockSize)
+			d tFile.ParseHeader(tHeader)
+			s magic=tFile.magic
+			quit:tFile.name=""
+			s fileSize=tFile.size
+			s typeFlag=tFile.typeflag
+			if (typeFlag="L") || (typeFlag="K") {
+				s readBlocks=fileSize \ blockSize
+				s:fileSize#blockSize>0 readBlocks=readBlocks + 1
+				s longLink=aFileStream.Read(readBlocks * blockSize)
+				s longLink=$zstrip(longLink,"<>",$c(0,32))
+				s:(typeFlag="L") longLink4Name=longLink
+				s:(typeFlag="K") longLink4Link=longLink
+				s repeat=1
+				continue
+			}
+			s repeat=0
+			s:longLink4Name'="" tFile.name=longLink4Name
+			s:longLink4Link'="" tFile.linkname=longLink4Link
+		} while repeat
+		s fileName=tFile.name
+		quit:fileName=""
+		if tFile.typeflag'="g" {
+			d ..AddToArray(tFile, result)
+		}
+		continue:fileSize=0
+		s readBlocks=fileSize \ blockSize
+		s:fileSize#blockSize>0 readBlocks=readBlocks + 1
+		s tFile.fileData=##class(%Stream.FileBinary).%New()
+		f tPos=1:1:readBlocks {
+			s tData=aFileStream.Read(512)
+			s:tPos=readBlocks tData=$e(tData, 1, fileSize#blockSize)
+			d tFile.fileData.Write(tData)
+		}
+	}
+	quit result
+]]></Implementation>
+</Method>
+
+<Method name="AddToArray">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pFile:FileBinaryTar,pArray:%ArrayOfDataTypes</FormalSpec>
+<Private>1</Private>
+<Implementation><![CDATA[
+	quit:'$isobject(pFile)
+	quit:'$isobject(pArray)
+	
+	s tFileName= $zstrip(pFile.name,"<>", "/")
+	s tItem=pArray
+	f i=1:1:$l(tFileName, "/")-1 {
+		s tPathItem=$p(tFileName, "/", i)
+		if 'tItem.IsDefined(tPathItem) {
+			d tItem.SetAt(##class(%ArrayOfDataTypes).%New(), tPathItem)
+		}
+		s tItem=tItem.GetAt(tPathItem)
+	}
+	d tItem.SetAt(pFile, $p(tFileName, "/", $l(tFileName, "/")))
+]]></Implementation>
+</Method>
+
+<Method name="ParseHeader">
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec>aHeaderData:%String</FormalSpec>
+<Implementation><![CDATA[
+	set tProps=%class.Properties
+	Set tPropKey = ""
+	For {
+		Set tProp = %class.Properties.GetNext(.tPropKey)
+		Quit:(tPropKey = "")
+		CONTINUE:"Header"'=tProp.Parameters.GetAt("CAPTION")
+		s tProps(tProp.SequenceNumber)=tProp
+	}	
+	Set tPropKey = "", tPos = 0
+	For {
+		Set tPropKey = $Order(tProps(tPropKey),1,tProp)
+		Quit:tPropKey=""
+		Set tLen = tProp.Parameters.GetAt("MAXLEN")
+		Do %code.WriteLine($c(9)_"Set i%"_tProp.Name_" = $zstrip($extract(aHeaderData, "_$i(tPos)_", "_$i(tPos, tLen - 1)_"), ""<>"", $c(0,32))")
+		Do:tProp.Name="typeflag" %code.WriteLine($c(9)_"Set:i%"_tProp.Name_"=$c(0) i%"_tProp.Name_" = 0")
+	}
+	quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
