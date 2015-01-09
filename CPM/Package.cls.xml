@@ -17,6 +17,11 @@
 <Parameter name="MAXLEN" value="2000"/>
 </Property>
 
+<Property name="Dependencies">
+<Type>%String</Type>
+<Collection>array</Collection>
+</Property>
+
 <Storage name="Default">
 <Type>%Library.CacheStorage</Type>
 <DataLocation>^CPM.PackageD</DataLocation>
@@ -24,6 +29,11 @@
 <IdLocation>^CPM.PackageD</IdLocation>
 <IndexLocation>^CPM.PackageI</IndexLocation>
 <StreamLocation>^CPM.PackageS</StreamLocation>
+<Data name="Dependencies">
+<Attribute>Dependencies</Attribute>
+<Structure>subnode</Structure>
+<Subscript>"Dependencies"</Subscript>
+</Data>
 <Data name="PackageDefaultData">
 <Value name="1">
 <Value>%%CLASSNAME</Value>
