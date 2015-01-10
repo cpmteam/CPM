@@ -4,7 +4,17 @@
 /// dump only dependencies
 DumpDeps(FileName) [xmltree] public {
     do ArrayFromXml(FileName,$name(xmltree))
-    zw xmltree
+    #dim i As %String
+    #dim deps
+    merge deps=xmltree("Manifest",2,"Dependencies")
+    set i=$order(deps(""))
+    while i'="" {
+        write deps(i,"Dependency","Name"), ?20,
+              $get(deps(i,"Dependency","Version"),$get(deps(i,"Dependency","Path"))),
+              !
+        set i=$order(deps(i))
+    }
+    //zw xmltree
 }
 
 Dump(FileName) public {
