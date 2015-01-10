@@ -34,6 +34,8 @@ Dump(FileName) public {
 
 #include CPM.DataTypes
 
+#; Load metainfo from given XML file into "local name"
+#; this name could be local, process private or global name
 ArrayFromXml(FileName,LocalName) public {
     #dim xreader As %XML.TextReader
     do ##class(%XML.TextReader).ParseFile(FileName,.xreader)
