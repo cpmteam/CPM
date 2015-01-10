@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
-<Routine name="DumpMeta" type="MAC" languagemode="0"><![CDATA[
+<Routine name="CPM.MetaInfo" type="MAC" languagemode="0"><![CDATA[
+#include CPM.License
+
 /// dump only dependencies
 DumpDeps(FileName) [xmltree] public {
     do ArrayFromXml(FileName,$name(xmltree))

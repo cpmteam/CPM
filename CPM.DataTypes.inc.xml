@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Routine name="CPM.DataTypes" type="INC"><![CDATA[
+
+#; use $listbuild() facilities for very simplistic stack
+#define INITSTACK(%stack) set %stack=""
+#define TOPSTACK(%stack) ($ll(%stack) && $li(%stack,*))
+#define PUSHVALUE(%stack,%value) set $li(%stack,*+1)=%value
+#define POPVALUE(%stack) set $li(%stack,*,*)=""
+
+]]></Routine>
+</Export>
