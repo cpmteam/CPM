@@ -30,11 +30,7 @@ Dump(FileName) public {
     }
 }
 
-#; use $listbuild() facilities for state stack
-#define INITSTACK(%stack) set %stack=""
-#define TOPSTACK(%stack) ($ll(%stack)&&$li(%stack,*))
-#define PUSHSTATE(%stack,%state) set $li(%stack,*+1)=%state
-#define POPSTATE(%stack) set $li(%stack,*,*)=""
+#include CPM.DataTypes
 
 ArrayFromXml(FileName,LocalName) public {
     #dim xreader As %XML.TextReader
@@ -57,7 +53,7 @@ ArrayFromXml(FileName,LocalName) public {
             // we are switching to "array mode" if there is no
             // single attribute in the current tag 
             set arrayMode = '(xreader.AttributeCount > 0)
-            $$$PUSHSTATE(modeStack,arrayMode)
+            $$$PUSHVALUE(modeStack,arrayMode)
             if arrayMode {
                 set @LocalName = 0
             }
@@ -66,7 +62,7 @@ ArrayFromXml(FileName,LocalName) public {
         elseif xreader.NodeType = "endelement" {
             // pop last tag
             // FIXME -make sure that the last popped subscript is the same as in xreader.Name
-            $$$POPSTATE(modeStack)
+            $$$POPVALUE(modeStack)
             set arrayMode =  $$$TOPSTACK(modeStack)
             set LocalName = $name(@LocalName,$qlength(LocalName) - (arrayMode + 1))
         }
