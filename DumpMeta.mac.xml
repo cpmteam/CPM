@@ -2,24 +2,11 @@
 <Export generator="Cache" version="25">
 <Routine name="DumpMeta" type="MAC" languagemode="0"><![CDATA[
 /// dump only dependencies
-DumpDeps(FileName) public {
-    #dim validFormat As %Boolean = 0
-    // TODO - convert XML to multidimensional array, then use it elsewhere
-    #dim xparser As %XML.TextReader
-    do ##class(%XML.TextReader).ParseFile(FileName,.xparser)
-
-    while xparser.Read() {
-        if xparser.NodeType = "element" && xparser.Name = "Manifest" {
-            // we have <manifest> tag, that's enough for now to be counted as valid
-            set validFormat = 1
-        }
-        write xparser.NodeType, ?20, xparser.Name, ?32, xparser.Value,!
-        for i=1:1:xparser.AttributeCount {
-            do xparser.MoveToAttributeIndex(i)
-            write ?8, xparser.NodeType, ?20, xparser.Name, ?32, xparser.Value,!
-        }
-    }
+DumpDeps(FileName) [xmltree] public {
+    do ArrayFromXml(FileName,$name(xmltree))
+    zw xmltree
 }
+
 Dump(FileName) public {
     // TODO - convert XML to multidimensional array, then use it elsewhere
     #dim XmlParser As %XML.TextReader
