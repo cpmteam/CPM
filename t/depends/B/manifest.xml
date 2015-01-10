@@ -1,0 +1,5 @@
+<Manifest>
+<Package Name="B" Version = "0.1.0" License="MIT" />
+<Dependencies>
+</Dependencies>
+</Manifest>

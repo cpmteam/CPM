@@ -1,0 +1,6 @@
+<Manifest>
+<Package Name="C" Version = "0.1.0" License="MIT" />
+<Dependencies>
+<Dependency Name="D" Version="*"/>
+</Dependencies>
+</Manifest>

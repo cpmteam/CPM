@@ -5,13 +5,18 @@
 
 /// dump only dependencies
 DumpDeps(FileName) [xmltree] public {
+    new xmltree
     do ArrayFromXml(FileName,$name(xmltree))
     #dim i As %String
-    #dim deps
-    merge deps=xmltree("Manifest",2,"Dependencies")
+    #dim pkg, deps
+    merge pkg  = xmltree("Manifest",1,"Package")
+    merge deps = xmltree("Manifest",2,"Dependencies")
+
+    write pkg("Name"),":",!
+
     set i=$order(deps(""))
     while i'="" {
-        write deps(i,"Dependency","Name"), ?20,
+        write ?4, deps(i,"Dependency","Name"), ?20,
               $get(deps(i,"Dependency","Version"),$get(deps(i,"Dependency","Path"))),
               !
         set i=$order(deps(i))
@@ -33,6 +38,31 @@ Dump(FileName) public {
 }
 
 #include CPM.DataTypes
+
+ /*
+    <Manifest>
+    <Package Name="CPM-Installer-Sample" Version = "0.5.0" 
+         License="MIT" Path="https://github.com/intersystems/monlbl-viewer.git" />
+    <Dependencies>
+    <Dependency Name="async" Version=">= 0.2.10"/>
+    <Dependency Name="language-cos" Path="https://github.com/UGroup/atom-language-cos.git"/>
+    </Dependencies>
+    </Manifest>
+
+ get loaded as local array
+    
+    %xmltree("Manifest")=2
+    %xmltree("Manifest",1,"Package","License")="MIT"
+    %xmltree("Manifest",1,"Package","Name")="CPM-Installer-Sample"
+    %xmltree("Manifest",1,"Package","Path")="https://github.com/intersystems/monlbl-
+    viewer.git"
+    %xmltree("Manifest",1,"Package","Version")="0.5.0"
+    %xmltree("Manifest",2,"Dependencies")=3
+    %xmltree("Manifest",2,"Dependencies",1,"Dependency","Name")="async"
+    %xmltree("Manifest",2,"Dependencies",1,"Dependency","Version")=">= 0.2.10"
+    %xmltree("Manifest",2,"Dependencies",3,"Dependency","Name")="language-cos"
+    %xmltree("Manifest",2,"Dependencies",3,"Dependency","Path")="https://github.com/UGroup/atom-language-cos.git"
+*/
 
 #; Load metainfo from given XML file into "local name"
 #; this name could be local, process private or global name
