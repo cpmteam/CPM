@@ -2,26 +2,70 @@
 <Export generator="Cache" version="25">
 <Routine name="CPM.MetaInfo" type="MAC" languagemode="0"><![CDATA[
 #include CPM.License
+#include CPM.DataTypes
 
-/// dump only dependencies
-DumpDeps(FileName) [xmltree] public {
+ProcessManifest(FileName,&pkg,&deps,Debug=0) [xmltree] {
     new xmltree
-    do ArrayFromXml(FileName,$name(xmltree))
+    do ArrayFromXml(FileName, $name(xmltree))
+    merge pkg       = xmltree("Manifest", 1, "Package")
+    merge localdeps = xmltree("Manifest", 2, "Dependencies")
+
+    if Debug { write pkg("Name"),":",! }
+
+    // FIXME - simpler for 1:1:deps?
+    set i = $order(localdeps(""))
+    while i'="" {
+        #dim name As %String = localdeps(i,"Dependency","Name")
+
+        set deps(name) = 1 ; create exportable list of deps
+
+        if Debug {
+            write ?4, name, ?20,
+                  $get(localdeps(i,"Dependency","Version"),$get(localdeps(i,"Dependency","Path"))),
+                  !
+        }
+        set i = $order(localdeps(i))
+    }
+    if Debug { zw xmltree }
+}
+
+CreateManifestPath(rootdir,package) public {
+    if '$data(package) || (package="") {
+        quit ""
+    }
+    #dim dir As %String = ##class(%Library.File).NormalizeDirectory(package,rootdir)
+    quit ##class(%Library.File).NormalizeFilename("manifest.xml",dir)
+}
+
+/// dump dependencies, optionally recursive and by request with whole xml tree
+DumpDeps(FileName,Recursive=0,Debug=0) [queue,known] public {
+    #dim directory As %String = ##class(%Library.File).GetDirectory(FileName)
+    #dim rootdir As %String = ##class(%Library.File).ParentDirectoryName(directory)
+    
+    new queue, known
+    $$$INITQUEUE(queue) $$$ENQUEUE(queue,"*")
+    
     #dim i As %String
     #dim pkg, deps
-    merge pkg  = xmltree("Manifest",1,"Package")
-    merge deps = xmltree("Manifest",2,"Dependencies")
+    
+    do {
+        $$$DEQUEUE(queue)
+        kill pkg, deps
+        do ProcessManifest(FileName, .pkg, .deps, Debug)
+        #dim pkgName As %String = pkg("Name")
 
-    write pkg("Name"),":",!
-
-    set i=$order(deps(""))
-    while i'="" {
-        write ?4, deps(i,"Dependency","Name"), ?20,
-              $get(deps(i,"Dependency","Version"),$get(deps(i,"Dependency","Path"))),
-              !
-        set i=$order(deps(i))
-    }
-    //zw xmltree
+        set known(pkgName) = 1 ; mark itself as visited
+        
+        #dim name As %String = $order(deps(""))
+        while name '="" {
+            if '$data(known(name)) {
+                $$$ENQUEUE(queue,name)
+                set known(name) = 1
+            }
+            set name = $order(deps(name))
+        }
+        set FileName = $$CreateManifestPath(rootdir, $$$QUEUEHEAD(queue))
+    } while Recursive && $$$QUEUELEN(queue)
 }
 
 Dump(FileName) public {
@@ -36,8 +80,6 @@ Dump(FileName) public {
         }
     }
 }
-
-#include CPM.DataTypes
 
  /*
     <Manifest>
@@ -54,8 +96,7 @@ Dump(FileName) public {
     %xmltree("Manifest")=2
     %xmltree("Manifest",1,"Package","License")="MIT"
     %xmltree("Manifest",1,"Package","Name")="CPM-Installer-Sample"
-    %xmltree("Manifest",1,"Package","Path")="https://github.com/intersystems/monlbl-
-    viewer.git"
+    %xmltree("Manifest",1,"Package","Path")="https://github.com/intersystems/monlbl-viewer.git"
     %xmltree("Manifest",1,"Package","Version")="0.5.0"
     %xmltree("Manifest",2,"Dependencies")=3
     %xmltree("Manifest",2,"Dependencies",1,"Dependency","Name")="async"
