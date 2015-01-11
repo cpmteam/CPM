@@ -98,11 +98,11 @@ Dump(FileName) public {
     %xmltree("Manifest",1,"Package","Name")="CPM-Installer-Sample"
     %xmltree("Manifest",1,"Package","Path")="https://github.com/intersystems/monlbl-viewer.git"
     %xmltree("Manifest",1,"Package","Version")="0.5.0"
-    %xmltree("Manifest",2,"Dependencies")=3
+    %xmltree("Manifest",2,"Dependencies")=2
     %xmltree("Manifest",2,"Dependencies",1,"Dependency","Name")="async"
     %xmltree("Manifest",2,"Dependencies",1,"Dependency","Version")=">= 0.2.10"
-    %xmltree("Manifest",2,"Dependencies",3,"Dependency","Name")="language-cos"
-    %xmltree("Manifest",2,"Dependencies",3,"Dependency","Path")="https://github.com/UGroup/atom-language-cos.git"
+    %xmltree("Manifest",2,"Dependencies",2,"Dependency","Name")="language-cos"
+    %xmltree("Manifest",2,"Dependencies",2,"Dependency","Path")="https://github.com/UGroup/atom-language-cos.git"
 */
 
 #; Load metainfo from given XML file into "local name"
