@@ -64,18 +64,40 @@ ALIASES
  ;LIST;L
 COMMANDS
 INSTALL(packages...) ;;install package
-    new (packages)
-    if '$d(packages) {
-        write !,"Nothing to install"
-        quit
-    }
-    
-    write !,"Installing packages: "
-    for i=1:1:packages {
-        set package=packages(i)
-        write !?3,package
-    }
-    quit
+	new (packages)
+	if '$d(packages) {
+		write !,"Nothing to install"
+		quit
+	}
+	
+	write !,"Installing packages: "
+	for i=1:1:packages {
+		set package=packages(i)
+		set packageContent=""
+		if ##class(%File).Exists(package) {
+			set packageContent=$$UnpackPackage(package)
+		}
+		continue:'$isobject(packageContent)
+		set packageContent=packageContent.GetNext()
+		set metaInfo=packageContent.GetAt("package.json")
+		continue:'$isobject(metaInfo)
+		#dim metaInfoData As %Stream.Object = metaInfo.fileData
+		continue:'##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(metaInfoData.Read(metaInfoData.Size),,.metaInfo)
+		set name=metaInfo.name
+		set description=$zcvt(metaInfo.description,"I","UTF8")
+		set version=metaInfo.version
+		write !?3,name,?25,version,?45,description
+	}
+	quit
+UnpackPackage(pFileName) {
+	set tFileStream=##class(%Stream.FileBinaryGzip).%New()
+	set tFileStream.Filename=pFileName
+	set result=##class(CPM.Utils.FileBinaryTar).ExtractStreamToArray(tFileStream)
+	kill tFileStream
+	quit result
+}
+CheckDependecies() {
+}
 LIST(args...) ;;list of installed packages
     new (args)
     set sql=##class(%SQL.Statement).%New()
