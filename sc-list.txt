@@ -1,6 +1,8 @@
 CPM-project.PRJ
+CPM.DataTypes.INC
 CPM.Dependencies.CLS
 CPM.Installer.CLS
+CPM.License.INC
 CPM.MAC
 CPM.Sample.Installer.CLS
 CPM.Utils.FileBinaryTar.CLS

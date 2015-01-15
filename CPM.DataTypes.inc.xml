@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Routine name="CPM.DataTypes" type="INC"><![CDATA[
+
+#; use $listbuild() facilities for very simplistic stack
+#define INITSTACK(%stack) set %stack=""
+#define TOPSTACK(%stack) ($select($ll(%stack):$li(%stack,*), 1:""))
+#define PUSHVALUE(%stack,%value) set $li(%stack,*+1)=%value
+#define POPVALUE(%stack) set $li(%stack,*,*)=""
+
+#define INITQUEUE(%queue) set %queue=""
+#define QUEUEHEAD(%queue) ($select($ll(%queue):$li(%queue,1), 1:""))
+#define QUEUETAIL(%queue) ($select($ll(%queue):$li(%queue,*), 1:""))
+#define QUEUELEN(%queue)  $ll(%queue)
+#define ENQUEUE(%queue,%value) set $li(%queue,*+1)=%value
+#define DEQUEUE(%queue) set $li(%queue,1,1)=""
+]]></Routine>
+</Export>

@@ -1,84 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Routine name="CPM" type="MAC" languagemode="0"><![CDATA[
- /*
-The MIT License (MIT)
-
-Copyright (c) 2015, All Intersystems developers
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
-
+#include CPM.License
 #include %occInclude
 
 SHELL
-	new
+    new
     #; here goes interactive entry
     set pattern=##class(%Regex.Matcher).%New("\b[^ ]+\b|\""([^\""]+)\""")
     #; aliases for commands
     f i=1:1 {
-	    set line=$text(ALIASES+i)
-	    quit:$e(line)'=" "
-	    set command=$zstrip($piece(line,";",2),"<>WCP")
-    	f j=3:1:$l(line,";") {
-	    	set alias=$zcvt($piece(line,";",j),"U")
-	    	continue:alias=""
-	    	continue:$data(aliases(alias))
-	    	set aliases(alias)=command
-    	}
+        set line=$text(ALIASES+i)
+        quit:$e(line)'=" "
+        set command=$zstrip($piece(line,";",2),"<>WCP")
+        f j=3:1:$l(line,";") {
+            set alias=$zcvt($piece(line,";",j),"U")
+            continue:alias=""
+            continue:$data(aliases(alias))
+            set aliases(alias)=command
+        }
     }
     for {
-	    write !,"CPM>> "
-	    read line
-	    set line=$zstrip(line,"<>WC")
-	    
-	    set command=$piece(line," ")
-	    set line=$extract(line,$find(line," ")+1,*)
-	    kill args
-	    set args=0
-	    set pattern.Text=line
-	    while pattern.Locate() {
-		    set argument=$zstrip(pattern.Group,"<>WC")
-		    set args($increment(args))=$zstrip(argument,"<>","""")
-	    }
-	    
-	    continue:command=""
-	    set command=$zconvert(command,"U")
-	    if $d(aliases(command),command)
-	    
-	    quit:command="QUIT"
-	    
-	    d BATCH(command, args...)
-	}
+        write !,"CPM>> "
+        read line
+        set line=$zstrip(line,"<>WC")
+        
+        set command=$piece(line," ")
+        set line=$extract(line,$find(line," ")+1,*)
+        kill args
+        set args=0
+        set pattern.Text=line
+        while pattern.Locate() {
+            set argument=$zstrip(pattern.Group,"<>WC")
+            set args($increment(args))=$zstrip(argument,"<>","""")
+        }
+        
+        continue:command=""
+        set command=$zconvert(command,"U")
+        if $d(aliases(command),command)
+        
+        quit:command="QUIT"
+        
+        d BATCH(command, args...)
+    }
     quit
 BATCH(command, args...)
     ; here goes batch entry
     if $text(@command)="" {
-	    write !,"Unrecognized command: ",command,!
-	    quit
-	}
-	try {
-		set command=command_"(args...)"
-		do @command
-	} catch {
-		write !,"Error occured: ",$zerror
-	}
+        write !,"Unrecognized command: ",command,!
+        quit
+    }
+    try {
+        set command=command_"(args...)"
+        do @command
+    } catch {
+        write !,"Error occured: ",$zerror
+    }
     quit
 ALIASES
  ;QUIT;Q
@@ -122,31 +99,33 @@ UnpackPackage(pFileName) {
 CheckDependecies() {
 }
 LIST(args...) ;;list of installed packages
-	new (args)
-	set sql=##class(%SQL.Statement).%New()
-	set tSC=sql.%Prepare("SELECT Name, Version, Description FROM CPM.Package")
-	quit:'$$$ISOK(tSC)
-	set tRS=sql.%Execute()
-	while tRS.%Next() {
-		w !?3,tRS.Name,?15,tRS.Version,?25,tRS.Description
-	}
-	quit
+    new (args)
+    set sql=##class(%SQL.Statement).%New()
+    set tSC=sql.%Prepare("SELECT Name, Version, Description FROM CPM.Package")
+    quit:'$$$ISOK(tSC)
+    set tRS=sql.%Execute()
+    while tRS.%Next() {
+        w !?3,tRS.Name,?15,tRS.Version,?25,tRS.Description
+    }
+    quit
 HELP(args...) ;;this help
-	new (args)
-	write !,"Cache Package Manager"
-	write !!,"Available commands:"
+    new (args)
+    write !,"Cache Package Manager"
+    write !!,"Available commands:"
     for i=1:1 {
-	    set line=$text(COMMANDS+i)
-	    quit:line=""
+        set line=$text(COMMANDS+i)
+        quit:line=""
 
-	    continue:$zstrip($extract(line),"*WCP")=""
-	    set help=$piece(line,";;",2)
-	    continue:help=""
-	    set command=$zcvt($piece(line,"("),"L")
-	    write !?3,command,?15,help
+        continue:$zstrip($extract(line),"*WCP")=""
+        set help=$piece(line,";;",2)
+        continue:help=""
+        set command=$zcvt($piece(line,"("),"L")
+        write !?3,command,?15,help
     }
     w !?3,"quit",?15,"quit from shell"
     w !
-	quit
+    quit
+    
+
 ]]></Routine>
 </Export>

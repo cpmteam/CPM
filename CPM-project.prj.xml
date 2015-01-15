@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
-<Project name="CPM-project" LastModified="2015-01-06 16:34:49.643258">
+<Project name="CPM-project" LastModified="2015-01-11 03:12:05.398845" Target="DumpDeps^CPM.MetaInfo(&quot;C:\Users\Timur\Documents\Intersystems\src\CPM\t\depends\A\manifest.xml&quot;,1,1)" TargetType="0">
   <Items>
     <ProjectItem name="CPM.Installer" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.Installer.Dependencies" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.Installer.Dependency" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.Installer.Package" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.MAC" type="MAC"></ProjectItem>
-    <ProjectItem name="CPM.Sample.Installer" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.Package" type="CLS"></ProjectItem>
+    <ProjectItem name="CPM.Sample.Installer" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.Utils.FileBinaryTar" type="CLS"></ProjectItem>
+    <ProjectItem name="CPM.License.INC" type="MAC"></ProjectItem>
+    <ProjectItem name="CPM.DataTypes.INC" type="MAC"></ProjectItem>
+    <ProjectItem name="CPM.MetaInfo.MAC" type="MAC"></ProjectItem>
   </Items>
+  <BreakPoints>
+    <BreakPoint Routine="DumpMeta.MAC" Offset="42"></BreakPoint>
+    <BreakPoint Routine="CPM.MetaInfo.INT" Offset="63"></BreakPoint>
+  </BreakPoints>
 </Project>
 </Export>

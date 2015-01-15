@@ -3,5 +3,30 @@
 <Class name="CPM.Installer">
 <Super>%Installer.Manifest</Super>
 <TimeCreated>63557,44268.676934</TimeCreated>
+
+<Method name="ExportManifest">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName:%String,ManifestName:%String,FileName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+#define CHECK(%sc) if $$$ISERR(%sc) quit %sc
+
+    #dim sc As %Status
+    #dim file As %File = ##class(%File).%New(FileName)
+    set sc = file.Open("WN")
+    $$$CHECK(sc)
+    #dim cc As %Dictionary.CompiledClass = ##class(%Dictionary.CompiledClass).%OpenId(ClassName,0,.sc)
+    $$$CHECK(sc)
+
+    #dim tXDataIndex as %String = cc.XDatas.FindObjectId(ClassName_"||"_ManifestName)
+    if tXDataIndex="" quit $$$ERROR($$$GeneralError, "No "_ManifestName_" XData block in the "_ClassName_" class")
+    #dim xdata as %Stream.TmpCharacter = cc.XDatas.GetAt(tXDataIndex).Data
+    set sc = file.CopyFrom(xdata)
+    $$$CHECK(sc)
+    set sc = file.%Save()
+
+    quit sc
+]]></Implementation>
+</Method>
 </Class>
 </Export>
