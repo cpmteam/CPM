@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for UNIX (SUSE Linux Enterprise Server for x86-64) 2014.1 (Build 608U)" ts="2015-01-06 15:24:04">
+<Export generator="Cache" version="25">
 <Class name="CPM.Utils.FileBinaryTar">
 <Super>%RegisteredObject,%ArrayOfDataTypes</Super>
-<TimeChanged>63542,80593.560476</TimeChanged>
 <TimeCreated>63525,80330.114251</TimeCreated>
 
 <Property name="name">
@@ -158,8 +157,8 @@ file data</Description>
 <FormalSpec>pSize:%Integer</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	set i%size=$tr($j($$dec2oct^%Wmdc(pSize),11)," ",0)
-	quit:$l(i%size)>11 $$$ERROR(5001, "Size too big")
+	set i%size=$translate($justify($$dec2oct^%Wmdc(pSize),11)," ",0)
+	quit:$length(i%size)>11 $$$ERROR(5001, "Size too big")
 	quit $$$OK
 ]]></Implementation>
 </Method>
@@ -188,43 +187,43 @@ file data</Description>
 	#dim blockSize As %Integer = 512
 	set result=##class(%ArrayOfDataTypes).%New()
 	while 'aFileStream.AtEnd {
-		s tFile=..%New()
-		s longLink4Name=""
-		s longLink4Link=""
+		set tFile=..%New()
+		set longLink4Name=""
+		set longLink4Link=""
 		do {
 			set tHeader=aFileStream.Read(blockSize)
-			d tFile.ParseHeader(tHeader)
-			s magic=tFile.magic
+			do tFile.ParseHeader(tHeader)
+			set magic=tFile.magic
 			quit:tFile.name=""
-			s fileSize=tFile.size
-			s typeFlag=tFile.typeflag
+			set fileSize=tFile.size
+			set typeFlag=tFile.typeflag
 			if (typeFlag="L") || (typeFlag="K") {
-				s readBlocks=fileSize \ blockSize
-				s:fileSize#blockSize>0 readBlocks=readBlocks + 1
-				s longLink=aFileStream.Read(readBlocks * blockSize)
-				s longLink=$zstrip(longLink,"<>",$c(0,32))
-				s:(typeFlag="L") longLink4Name=longLink
-				s:(typeFlag="K") longLink4Link=longLink
-				s repeat=1
+				set readBlocks=fileSize \ blockSize
+				set:fileSize#blockSize>0 readBlocks=readBlocks + 1
+				set longLink=aFileStream.Read(readBlocks * blockSize)
+				set longLink=$zstrip(longLink,"<>",$char(0,32))
+				set:(typeFlag="L") longLink4Name=longLink
+				set:(typeFlag="K") longLink4Link=longLink
+				set repeat=1
 				continue
 			}
-			s repeat=0
-			s:longLink4Name'="" tFile.name=longLink4Name
-			s:longLink4Link'="" tFile.linkname=longLink4Link
+			set repeat=0
+			set:longLink4Name'="" tFile.name=longLink4Name
+			set:longLink4Link'="" tFile.linkname=longLink4Link
 		} while repeat
-		s fileName=tFile.name
+		set fileName=tFile.name
 		quit:fileName=""
 		if tFile.typeflag'="g" {
-			d ..AddToArray(tFile, result)
+			do ..AddToArray(tFile, result)
 		}
 		continue:fileSize=0
-		s readBlocks=fileSize \ blockSize
-		s:fileSize#blockSize>0 readBlocks=readBlocks + 1
-		s tFile.fileData=##class(%Stream.FileBinary).%New()
-		f tPos=1:1:readBlocks {
-			s tData=aFileStream.Read(512)
-			s:tPos=readBlocks tData=$e(tData, 1, fileSize#blockSize)
-			d tFile.fileData.Write(tData)
+		set readBlocks=fileSize \ blockSize
+		set:fileSize#blockSize>0 readBlocks=readBlocks + 1
+		set tFile.fileData=##class(%Stream.FileBinary).%New()
+		for tPos=1:1:readBlocks {
+			set tData=aFileStream.Read(512)
+			set:tPos=readBlocks tData=$extract(tData, 1, fileSize#blockSize)
+			do tFile.fileData.Write(tData)
 		}
 	}
 	quit result
@@ -240,16 +239,16 @@ file data</Description>
 	quit:'$isobject(pFile)
 	quit:'$isobject(pArray)
 	
-	s tFileName= $zstrip(pFile.name,"<>", "/")
-	s tItem=pArray
-	f i=1:1:$l(tFileName, "/")-1 {
-		s tPathItem=$p(tFileName, "/", i)
+	set tFileName= $zstrip(pFile.name,"<>", "/")
+	set tItem=pArray
+	for i=1:1:$length(tFileName, "/")-1 {
+		set tPathItem=$piece(tFileName, "/", i)
 		if 'tItem.IsDefined(tPathItem) {
-			d tItem.SetAt(##class(%ArrayOfDataTypes).%New(), tPathItem)
+			do tItem.SetAt(##class(%ArrayOfDataTypes).%New(), tPathItem)
 		}
-		s tItem=tItem.GetAt(tPathItem)
+		set tItem=tItem.GetAt(tPathItem)
 	}
-	d tItem.SetAt(pFile, $p(tFileName, "/", $l(tFileName, "/")))
+	do tItem.SetAt(pFile, $piece(tFileName, "/", $length(tFileName, "/")))
 ]]></Implementation>
 </Method>
 
@@ -263,15 +262,15 @@ file data</Description>
 		Set tProp = %class.Properties.GetNext(.tPropKey)
 		Quit:(tPropKey = "")
 		CONTINUE:"Header"'=tProp.Parameters.GetAt("CAPTION")
-		s tProps(tProp.SequenceNumber)=tProp
+		set tProps(tProp.SequenceNumber)=tProp
 	}	
 	Set tPropKey = "", tPos = 0
 	For {
 		Set tPropKey = $Order(tProps(tPropKey),1,tProp)
 		Quit:tPropKey=""
 		Set tLen = tProp.Parameters.GetAt("MAXLEN")
-		Do %code.WriteLine($c(9)_"Set i%"_tProp.Name_" = $zstrip($extract(aHeaderData, "_$i(tPos)_", "_$i(tPos, tLen - 1)_"), ""<>"", $c(0,32))")
-		Do:tProp.Name="typeflag" %code.WriteLine($c(9)_"Set:i%"_tProp.Name_"=$c(0) i%"_tProp.Name_" = 0")
+		Do %code.WriteLine($char(9)_"Set i%"_tProp.Name_" = $zstrip($extract(aHeaderData, "_$increment(tPos)_", "_$increment(tPos, tLen - 1)_"), ""<>"", $c(0,32))")
+		Do:tProp.Name="typeflag" %code.WriteLine($char(9)_"Set:i%"_tProp.Name_"=$c(0) i%"_tProp.Name_" = 0")
 	}
 	quit $$$OK
 ]]></Implementation>
