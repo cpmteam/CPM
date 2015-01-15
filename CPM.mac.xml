@@ -9,12 +9,12 @@ SHELL
     #; here goes interactive entry
     set pattern=##class(%Regex.Matcher).%New("\b[^ ]+\b|\""([^\""]+)\""")
     #; aliases for commands
-    f i=1:1 {
+    for i=1:1 {
         set line=$text(ALIASES+i)
-        quit:$e(line)'=" "
+        quit:$extract(line)'=" "
         set command=$zstrip($piece(line,";",2),"<>WCP")
-        f j=3:1:$l(line,";") {
-            set alias=$zcvt($piece(line,";",j),"U")
+        for j=3:1:$length(line,";") {
+            set alias=$zconvert($piece(line,";",j),"U")
             continue:alias=""
             continue:$data(aliases(alias))
             set aliases(alias)=command
@@ -37,11 +37,11 @@ SHELL
         
         continue:command=""
         set command=$zconvert(command,"U")
-        if $d(aliases(command),command)
+        if $data(aliases(command),command)
         
         quit:command="QUIT"
         
-        d BATCH(command, args...)
+        do BATCH(command, args...)
     }
     quit
 BATCH(command, args...)
@@ -65,7 +65,7 @@ ALIASES
 COMMANDS
 INSTALL(packages...) ;;install package
     new (packages)
-    if '$d(packages) {
+    if '$data(packages) {
         write !,"Nothing to install"
         quit
     }
@@ -73,9 +73,31 @@ INSTALL(packages...) ;;install package
     write !,"Installing packages: "
     for i=1:1:packages {
         set package=packages(i)
-        write !?3,package
+        set packageContent=""
+        if ##class(%File).Exists(package) {
+            set packageContent=$$UnpackPackage(package)
+        }
+        continue:'$isobject(packageContent)
+        set packageContent=packageContent.GetNext()
+        set metaInfo=packageContent.GetAt("package.json")
+        continue:'$isobject(metaInfo)
+        #dim metaInfoData As %Stream.Object = metaInfo.fileData
+        continue:'##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(metaInfoData.Read(metaInfoData.Size),,.metaInfo)
+        set name=metaInfo.name
+        set description=$zconvert(metaInfo.description,"I","UTF8")
+        set version=metaInfo.version
+        write !?3,name,?25,version,?45,description
     }
     quit
+UnpackPackage(pFileName) {
+    set tFileStream=##class(%Stream.FileBinaryGzip).%New()
+    set tFileStream.Filename=pFileName
+    set result=##class(CPM.Utils.FileBinaryTar).ExtractStreamToArray(tFileStream)
+    kill tFileStream
+    quit result
+}
+CheckDependecies() {
+}
 LIST(args...) ;;list of installed packages
     new (args)
     set sql=##class(%SQL.Statement).%New()
@@ -83,7 +105,7 @@ LIST(args...) ;;list of installed packages
     quit:'$$$ISOK(tSC)
     set tRS=sql.%Execute()
     while tRS.%Next() {
-        w !?3,tRS.Name,?15,tRS.Version,?25,tRS.Description
+        write !?3,tRS.Name,?15,tRS.Version,?25,tRS.Description
     }
     quit
 HELP(args...) ;;this help
@@ -97,11 +119,11 @@ HELP(args...) ;;this help
         continue:$zstrip($extract(line),"*WCP")=""
         set help=$piece(line,";;",2)
         continue:help=""
-        set command=$zcvt($piece(line,"("),"L")
+        set command=$zconvert($piece(line,"("),"L")
         write !?3,command,?15,help
     }
-    w !?3,"quit",?15,"quit from shell"
-    w !
+    write !?3,"quit",?15,"quit from shell"
+    write !
     quit
     
 
