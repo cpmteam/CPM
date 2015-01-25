@@ -4,8 +4,9 @@
 ## TODO list (the nearest and long-term)
 
 - [ ] %CPM shell
-  - [ ] list
-  - [ ] install
+  - [X] list
+  - [X] install
+  - [X] help
   - [ ] uninstall
   - [ ] reinstall
   - [ ] package create

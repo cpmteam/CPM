@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.SourceType.IBase">
+<Abstract>1</Abstract>
+<IncludeCode>%occConstant</IncludeCode>
+<TimeCreated>63577,81983.079145</TimeCreated>
+
+<Parameter name="EXTENSIONS">
+<Type>%String</Type>
+</Parameter>
+
+<Property name="FileName">
+<Type>%String</Type>
+</Property>
+
+<Property name="IsPacked">
+<Type>%Boolean</Type>
+<InitialExpression>0</InitialExpression>
+</Property>
+
+<Property name="PackageContent">
+<Type>%ArrayOfDataTypes</Type>
+</Property>
+
+<Method name="Open">
+<FormalSpec>fileName:%String</FormalSpec>
+<Implementation><![CDATA[
+]]></Implementation>
+</Method>
+
+<Method name="Unpack">
+<FormalSpec>fileName:%String=""</FormalSpec>
+<ReturnType>%ArrayOfDataTypes</ReturnType>
+<Implementation><![CDATA[
+    quit i%PackageContent
+
+]]></Implementation>
+</Method>
+
+<Method name="Parse">
+<FormalSpec>arrayOfStrings:%ArrayOfDataTypes=""</FormalSpec>
+<ReturnType>CPM.IPackage</ReturnType>
+<Implementation><![CDATA[
+    quit $$$NULLOREF
+
+]]></Implementation>
+</Method>
+</Class>
+</Export>

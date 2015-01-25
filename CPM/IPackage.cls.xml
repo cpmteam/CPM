@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.IPackage">
+<Abstract>1</Abstract>
+<TimeCreated>63577,81977.364523</TimeCreated>
+
+<Property name="Name">
+<Type>%String</Type>
+</Property>
+
+<Property name="Version">
+<Type>%String</Type>
+</Property>
+
+<Property name="Description">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="2000"/>
+</Property>
+
+<Property name="Dependencies">
+<Type>%String</Type>
+<Collection>array</Collection>
+</Property>
+</Class>
+</Export>

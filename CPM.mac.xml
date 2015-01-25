@@ -72,20 +72,23 @@ INSTALL(packages...) ;;install package
     
     write !,"Installing packages: "
     for i=1:1:packages {
-        set package=packages(i)
-        set packageContent=""
+        #dim package As %String = packages(i)
+        #dim packageContent As %Library.ArrayOfDataTypes = ""
+        
         if ##class(%File).Exists(package) {
-            set packageContent=$$UnpackPackage(package)
+            set packageContent = $$UnpackPackage(package)
         }
         continue:'$isobject(packageContent)
-        set packageContent=packageContent.GetNext()
-        set metaInfo=packageContent.GetAt("package.json")
+        set packageContent = packageContent.GetNext()
+        set metaInfo       = packageContent.GetAt("package.json")
         continue:'$isobject(metaInfo)
+        
         #dim metaInfoData As %Stream.Object = metaInfo.fileData
         continue:'##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(metaInfoData.Read(metaInfoData.Size),,.metaInfo)
-        set name=metaInfo.name
-        set description=$zconvert(metaInfo.description,"I","UTF8")
-        set version=metaInfo.version
+        #dim name As %String        = metaInfo.name
+        #dim description As %String = $zconvert(metaInfo.description,"I","UTF8")
+        #dim version As %String     = metaInfo.version
+        
         write !?3,name,?25,version,?45,description
     }
     quit
