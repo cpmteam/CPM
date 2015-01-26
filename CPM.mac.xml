@@ -74,7 +74,7 @@ INSTALL(packages...) ;;install package
     write !,"Installing packages: "
     for i=1:1:packages {
         #dim package As %String = packages(i)
-        #dim packageFile As CPM.SourceType.TGZ = ##class(CPM.SourceType.TGZ).%New()
+        #dim packageFile As CPM.SourceType.TarGz = ##class(CPM.SourceType.TarGz).%New()
         if $$$ISERR(packageFile.Open(package)) {
             continue
         }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
-<Class name="CPM.SourceType.TGZ">
+<Class name="CPM.SourceType.TarGz">
 <Super>%RegisteredObject,CPM.SourceType.IBase</Super>
 <TimeCreated>63578,9135.530254</TimeCreated>
 
@@ -13,7 +13,9 @@
 <Description>
 override IsPacked property to be always returning 1</Description>
 <ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[    quit 1
+<Implementation><![CDATA[
+    quit 1
+
 ]]></Implementation>
 </Method>
 
@@ -23,6 +25,7 @@ override IsPacked property to be always returning 1</Description>
 <Implementation><![CDATA[
     #; simply ignore
     quit $$$OK
+
 ]]></Implementation>
 </Method>
 
@@ -33,6 +36,7 @@ override IsPacked property to be always returning 1</Description>
     #; not try to actually open file
     set ..FileName = fileName
     quit ##class(%File).Exists(..FileName)
+
 ]]></Implementation>
 </Method>
 
@@ -46,6 +50,7 @@ override IsPacked property to be always returning 1</Description>
     kill tFileStream
 
     quit $isobject(i%PackageContent)
+
 ]]></Implementation>
 </Method>
 
@@ -74,6 +79,8 @@ override IsPacked property to be always returning 1</Description>
     #dim version As %String     = metaInfo.version
 
     quit ##class(CPM.IPackage).Create(name, description, version)
+
+
 ]]></Implementation>
 </Method>
 </Class>
