@@ -85,8 +85,14 @@ INSTALL(packages...) ;;install package
         write !?3, packageData.Name, ?25, packageData.Version, ?45, packageData.Description
     }
     quit
-CheckDependecies() {
+    
+AllSuccessors(baseClass) public {
+    #dim rs As %ResultSet.SQL = ##class(%ResultSet.SQL).%Prepare("select *from %Dictionary.ClassDefinition where Super['"_baseClass_"'")
+    while rs.%Next() {
+        write rs.Name,":",?24, $parameter(rs.Name,"EXTENSIONS"),!
+    }
 }
+
 LIST(args...) ;;list of installed packages
     new (args)
     set sql=##class(%SQL.Statement).%New()

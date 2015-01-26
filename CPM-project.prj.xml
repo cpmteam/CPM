@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
-<Project name="CPM-project" LastModified="2015-01-26 17:16:14.585356" Target="INSTALL^CPM(&quot;C:\Users\Timur\Documents\Intersystems\src\CPM\t\tgz\webterminal-2.0.0-beta.6.tgz&quot;)" TargetType="0">
+<Project name="CPM-project" LastModified="2015-01-26 19:31:07.915663" Target="INSTALL^CPM(&quot;C:\Users\Timur\Documents\Intersystems\src\CPM\t\tgz\webterminal-2.0.0-beta.6.tgz&quot;)" TargetType="0">
   <Items>
     <ProjectItem name="CPM.DataTypes.INC" type="MAC"></ProjectItem>
     <ProjectItem name="CPM.Installer" type="CLS"></ProjectItem>
@@ -16,6 +16,7 @@
     <ProjectItem name="CPM.IPackage" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.SourceType.IBase" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.SourceType.TarGz" type="CLS"></ProjectItem>
+    <ProjectItem name="CPM.SourceType.Xml" type="CLS"></ProjectItem>
   </Items>
 </Project>
 </Export>
