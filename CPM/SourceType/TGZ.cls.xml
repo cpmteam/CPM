@@ -28,31 +28,48 @@ override IsPacked property to be always returning 1</Description>
 
 <Method name="Open">
 <FormalSpec>fileName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     #; not try to actually open file
-    set i%FileName = fileName
+    set ..FileName = fileName
+    quit ##class(%File).Exists(..FileName)
 ]]></Implementation>
 </Method>
 
 <Method name="Unpack">
-<FormalSpec>fileName:%String=""</FormalSpec>
-<ReturnType>%ArrayOfDataTypes</ReturnType>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    set i%FileName = fileName
     #dim tFileStream As %Stream.FileBinaryGzip = ##class(%Stream.FileBinaryGzip).%New()
 
-    set tFileStream.Filename = i%FileName
-    set i%PackageContent = ##class(CPM.Utils.FileBinaryTar).ExtractStreamToArray(tFileStream)
+    set tFileStream.Filename = ..FileName
+    set ..PackageContent = ##class(CPM.Utils.FileBinaryTar).ExtractStreamToArray(tFileStream)
     kill tFileStream
 
-    quit i%PackageContent
+    quit $isobject(i%PackageContent)
 ]]></Implementation>
 </Method>
 
 <Method name="Parse">
-<FormalSpec>arrayOfStrings:%ArrayOfDataTypes=""</FormalSpec>
 <ReturnType>CPM.IPackage</ReturnType>
-<Implementation><![CDATA[    quit $$$NULLOREF
+<Implementation><![CDATA[
+    if '$isobject(..PackageContent) {
+        quit $$$NULLOREF
+    }
+    set ..PackageContent = ..PackageContent.GetNext()
+    set metaInfo         = ..PackageContent.GetAt("package.json")
+    if '$isobject(metaInfo) {
+        quit $$$NULLOREF
+    }
+    
+    #dim metaInfoData As %Stream.FileBinary = metaInfo.fileData
+    if '##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(metaInfoData.Read(metaInfoData.Size),,.metaInfo) {
+        quit $$$NULLOREF
+    }
+    #dim name As %String        = metaInfo.name
+    #dim description As %String = $zconvert(metaInfo.description,"I","UTF8")
+    #dim version As %String     = metaInfo.version
+
+    quit ##class(CPM.IPackage).Create(name, description, version)
 ]]></Implementation>
 </Method>
 </Class>

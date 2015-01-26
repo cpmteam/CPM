@@ -29,20 +29,14 @@
 </Method>
 
 <Method name="Unpack">
-<FormalSpec>fileName:%String=""</FormalSpec>
-<ReturnType>%ArrayOfDataTypes</ReturnType>
-<Implementation><![CDATA[
-    quit i%PackageContent
-
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[    quit '$$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="Parse">
-<FormalSpec>arrayOfStrings:%ArrayOfDataTypes=""</FormalSpec>
 <ReturnType>CPM.IPackage</ReturnType>
-<Implementation><![CDATA[
-    quit $$$NULLOREF
-
+<Implementation><![CDATA[    quit $$$NULLOREF
 ]]></Implementation>
 </Method>
 </Class>
