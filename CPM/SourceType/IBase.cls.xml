@@ -15,6 +15,7 @@
 
 <Property name="IsPacked">
 <Type>%Boolean</Type>
+<Calculated>1</Calculated>
 <InitialExpression>0</InitialExpression>
 </Property>
 
@@ -24,8 +25,7 @@
 
 <Method name="Open">
 <FormalSpec>fileName:%String</FormalSpec>
-<Implementation><![CDATA[
-]]></Implementation>
+<Implementation><![CDATA[]]></Implementation>
 </Method>
 
 <Method name="Unpack">

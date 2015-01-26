@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.IPackage">
-<Abstract>1</Abstract>
+<Abstract>0</Abstract>
 <TimeCreated>63577,81977.364523</TimeCreated>
 
 <Property name="Name">
