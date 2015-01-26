@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.SourceType.TGZ">
-<Super>CPM.SourceType.IBase</Super>
+<Super>%RegisteredObject,CPM.SourceType.IBase</Super>
 <TimeCreated>63578,9135.530254</TimeCreated>
 
 <Parameter name="EXTENSIONS">
@@ -55,14 +55,18 @@ override IsPacked property to be always returning 1</Description>
     if '$isobject(..PackageContent) {
         quit $$$NULLOREF
     }
-    set ..PackageContent = ..PackageContent.GetNext()
+
+    set ..PackageContent = ..PackageContent.GetNext()   // what the heck?
+    // FIXME - typed declaration
     set metaInfo         = ..PackageContent.GetAt("package.json")
     if '$isobject(metaInfo) {
         quit $$$NULLOREF
     }
     
     #dim metaInfoData As %Stream.FileBinary = metaInfo.fileData
-    if '##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(metaInfoData.Read(metaInfoData.Size),,.metaInfo) {
+    if '##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(metaInfoData.Read(metaInfoData.Size),,
+                                                                  .metaInfo) 
+    {
         quit $$$NULLOREF
     }
     #dim name As %String        = metaInfo.name
