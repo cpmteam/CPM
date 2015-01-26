@@ -74,25 +74,6 @@ INSTALL(packages...) ;;install package
     write !,"Installing packages: "
     for i=1:1:packages {
         #dim package As %String = packages(i)
-#if 0
-        #dim packageContent As %Library.ArrayOfDataTypes = ""
-        
-        if ##class(%File).Exists(package) {
-            set packageContent = $$UnpackPackage(package)
-        }
-        continue:'$isobject(packageContent)
-        set packageContent = packageContent.GetNext()
-        set metaInfo       = packageContent.GetAt("package.json")
-        continue:'$isobject(metaInfo)
-        
-        #dim metaInfoData As %Stream.Object = metaInfo.fileData
-        continue:'##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(metaInfoData.Read(metaInfoData.Size),,.metaInfo)
-        #dim name As %String        = metaInfo.name
-        #dim description As %String = $zconvert(metaInfo.description,"I","UTF8")
-        #dim version As %String     = metaInfo.version
-        
-        write !?3,name,?25,version,?45,description
-#else
         #dim packageFile As CPM.SourceType.TGZ = ##class(CPM.SourceType.TGZ).%New()
         if $$$ISERR(packageFile.Open(package)) {
             continue
@@ -102,16 +83,8 @@ INSTALL(packages...) ;;install package
         }
         #dim packageData As CPM.IPackage = packageFile.Parse()
         write !?3, packageData.Name, ?25, packageData.Version, ?45, packageData.Description
-#endif
     }
     quit
-UnpackPackage(pFileName) {
-    set tFileStream=##class(%Stream.FileBinaryGzip).%New()
-    set tFileStream.Filename=pFileName
-    set result=##class(CPM.Utils.FileBinaryTar).ExtractStreamToArray(tFileStream)
-    kill tFileStream
-    quit result
-}
 CheckDependecies() {
 }
 LIST(args...) ;;list of installed packages
