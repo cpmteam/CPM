@@ -6,7 +6,12 @@
 
 <Parameter name="EXTENSIONS">
 <Type>%String</Type>
-<Default>.XML</Default>
+<Default>XML</Default>
+</Parameter>
+
+<Parameter name="MANIFEST">
+<Type>%String</Type>
+<Default>manifest.xml</Default>
 </Parameter>
 
 <Method name="IsPackedGet">

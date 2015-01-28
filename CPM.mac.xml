@@ -70,12 +70,12 @@ INSTALL(packages...) ;;install package
         write !,"Nothing to install"
         quit
     }
-    
+    do RegisterAllSourceTypes()
     write !,"Installing packages: "
     for i=1:1:packages {
         #dim package As %String = packages(i)
-        #dim packageFile As CPM.SourceType.TarGz = ##class(CPM.SourceType.TarGz).%New()
-        if $$$ISERR(packageFile.Open(package)) {
+        #dim packageFile As CPM.SourceType.IBase = ##class(CPM.SourceType.IBase).%OpenContainer(package)
+        if '$isobject(packageFile) {
             continue
         }
         if packageFile.IsPacked {
@@ -86,6 +86,10 @@ INSTALL(packages...) ;;install package
     }
     quit
     
+RegisterAllSourceTypes() {
+    do ##class(CPM.SourceType.IBase).UnregisterExts()
+    do ##class(CPM.SourceType.IBase).ForEachSuccessor("RegisterExts")
+}
 AllSuccessors(baseClass) public {
     #dim rs As %ResultSet.SQL = ##class(%ResultSet.SQL).%Prepare("select *from %Dictionary.ClassDefinition where Super['"_baseClass_"'")
     while rs.%Next() {

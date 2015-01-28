@@ -6,16 +6,19 @@
 
 <Parameter name="EXTENSIONS">
 <Type>%String</Type>
-<Default>.TGZ,.TAR.GZ</Default>
+<Default>TGZ,GZ</Default>
+</Parameter>
+
+<Parameter name="MANIFEST">
+<Type>%String</Type>
+<Default>package.json</Default>
 </Parameter>
 
 <Method name="IsPackedGet">
 <Description>
 override IsPacked property to be always returning 1</Description>
 <ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
-    quit 1
-
+<Implementation><![CDATA[    quit 1
 ]]></Implementation>
 </Method>
 
@@ -25,7 +28,6 @@ override IsPacked property to be always returning 1</Description>
 <Implementation><![CDATA[
     #; simply ignore
     quit $$$OK
-
 ]]></Implementation>
 </Method>
 
@@ -36,7 +38,6 @@ override IsPacked property to be always returning 1</Description>
     #; not try to actually open file
     set ..FileName = fileName
     quit ##class(%File).Exists(..FileName)
-
 ]]></Implementation>
 </Method>
 
@@ -50,7 +51,6 @@ override IsPacked property to be always returning 1</Description>
     kill tFileStream
 
     quit $isobject(i%PackageContent)
-
 ]]></Implementation>
 </Method>
 
@@ -63,7 +63,7 @@ override IsPacked property to be always returning 1</Description>
 
     set ..PackageContent = ..PackageContent.GetNext()   // what the heck?
     // FIXME - typed declaration
-    set metaInfo         = ..PackageContent.GetAt("package.json")
+    set metaInfo         = ..PackageContent.GetAt(..#MANIFEST)
     if '$isobject(metaInfo) {
         quit $$$NULLOREF
     }
@@ -79,8 +79,6 @@ override IsPacked property to be always returning 1</Description>
     #dim version As %String     = metaInfo.version
 
     quit ##class(CPM.IPackage).Create(name, description, version)
-
-
 ]]></Implementation>
 </Method>
 </Class>
