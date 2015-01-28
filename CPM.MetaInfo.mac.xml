@@ -17,12 +17,11 @@ ProcessManifest(FileName,&pkg,&deps,Debug=0) [xmltree] {
     while i'="" {
         #dim name As %String = localdeps(i,"Dependency","Name")
 
-        set deps(name) = 1 ; create exportable list of deps
+        set deps(name) = $get(localdeps(i,"Dependency","Version"),
+                              $get(localdeps(i,"Dependency","Path"))) ; create exportable list of deps
 
         if Debug {
-            write ?4, name, ?20,
-                  $get(localdeps(i,"Dependency","Version"),$get(localdeps(i,"Dependency","Path"))),
-                  !
+            write ?4, name, ?20, deps(name), !
         }
         set i = $order(localdeps(i))
     }

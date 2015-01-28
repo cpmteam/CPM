@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.IPackage">
+<Super>%RegisteredObject</Super>
+<TimeCreated>63577,81977.364523</TimeCreated>
+
+<Property name="Name">
+<Type>%String</Type>
+</Property>
+
+<Property name="Version">
+<Type>%String</Type>
+</Property>
+
+<Property name="Description">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="2000"/>
+</Property>
+
+<Property name="Dependencies">
+<Type>%String</Type>
+<Collection>array</Collection>
+</Property>
+
+<Method name="Create">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>name:%String,description:%String,version:%String</FormalSpec>
+<Implementation><![CDATA[
+    #dim object As CPM.IPackage = ..%New()
+    set object.Name = name
+    set object.Version = version
+    set object.Description = description
+
+    quit object
+]]></Implementation>
+</Method>
+</Class>
+</Export>
