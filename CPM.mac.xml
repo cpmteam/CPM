@@ -90,12 +90,6 @@ RegisterAllSourceTypes() {
     do ##class(CPM.SourceType.IBase).UnregisterExts()
     do ##class(CPM.SourceType.IBase).ForEachSuccessor("RegisterExts")
 }
-AllSuccessors(baseClass) public {
-    #dim rs As %ResultSet.SQL = ##class(%ResultSet.SQL).%Prepare("select *from %Dictionary.ClassDefinition where Super['"_baseClass_"'")
-    while rs.%Next() {
-        write rs.Name,":",?24, $parameter(rs.Name,"EXTENSIONS"),!
-    }
-}
 
 LIST(args...) ;;list of installed packages
     new (args)
