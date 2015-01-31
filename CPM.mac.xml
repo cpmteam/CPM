@@ -4,17 +4,6 @@
 #include CPM.License
 #include %occInclude
 #include CPM.LIB
-    kill
-    
-    ;try {
-        s cpm=##class(CPM.Main).%New()
-        d cpm.Registry.Cache.Update()
-        
-        
-    ;} catch ex {
-    ;    w !,ex.DisplayString()
-    ;}
-    quit
 SHELL
     new
     #; here goes interactive entry
