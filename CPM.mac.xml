@@ -3,7 +3,18 @@
 <Routine name="CPM" type="MAC" languagemode="0"><![CDATA[
 #include CPM.License
 #include %occInclude
-
+#include CPM.LIB
+    kill
+    
+    ;try {
+        s cpm=##class(CPM.Main).%New()
+        d cpm.Registry.Cache.Update()
+        
+        
+    ;} catch ex {
+    ;    w !,ex.DisplayString()
+    ;}
+    quit
 SHELL
     new
     #; here goes interactive entry
@@ -96,8 +107,13 @@ UnpackPackage(pFileName) {
     kill tFileStream
     quit result
 }
-CheckDependecies() {
+CheckDependecies(Package, &Depends) {
+    
 }
+SEARCH(string, args...)
+    set cpm=##class(CPM.Main).%New()
+    do cpm.Search(string)
+    quit
 LIST(args...) ;;list of installed packages
     new (args)
     set sql=##class(%SQL.Statement).%New()

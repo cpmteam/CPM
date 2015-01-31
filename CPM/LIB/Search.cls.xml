@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.LIB.Search">
+<Super>Base</Super>
+<TimeCreated>63576,66371.397831</TimeCreated>
+
+<Method name="Search">
+<FormalSpec>String</FormalSpec>
+<Implementation><![CDATA[
+    do ..Registry.Cache.Update()
+    write !,"Searching for string: "_String
+    quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

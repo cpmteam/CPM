@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.LIB.Install">
+<Super>Base</Super>
+<TimeCreated>63569,56031.260241</TimeCreated>
+
+<Method name="Install">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Packages:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set:'$listvalid(Packages) Packages=$lb(Packages)
+    for i=1:1:$ll(Packages) {
+        s package=$lg(Packages)
+        continue:package=""
+        
+        set meta=..getMeta(package)
+        continue:'$isobject(meta)
+    }
+    quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="readDependencies">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[Package:%String,&Dependencies]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[    quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
