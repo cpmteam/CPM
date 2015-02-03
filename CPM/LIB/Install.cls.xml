@@ -14,18 +14,10 @@
         s package=$lg(Packages)
         continue:package=""
         
-        set meta=..getMeta(package)
+        set meta=..GetMeta(package)
         continue:'$isobject(meta)
     }
     quit $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="readDependencies">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[Package:%String,&Dependencies]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[    quit $$$OK
 ]]></Implementation>
 </Method>
 </Class>

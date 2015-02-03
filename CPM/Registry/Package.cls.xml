@@ -31,6 +31,19 @@
 <Properties>keywords(ELEMENTS)</Properties>
 </Index>
 
+<Property name="author">
+<Type>%String</Type>
+</Property>
+
+<Property name="maintainers">
+<Type>%String</Type>
+<Collection>list</Collection>
+</Property>
+
+<Property name="modified">
+<Type>%TimeStamp</Type>
+</Property>
+
 <Method name="%OnNew">
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[    quit $$$OK
@@ -45,14 +58,20 @@
     set package=..%OpenId(Package)
     set:'$isobject(package) package=..%New()
     set package.name=Package
-    
     set package.description=Value.description
     
     do package.keywords.Clear()
     for i=1:1:Value.keywords.Size {
         do package.keywords.Insert(Value.keywords.GetAt(i))
     }
-    
+    do package.maintainers.Clear()
+    if Value.maintainers.%IsA("%ListOfObjects") {
+        for i=1:1:Value.maintainers.Size {
+            do package.maintainers.Insert(Value.maintainers.GetAt(i).name)
+        }
+    }
+    set package.author=$select($isobject(Value.author):Value.author.name, 1:"")
+    set package.modified=$tr(Value.time.modified,"TZ"," ")
     do Value.versions.%CopyToArray(.versions)
     set tVersion=""
     for {
@@ -81,21 +100,39 @@ Is used to get the value of an unknown property.</Description>
 ]]></Implementation>
 </Method>
 
+<Query name="Search">
+<Type>%SQLQuery</Type>
+<FormalSpec>Value:%String</FormalSpec>
+<SqlProc>1</SqlProc>
+<SqlQuery>SELECT id from (
+    SELECT id FROM package where name = :Value
+    union all
+    SELECT id FROM package where name like STRING('%',:Value,'%')
+    union all
+    SELECT id FROM package where keywords like STRING('%',:Value,'%')
+    union all
+    SELECT id FROM package where description like STRING('%',:Value,'%')
+) GROUP BY id</SqlQuery>
+</Query>
+
 <Query name="ListByName">
 <Type>%SQLQuery</Type>
 <FormalSpec>Value:%String</FormalSpec>
+<SqlProc>1</SqlProc>
 <SqlQuery>SELECT id FROM package where name like STRING('%',:Value,'%')</SqlQuery>
 </Query>
 
 <Query name="ListByKeyword">
 <Type>%SQLQuery</Type>
 <FormalSpec>Value:%String</FormalSpec>
+<SqlProc>1</SqlProc>
 <SqlQuery>SELECT id FROM package where keywords like STRING('%',:Value,'%')</SqlQuery>
 </Query>
 
 <Query name="ListByDescription">
 <Type>%SQLQuery</Type>
 <FormalSpec>Value:%String</FormalSpec>
+<SqlProc>1</SqlProc>
 <SqlQuery>SELECT id FROM package where description like STRING('%',:Value,'%')</SqlQuery>
 </Query>
 
@@ -118,6 +155,15 @@ Is used to get the value of an unknown property.</Description>
 </Value>
 <Value name="4">
 <Value>keywords</Value>
+</Value>
+<Value name="5">
+<Value>author</Value>
+</Value>
+<Value name="6">
+<Value>maintainers</Value>
+</Value>
+<Value name="7">
+<Value>modified</Value>
 </Value>
 </Data>
 </Storage>

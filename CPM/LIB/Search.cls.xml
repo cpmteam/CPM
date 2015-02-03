@@ -7,8 +7,27 @@
 <Method name="Search">
 <FormalSpec>String</FormalSpec>
 <Implementation><![CDATA[
+    set String=$zstrip(String,"<>WC")
     do ..Registry.Cache.Update()
-    write !,"Searching for string: "_String
+    
+    set tST=##class(%SQL.Statement).%New()
+    set tSC=tST.%PrepareClassQuery("CPM.Registry.Package","Search")
+    $$$ThrowOnError(tSC)
+    #dim tRes As %Library.ProcedureContext = tST.%Execute(String)
+    while tRes.%Next() {
+        set id=tRes.%Get("ID")
+        set package=##class(CPM.Registry.Package).%OpenId(id)
+        set authors=""
+        for i=1:1:package.maintainers.Size {
+            set $list(authors,i)="="_package.maintainers.GetAt(i)
+        }
+        set line=$listbuild(id,$listtostring(authors," "),$piece(package.modified," "),package.latestVersion,package.description)
+        set result($increment(result))=line
+    }
+    if $data(result) {
+        set result(0)=$listbuild("NAME","AUTHOR","DATE","VERSION","DESCRIPTION")
+    }
+    do ..ShowTable(.result)
     quit $$$OK
 ]]></Implementation>
 </Method>

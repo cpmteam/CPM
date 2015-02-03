@@ -21,7 +21,7 @@ Client for API of registry</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="getCertificate">
+<Method name="GetCertificate">
 <Description>
 Get SSL Configuration by Server as a name for configuration</Description>
 <ClassMethod>1</ClassMethod>
@@ -55,7 +55,7 @@ Get SSL Configuration by Server as a name for configuration</Description>
     set:$get(url("port"))'="" request.Port=port
     if url("scheme")="https" {
         set request.Https=1
-        set request.SSLConfiguration=..getCertificate(request.Server)
+        set request.SSLConfiguration=..GetCertificate(request.Server)
     }
     if $data(Params("body")) {
         
@@ -65,7 +65,7 @@ Get SSL Configuration by Server as a name for configuration</Description>
     $$$ThrowOnError(tSC)
     
     set statusCode=request.HttpResponse.StatusCode
-    throw:statusCode>=500 ##class(%Exception.General).%New("Server error: "_statusCode)
+    throw:statusCode=404 ##class(%Exception.General).%New("File not found error: "_statusCode)
     throw:statusCode>=400 ##class(%Exception.General).%New("Server error: "_statusCode)
     
     quit request.HttpResponse

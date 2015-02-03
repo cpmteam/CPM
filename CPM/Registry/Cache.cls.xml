@@ -31,20 +31,40 @@
     set Url=..Config.registry
     $$$UrlParser(Url,url)
     if .."_updated"'="" {
+        quit:..GetTime()-.."_updated"<60000 $$$OK
         set url("query")="stale=update_after&startkey="_.."_updated"
         set url("path")=$$$getParam(url, "path", "/-/all/since")
-        write !,"Updating index",!
+        write "Updating index",!
     } else {
         set url("path")=$$$getParam(url, "path", "/-/all/")
-        write !,"Building the local index for the first time",!
+        write "Building the local index for the first time",!
     }
+    #dim exception As %Exception.AbstractException
+    try {
+        set response=..Registry.Get(.url,.params)
+    } catch exception {
+        if exception.Code="6059" {
+            write !,"Connection error!",!
+        } else {
+            throw exception
+        }
+    }
+    quit:$data(exception) $$$OK
     
-    set response=..Registry.Get(.url)
     #dim data As %ZEN.proxyObject
     set tSC=##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(response.Data,..%ClassName(1),.data,1)
     $$$ThrowOnError(tSC)
     
     quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetTime">
+<Description>
+Get time in Unix format</Description>
+<FormalSpec>TimeStamp=$zts</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[    quit ($piece(TimeStamp,",")-47117)*86400 + $piece(TimeStamp,",",2) * 1000
 ]]></Implementation>
 </Method>
 
@@ -76,7 +96,8 @@ is used to set the value of an unknown property.</Description>
             set ..Config.updated=Val
         }
     } else {
-        do ##class(CPM.Registry.Package).Load(Property, Val)
+        set tSC=##class(CPM.Registry.Package).Load(Property, Val)
+        $$$ThrowOnError(tSC)
     }
     quit $$$OK
 ]]></Implementation>
