@@ -7,7 +7,7 @@
 <Method name="Search">
 <FormalSpec>String</FormalSpec>
 <Implementation><![CDATA[
-    set String=$zstrip(String,"<>WC")
+    set String=$zconvert($zstrip(String,"<>WC"),"U")
     do ..Registry.Cache.Update()
     
     set tST=##class(%SQL.Statement).%New()
@@ -27,7 +27,7 @@
     if $data(result) {
         set result(0)=$listbuild("NAME","AUTHOR","DATE","VERSION","DESCRIPTION")
     }
-    do ..ShowTable(.result)
+    do ..ShowTable(.result, String)
     quit $$$OK
 ]]></Implementation>
 </Method>
