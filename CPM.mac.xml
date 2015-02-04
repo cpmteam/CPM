@@ -96,9 +96,6 @@ UnpackPackage(pFileName) {
     kill tFileStream
     quit result
 }
-CheckDependecies(Package, &Depends) {
-    
-}
 SEARCH(string, args...)
     set cpm=##class(CPM.Main).%New()
     do cpm.Search(string)
