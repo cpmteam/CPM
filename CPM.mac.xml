@@ -96,7 +96,7 @@ UnpackPackage(pFileName) {
     kill tFileStream
     quit result
 }
-SEARCH(string, args...)
+SEARCH(string, args...) ;;search packages
     set cpm=##class(CPM.Main).%New()
     do cpm.Search(string)
     quit
