@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.LIB.Base">
+<Abstract>1</Abstract>
+<Super>%RegisteredObject</Super>
+<TimeCreated>63570,61555.098661</TimeCreated>
+
+<Property name="Config">
+<Type>Config</Type>
+<Internal>1</Internal>
+</Property>
+
+<Property name="Registry">
+<Type>CPM.Registry.Client</Type>
+</Property>
+
+<Method name="%OnNew">
+<FormalSpec>Config,Registry</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set ..Config=Config
+    set ..Registry=Registry
+    quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetMeta">
+<Description>
+getting met informationfor package, i.e. package.json</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Package:%String</FormalSpec>
+<ReturnType>%ArrayOfDataTypes</ReturnType>
+<Implementation><![CDATA[
+    set meta = ##class(%ArrayOfDataTypes).%New()
+    
+    quit meta
+]]></Implementation>
+</Method>
+
+<Method name="ShowTable">
+<Description>
+Show table form array data, where indexes as rows, and data in $listbuild's
+pHighlight - highlighted text</Description>
+<FormalSpec><![CDATA[&Array,pHighlight=""]]></FormalSpec>
+<Implementation><![CDATA[
+    #define redText $char(27)_"[31m"
+    #define clear $c(27)_"[0m"
+    quit:'$data(Array,size)
+    quit:+size=0
+    for i=0:1:size {
+        set line=$get(Array(i))
+        for j=1:1:$listlength(line) {
+            set width=$length($listget(line,j))+1
+            if $get(cols(j))<width set cols(j)=width
+        }
+    }
+    #; Terminal's width
+    set maxWidth=80
+    
+    set:pHighlight'="" re=##class(%Regex.Matcher).%New("(?i)(terminal)")
+    
+    for i=0:1:size {
+        set line=$get(Array(i))
+        write !
+        set pos=0
+        for j=1:1:$listlength(line) {
+            set value=$listget(line,j)
+            if $length(value)>(maxWidth-pos) {
+                set value=$extract(value,1,maxWidth-pos-1)_"…"
+            }
+            if pHighlight'="" set re.Text=value,value=re.ReplaceAll($$$redText_"$1"_$$$clear)
+            w ?pos,value
+            set pos=pos+$get(cols(j))    
+        }
+        
+    }
+]]></Implementation>
+</Method>
+</Class>
+</Export>

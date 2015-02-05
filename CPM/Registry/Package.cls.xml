@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.Registry.Package">
+<Super>%Persistent</Super>
+<TimeCreated>63577,86035.524325</TimeCreated>
+
+<Property name="name">
+<Type>%String</Type>
+</Property>
+
+<Index name="byName">
+<IdKey>1</IdKey>
+<Properties>name</Properties>
+</Index>
+
+<Property name="description">
+<Type>%String</Type>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="latestVersion">
+<Type>%String</Type>
+</Property>
+
+<Property name="keywords">
+<Type>%String</Type>
+<Collection>list</Collection>
+</Property>
+
+<Index name="byKeywords">
+<Properties>keywords(ELEMENTS)</Properties>
+</Index>
+
+<Property name="author">
+<Type>%String</Type>
+</Property>
+
+<Property name="maintainers">
+<Type>%String</Type>
+<Collection>list</Collection>
+</Property>
+
+<Property name="modified">
+<Type>%TimeStamp</Type>
+</Property>
+
+<Method name="%OnNew">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[    quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Load">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Package,Value:%ZEN.proxyObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set package=..%OpenId(Package)
+    set:'$isobject(package) package=..%New()
+    set package.name=Package
+    set package.description=Value.description
+    
+    do package.keywords.Clear()
+    for i=1:1:Value.keywords.Size {
+        do package.keywords.Insert(Value.keywords.GetAt(i))
+    }
+    do package.maintainers.Clear()
+    if Value.maintainers.%IsA("%ListOfObjects") {
+        for i=1:1:Value.maintainers.Size {
+            do package.maintainers.Insert(Value.maintainers.GetAt(i).name)
+        }
+    }
+    set package.author=$select($isobject(Value.author):Value.author.name, 1:"")
+    set package.modified=$tr(Value.time.modified,"TZ"," ")
+    do Value.versions.%CopyToArray(.versions)
+    set tVersion=""
+    for {
+        set tVersion=$o(versions(tVersion),1,latest)
+        quit:tVersion=""
+        continue:latest'="latest"
+        set package.latestVersion=tVersion
+    }
+    quit package.%Save()
+]]></Implementation>
+</Method>
+
+<Method name="%DispatchSetProperty">
+<Description>
+is used to set the value of an unknown property.</Description>
+<FormalSpec>Property:%String,Val</FormalSpec>
+<ServerOnly>1</ServerOnly>
+</Method>
+
+<Method name="%DispatchGetProperty">
+<Description>
+Is used to get the value of an unknown property.</Description>
+<FormalSpec>Property:%String</FormalSpec>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[   quit ""
+]]></Implementation>
+</Method>
+
+<Query name="Search">
+<Type>%SQLQuery</Type>
+<FormalSpec>Value:%String</FormalSpec>
+<SqlProc>1</SqlProc>
+<SqlQuery>SELECT id from (
+    SELECT id FROM package where name = :Value
+    union all
+    SELECT id FROM package where name like STRING('%',:Value,'%')
+    union all
+    SELECT id FROM package where keywords like STRING('%',:Value,'%')
+    union all
+    SELECT id FROM package where description like STRING('%',:Value,'%')
+) GROUP BY id</SqlQuery>
+</Query>
+
+<Query name="ListByName">
+<Type>%SQLQuery</Type>
+<FormalSpec>Value:%String</FormalSpec>
+<SqlProc>1</SqlProc>
+<SqlQuery>SELECT id FROM package where name like STRING('%',:Value,'%')</SqlQuery>
+</Query>
+
+<Query name="ListByKeyword">
+<Type>%SQLQuery</Type>
+<FormalSpec>Value:%String</FormalSpec>
+<SqlProc>1</SqlProc>
+<SqlQuery>SELECT id FROM package where keywords like STRING('%',:Value,'%')</SqlQuery>
+</Query>
+
+<Query name="ListByDescription">
+<Type>%SQLQuery</Type>
+<FormalSpec>Value:%String</FormalSpec>
+<SqlProc>1</SqlProc>
+<SqlQuery>SELECT id FROM package where description like STRING('%',:Value,'%')</SqlQuery>
+</Query>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^CPM.Registry.PackageD</DataLocation>
+<DefaultData>packageDefaultData</DefaultData>
+<IdLocation>^CPM.Registry.PackageD</IdLocation>
+<IndexLocation>^CPM.Registry.PackageI</IndexLocation>
+<StreamLocation>^CPM.Registry.PackageS</StreamLocation>
+<Data name="packageDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>description</Value>
+</Value>
+<Value name="3">
+<Value>latestVersion</Value>
+</Value>
+<Value name="4">
+<Value>keywords</Value>
+</Value>
+<Value name="5">
+<Value>author</Value>
+</Value>
+<Value name="6">
+<Value>maintainers</Value>
+</Value>
+<Value name="7">
+<Value>modified</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

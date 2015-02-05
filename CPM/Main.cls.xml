@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.Main">
+<Super>%RegisteredObject</Super>
+<TimeCreated>63576,64984.978961</TimeCreated>
+
+<Property name="Config">
+<Type>CPM.LIB.Config</Type>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="Registry">
+<Type>CPM.Registry.Client</Type>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="install">
+<Type>CPM.LIB.Install</Type>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="search">
+<Type>CPM.LIB.Search</Type>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Method name="%OnNew">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set i%Config=##class(CPM.LIB.Config).%New()
+    set i%Registry=##class(CPM.Registry.Client).%New(..Config)
+    set i%install=##class(CPM.LIB.Install).%New(..Config,..Registry)
+    set i%search=##class(CPM.LIB.Search).%New(..Config,..Registry)
+    quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Install">
+<CodeMode>expression</CodeMode>
+<FormalSpec>Args...</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[..install.Install(Args...)
+]]></Implementation>
+</Method>
+
+<Method name="Search">
+<CodeMode>expression</CodeMode>
+<FormalSpec>Args...</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[..search.Search(Args...)
+]]></Implementation>
+</Method>
+</Class>
+</Export>
