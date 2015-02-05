@@ -4,8 +4,9 @@
 ## TODO list (the nearest and long-term)
 
 - [ ] %CPM shell
-  - [ ] list
-  - [ ] install
+  - [X] list
+  - [X] install
+  - [X] help
   - [ ] uninstall
   - [ ] reinstall
   - [ ] package create
@@ -14,11 +15,11 @@
 
 - [ ] Multiple container types
   - [ ] XML
-  - [ ] TGZ
+  - [X] TGZ
 
 - [ ] Multiple metainfo formats
   - [ ] metainfo.xml
-  - [ ] package.json
+  - [X] package.json
   - [ ] package.toml
 
 - [ ] build step for source-binary packages
@@ -33,7 +34,7 @@
 
 - [ ] site
   - [ ] dynamic part
-  - [ ] sttaic part on CDN
+  - [ ] static part on CDN
 
 - [ ] initial examples converted
   - [ ]  iknowSocial - *good*;

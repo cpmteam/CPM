@@ -3,6 +3,7 @@
 <Class name="CPM.Sample.Installer">
 <Description>
 Simple example of installation instructions (Manifest)</Description>
+<CompileAfter>CPM.Installer.Package,CPM.Installer.Dependencies,CPM.Installer.Dependency</CompileAfter>
 <IncludeCode>%occInclude</IncludeCode>
 <TimeCreated>63557,45888.273376</TimeCreated>
 

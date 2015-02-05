@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.SourceType.Xml">
+<Super>%RegisteredObject,CPM.SourceType.IBase</Super>
+<TimeCreated>63578,69857.787389</TimeCreated>
+
+<Parameter name="EXTENSIONS">
+<Type>%String</Type>
+<Default>XML</Default>
+</Parameter>
+
+<Parameter name="MANIFEST">
+<Type>%String</Type>
+<Default>manifest.xml</Default>
+</Parameter>
+
+<Method name="IsPackedGet">
+<Description>
+override IsPacked property to be always returning 1</Description>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[    quit 0
+]]></Implementation>
+</Method>
+
+<Method name="IsPackedSet">
+<FormalSpec>Val:%Boolean</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #; simply ignore
+    quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Open">
+<FormalSpec>fileName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #; not try to actually open file
+    set ..FileName = fileName
+    quit ##class(%File).Exists(..FileName)
+]]></Implementation>
+</Method>
+
+<Method name="Unpack">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[    quit '$$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Parse">
+<ReturnType>CPM.IPackage</ReturnType>
+<Implementation><![CDATA[
+    if '$isobject(..PackageContent) {
+        quit $$$NULLOREF
+    }
+
+    quit $$$NULLOREF
+]]></Implementation>
+</Method>
+</Class>
+</Export>

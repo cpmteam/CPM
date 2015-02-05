@@ -1,26 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.Package">
-<Super>%Persistent</Super>
+<Super>%Persistent,CPM.IPackage</Super>
 <TimeCreated>63557,66899.47691</TimeCreated>
-
-<Property name="Name">
-<Type>%String</Type>
-</Property>
-
-<Property name="Version">
-<Type>%String</Type>
-</Property>
-
-<Property name="Description">
-<Type>%String</Type>
-<Parameter name="MAXLEN" value="2000"/>
-</Property>
-
-<Property name="Dependencies">
-<Type>%String</Type>
-<Collection>array</Collection>
-</Property>
 
 <Storage name="Default">
 <Type>%Library.CacheStorage</Type>
