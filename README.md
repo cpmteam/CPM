@@ -5,13 +5,15 @@
 
 - [ ] %CPM shell
   - [X] list
+  - [X] search
   - [X] install
   - [X] help
   - [ ] uninstall
   - [ ] reinstall
   - [ ] package create
     - [ ] package ...
-  - [ ] shell extensions API
+  - [ ] package publish
+  - [ ] shell extensions API via extending basic class
 
 - [ ] Multiple container types
   - [ ] XML
