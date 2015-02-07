@@ -8,10 +8,14 @@
     <ProjectItem name="CPM.Installer.Dependencies" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.Installer.Dependency" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.Installer.Package" type="CLS"></ProjectItem>
+    <ProjectItem name="CPM.LIB" type="PKG"></ProjectItem>
+    <ProjectItem name="CPM.LIB.INC" type="MAC"></ProjectItem>
     <ProjectItem name="CPM.License.INC" type="MAC"></ProjectItem>
     <ProjectItem name="CPM.MAC" type="MAC"></ProjectItem>
+    <ProjectItem name="CPM.Main" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.MetaInfo.MAC" type="MAC"></ProjectItem>
     <ProjectItem name="CPM.Package" type="CLS"></ProjectItem>
+    <ProjectItem name="CPM.Registry" type="PKG"></ProjectItem>
     <ProjectItem name="CPM.Sample.Installer" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.SourceType.IBase" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.SourceType.TarGz" type="CLS"></ProjectItem>

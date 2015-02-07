@@ -3,7 +3,7 @@
 <Routine name="CPM" type="MAC" languagemode="0"><![CDATA[
 #include CPM.License
 #include %occInclude
-#include %occStatus
+#include CPM.LIB
 
 SHELL
     new
@@ -84,6 +84,17 @@ INSTALL(packages...) ;;install package
         #dim packageData As CPM.IPackage = packageFile.Parse()
         write !?3, packageData.Name, ?25, packageData.Version, ?45, packageData.Description
     }
+    quit
+UnpackPackage(pFileName) {
+    set tFileStream=##class(%Stream.FileBinaryGzip).%New()
+    set tFileStream.Filename=pFileName
+    set result=##class(CPM.Utils.FileBinaryTar).ExtractStreamToArray(tFileStream)
+    kill tFileStream
+    quit result
+}
+SEARCH(string, args...) ;;search packages
+    set cpm=##class(CPM.Main).%New()
+    do cpm.Search(string)
     quit
     
 RegisterAllSourceTypes() {
