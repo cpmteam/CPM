@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
-<Class name="CPM.SourceType.IBase">
+<Class name="CPM.Source.IBase">
 <IncludeCode>%occConstant,CPM.SourceTypes</IncludeCode>
 <Super>%Library.RegisteredObject</Super>
 <TimeCreated>63577,81983.079145</TimeCreated>
@@ -38,6 +38,7 @@ will be overriden in the successor</Description>
 <Implementation><![CDATA[
     kill $$$PPV0EXTENSIONS
     kill $$$PPV0MANIFESTS
+
 ]]></Implementation>
 </Method>
 
@@ -59,13 +60,14 @@ register class extension and manifest name</Description>
         set ext = $piece(..#MANIFEST, ",", i)
         set $$$PPV0MANIFESTS(ext) = $CLASSNAME($this)
     }
+
 ]]></Implementation>
 </Method>
 
 <Method name="%OpenContainer">
 <ClassMethod>1</ClassMethod>
 <FormalSpec>fileName:%String</FormalSpec>
-<ReturnType>CPM.SourceType.IBase</ReturnType>
+<ReturnType>CPM.Source.IBase</ReturnType>
 <Implementation><![CDATA[
     #dim ext As %String = $zcvt($piece(fileName,".",*), "U")
     #dim o As CPM.SourceType.IBase = $$$NULLOREF
@@ -77,22 +79,29 @@ register class extension and manifest name</Description>
         }
     }
     quit o
+
 ]]></Implementation>
 </Method>
 
 <Method name="Open">
 <FormalSpec>fileName:%String</FormalSpec>
+<Implementation><![CDATA[
+]]></Implementation>
 </Method>
 
 <Method name="Unpack">
 <ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[    quit '$$$OK
+<Implementation><![CDATA[
+    quit '$$$OK
+
 ]]></Implementation>
 </Method>
 
 <Method name="Parse">
 <ReturnType>CPM.IPackage</ReturnType>
-<Implementation><![CDATA[    quit $$$NULLOREF
+<Implementation><![CDATA[
+    quit $$$NULLOREF
+
 ]]></Implementation>
 </Method>
 
@@ -104,6 +113,8 @@ register class extension and manifest name</Description>
     while rs.%Next() {
         do $classmethod(rs.Name, methodName, .Args)
     }
+
+
 ]]></Implementation>
 </Method>
 </Class>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
-<Class name="CPM.SourceType.Xml">
-<Super>%RegisteredObject,CPM.SourceType.IBase</Super>
+<Class name="CPM.Source.Xml">
+<Super>%RegisteredObject,CPM.Source.IBase</Super>
 <TimeCreated>63578,69857.787389</TimeCreated>
 
 <Parameter name="EXTENSIONS">
@@ -18,7 +18,9 @@
 <Description>
 override IsPacked property to be always returning 1</Description>
 <ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[    quit 0
+<Implementation><![CDATA[
+    quit 0
+
 ]]></Implementation>
 </Method>
 
@@ -28,6 +30,7 @@ override IsPacked property to be always returning 1</Description>
 <Implementation><![CDATA[
     #; simply ignore
     quit $$$OK
+
 ]]></Implementation>
 </Method>
 
@@ -38,12 +41,15 @@ override IsPacked property to be always returning 1</Description>
     #; not try to actually open file
     set ..FileName = fileName
     quit ##class(%File).Exists(..FileName)
+
 ]]></Implementation>
 </Method>
 
 <Method name="Unpack">
 <ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[    quit '$$$OK
+<Implementation><![CDATA[
+    quit '$$$OK
+
 ]]></Implementation>
 </Method>
 
@@ -55,6 +61,7 @@ override IsPacked property to be always returning 1</Description>
     }
 
     quit $$$NULLOREF
+
 ]]></Implementation>
 </Method>
 </Class>

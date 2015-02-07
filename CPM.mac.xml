@@ -74,7 +74,7 @@ INSTALL(packages...) ;;install package
     write !,"Installing packages: "
     for i=1:1:packages {
         #dim package As %String = packages(i)
-        #dim packageFile As CPM.SourceType.IBase = ##class(CPM.SourceType.IBase).%OpenContainer(package)
+        #dim packageFile As CPM.Source.IBase = ##class(CPM.Source.IBase).%OpenContainer(package)
         if '$isobject(packageFile) {
             continue
         }
@@ -98,8 +98,8 @@ SEARCH(string, args...) ;;search packages
     quit
     
 RegisterAllSourceTypes() {
-    do ##class(CPM.SourceType.IBase).UnregisterExts()
-    do ##class(CPM.SourceType.IBase).ForEachSuccessor("RegisterExts")
+    do ##class(CPM.Source.IBase).UnregisterExts()
+    do ##class(CPM.Source.IBase).ForEachSuccessor("RegisterExts")
 }
 
 LIST(args...) ;;list of installed packages
