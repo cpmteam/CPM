@@ -83,7 +83,10 @@ factory class</Description>
 <Method name="ParseXml">
 <FormalSpec>LocalName:%String</FormalSpec>
 <Implementation><![CDATA[
-    do ##class(%XML.TextReader).ParseFile(..FileName,. ..XReader)
+    #dim xreader As %XML.TextReader
+    do ##class(%XML.TextReader).ParseFile(..FileName,.xreader)
+    set ..XReader = xreader
+    quit:'$isobject(..XReader)
 
     #dim modeStack As %ArrayOfDataTypes
     #dim arrayMode As %Boolean
