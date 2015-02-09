@@ -69,7 +69,8 @@ override IsPacked property to be always returning 1</Description>
     do ..xmlArrayReader.ParseXml($name(xmltree))
     merge pkg       = xmltree("Manifest", 1, "Package")
     merge localdeps = xmltree("Manifest", 2, "Dependencies")
-
+    merge ..PackageContent.Data = xmltree kill xmltree
+    
     #dim pkgName As %String = pkg("Name")
     #dim pkgVersion As %String = $get(pkg("Version"),$get(pkg("Path")))
     
@@ -90,7 +91,7 @@ override IsPacked property to be always returning 1</Description>
         }
         set i = $order(localdeps(i))
     }
-    if ..DebugMode { zw xmltree }
+    if ..DebugMode { zw ..PackageContent }
 
     #dim p As CPM.IPackage = ##class(CPM.IPackage).Create(pkgName,"",pkgVersion)
     merge p.Dependencies.Data = deps

@@ -64,6 +64,11 @@ ALIASES
  ;HELP;?
  ;LIST;L
 COMMANDS
+
+RegisterAllSourceTypes() {
+    do ##class(CPM.Source.IBase).UnregisterExts()
+    do ##class(CPM.Source.IBase).ForEachSuccessor("RegisterExts")
+}
 INSTALL(packages...) ;;install package
     new (packages)
     if '$data(packages) {
@@ -85,22 +90,12 @@ INSTALL(packages...) ;;install package
         write !?3, packageData.Name, ?25, packageData.Version, ?45, packageData.Description
     }
     quit
-UnpackPackage(pFileName) {
-    set tFileStream=##class(%Stream.FileBinaryGzip).%New()
-    set tFileStream.Filename=pFileName
-    set result=##class(CPM.Utils.FileBinaryTar).ExtractStreamToArray(tFileStream)
-    kill tFileStream
-    quit result
-}
+
 SEARCH(string, args...) ;;search packages
     set cpm=##class(CPM.Main).%New()
     do cpm.Search(string)
     quit
     
-RegisterAllSourceTypes() {
-    do ##class(CPM.Source.IBase).UnregisterExts()
-    do ##class(CPM.Source.IBase).ForEachSuccessor("RegisterExts")
-}
 
 LIST(args...) ;;list of installed packages
     new (args)

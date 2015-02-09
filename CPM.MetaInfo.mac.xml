@@ -4,7 +4,7 @@
 #include CPM.License
 #include CPM.DataTypes
 
-ProcessManifest(FileName,&pkg,&deps,Debug=0) [xmltree] {
+ProcessManifest(FileName,&pkg,&deps,Debug=0) [xmltree] public {
 #if 0
     new xmltree
     do ##class(CPM.Utils.XmlArray).ArrayFromXml(FileName, $name(xmltree))
