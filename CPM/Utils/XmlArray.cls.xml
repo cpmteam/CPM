@@ -20,8 +20,6 @@
 <FormalSpec>fileName:%String</FormalSpec>
 <ReturnType>CPM.Utils.XmlArray</ReturnType>
 <Implementation><![CDATA[
-    #; not try to actually open file
-    quit:'##class(%File).Exists(fileName) $$$NULLOREF
     #dim o As CPM.Utils.XmlArray = ..%New()
     if '$$$ISOK(o.Open(fileName)) {
         quit $$$NULLOREF
