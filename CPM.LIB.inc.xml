@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Routine name="CPM.LIB" type="INC"><![CDATA[
+#include %occInclude
+#include %occErrors
 
 #; get value from array with default
-#define getParam(%arr,%name,%def) $select($data(%arr(%name),tmpRes)&&(tmpRes'=""):tmpRes,1:%def)
+#define GetParam(%arr,%name,%def) $select($data(%arr(%name),tmpRes)&&(tmpRes'=""):tmpRes,1:%def)
 
 #define UrlParser(%url,%parsed) if $data(%url)=1 { do ##class(%Net.URLParser).Parse(%url, .%parsed) } else { merge %parsed=%url } 
 ]]></Routine>

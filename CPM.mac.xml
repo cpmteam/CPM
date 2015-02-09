@@ -26,7 +26,7 @@ SHELL
         set line=$zstrip(line,"<>WC")
         
         set command=$piece(line," ")
-        set line=$extract(line,$find(line," ")+1,*)
+        set line=$extract(line,$length(command)+1,*)
         kill args
         set args=0
         set pattern.Text=line
@@ -96,9 +96,9 @@ UnpackPackage(pFileName) {
     kill tFileStream
     quit result
 }
-SEARCH(string, args...) ;;search packages
+SEARCH(terms...) ;;search packages
     set cpm=##class(CPM.Main).%New()
-    do cpm.Search(string)
+    do cpm.Search(terms...)
     quit
 LIST(args...) ;;list of installed packages
     new (args)
@@ -110,8 +110,13 @@ LIST(args...) ;;list of installed packages
         write !?3,tRS.Name,?15,tRS.Version,?25,tRS.Description
     }
     quit
-HELP(args...) ;;this help
-    new (args)
+HELP(command="",args...) ;;this help
+    new (command,args)
+    if command'="" {
+        set cpm=##class(CPM.Main).%New()
+        do cpm.Help(command,args...)
+        quit 
+    }
     write !,"Cache Package Manager"
     write !!,"Available commands:"
     for i=1:1 {

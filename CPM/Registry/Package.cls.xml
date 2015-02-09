@@ -8,13 +8,14 @@
 <Type>%String</Type>
 </Property>
 
-<Index name="byName">
+<Index name="byNameIdKey">
 <IdKey>1</IdKey>
 <Properties>name</Properties>
 </Index>
 
 <Property name="description">
-<Type>%String</Type>
+<Type>%Text</Type>
+<Parameter name="MAXLEN" value="2000"/>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>
 
@@ -33,6 +34,7 @@
 
 <Property name="author">
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="100"/>
 </Property>
 
 <Property name="maintainers">
@@ -40,9 +42,17 @@
 <Collection>list</Collection>
 </Property>
 
+<Index name="byMaintainer">
+<Properties>maintainers(ELEMENTS)</Properties>
+</Index>
+
 <Property name="modified">
 <Type>%TimeStamp</Type>
 </Property>
+
+<Index name="ByName">
+<Properties>name</Properties>
+</Index>
 
 <Method name="%OnNew">
 <ReturnType>%Status</ReturnType>
@@ -61,18 +71,20 @@
     set package.description=Value.description
     
     do package.keywords.Clear()
-    for i=1:1:Value.keywords.Size {
-        do package.keywords.Insert(Value.keywords.GetAt(i))
+    if $isobject(Value.keywords),Value.keywords.%IsA("%ListOfObjects") {
+        for i=1:1:Value.keywords.Size {
+            do package.keywords.Insert(Value.keywords.GetAt(i))
+        }
     }
     do package.maintainers.Clear()
-    if Value.maintainers.%IsA("%ListOfObjects") {
+    if $isobject(Value.maintainers),Value.maintainers.%IsA("%ListOfObjects") {
         for i=1:1:Value.maintainers.Size {
             do package.maintainers.Insert(Value.maintainers.GetAt(i).name)
         }
     }
     set package.author=$select($isobject(Value.author):Value.author.name, 1:"")
     set package.modified=$tr(Value.time.modified,"TZ"," ")
-    do Value.versions.%CopyToArray(.versions)
+    do:$isobject(Value.versions) Value.versions.%CopyToArray(.versions)
     set tVersion=""
     for {
         set tVersion=$o(versions(tVersion),1,latest)
@@ -105,13 +117,13 @@ Is used to get the value of an unknown property.</Description>
 <FormalSpec>Value:%String</FormalSpec>
 <SqlProc>1</SqlProc>
 <SqlQuery>SELECT id from (
-    SELECT id FROM package where name = :Value
+    SELECT id FROM package where UPPER(name) %INLIST UPPER(:Value)
     union all
-    SELECT id FROM package where name like STRING('%',:Value,'%')
+    SELECT id FROM package where FOR SOME %ELEMENT(keywords) (%VALUE %INLIST(:Value))
     union all
-    SELECT id FROM package where keywords like STRING('%',:Value,'%')
+    SELECT id FROM package where description %CONTAINSTERM(:Value)
     union all
-    SELECT id FROM package where description like STRING('%',:Value,'%')
+    SELECT id FROM package where FOR SOME %ELEMENT(maintainers) (%VALUE %INLIST(:Value))
 ) GROUP BY id</SqlQuery>
 </Query>
 

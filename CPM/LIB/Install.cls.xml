@@ -4,6 +4,21 @@
 <Super>Base</Super>
 <TimeCreated>63569,56031.260241</TimeCreated>
 
+<Parameter name="USAGE">
+<Description><![CDATA[
+<pre>
+install a package
+
+    cpm install <tarball file>
+    cpm install <packagename>
+
+DESCRIPTION
+
+    cpm install <tarball file>
+           
+</pre>]]></Description>
+</Parameter>
+
 <Method name="Install">
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Packages:%String</FormalSpec>

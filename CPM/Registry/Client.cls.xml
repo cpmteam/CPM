@@ -43,13 +43,13 @@ Get SSL Configuration by Server as a name for configuration</Description>
 <Internal>1</Internal>
 <FormalSpec><![CDATA[Url:%String,&Params]]></FormalSpec>
 <Implementation><![CDATA[
-    set method=$$$getParam(Params,"method","GET")
+    set method=$$$GetParam(Params,"method","GET")
     $$$UrlParser(Url,url)
     
     set request=##class(%Net.HttpRequest).%New()
     set request.ContentType="application/json"
     set request.AcceptGzip=1
-    set request.Timeout=$$$getParam(Params,"timeout",30)
+    set request.Timeout=$$$GetParam(Params,"timeout",30)
     
     set request.Server=url("host")
     set:$get(url("port"))'="" request.Port=port
@@ -61,7 +61,7 @@ Get SSL Configuration by Server as a name for configuration</Description>
         
     }
     
-    s tSC=request.Send(method, $$$getParam(url,"path","/")_"?"_$$$getParam(url,"query",""))
+    s tSC=request.Send(method, $$$GetParam(url,"path","/")_"?"_$$$GetParam(url,"query",""))
     $$$ThrowOnError(tSC)
     
     set statusCode=request.HttpResponse.StatusCode
