@@ -14,13 +14,20 @@
 <Default>manifest.xml</Default>
 </Parameter>
 
+<Property name="xmlArrayReader">
+<Type>CPM.Utils.XmlArray</Type>
+</Property>
+
+<Property name="DebugMode">
+<Type>%Boolean</Type>
+<InitialExpression>0</InitialExpression>
+</Property>
+
 <Method name="IsPackedGet">
 <Description>
 override IsPacked property to be always returning 1</Description>
 <ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
-    quit 0
-
+<Implementation><![CDATA[    quit 0
 ]]></Implementation>
 </Method>
 
@@ -30,7 +37,6 @@ override IsPacked property to be always returning 1</Description>
 <Implementation><![CDATA[
     #; simply ignore
     quit $$$OK
-
 ]]></Implementation>
 </Method>
 
@@ -38,30 +44,57 @@ override IsPacked property to be always returning 1</Description>
 <FormalSpec>fileName:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+#if 0
     #; not try to actually open file
     set ..FileName = fileName
-    quit ##class(%File).Exists(..FileName)
-
+    quit ##class(%File).Exists(..FileName).%OpenFile(fileName)
+#else
+    set ..xmlArrayReader = ##class(CPM.Utils.XmlArray).%OpenFile(fileName)
+    quit $isobject(..xmlArrayReader)
+#endif
 ]]></Implementation>
 </Method>
 
 <Method name="Unpack">
 <ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-    quit '$$$OK
-
+<Implementation><![CDATA[    quit '$$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="Parse">
+<PublicList>xmltree</PublicList>
 <ReturnType>CPM.IPackage</ReturnType>
 <Implementation><![CDATA[
-    if '$isobject(..PackageContent) {
-        quit $$$NULLOREF
+    new xmltree
+    do ..xmlArrayReader.ParseXml($name(xmltree))
+    merge pkg       = xmltree("Manifest", 1, "Package")
+    merge localdeps = xmltree("Manifest", 2, "Dependencies")
+
+    #dim pkgName As %String = pkg("Name")
+    #dim pkgVersion As %String = $get(pkg("Version"),$get(pkg("Path")))
+    
+    if ..DebugMode { write pkgName,":",pkgVersion,! }
+
+    #dim deps As %ArrayOfDataTypes
+    
+    set i = $order(localdeps(""))
+    while i'="" {
+        #dim depName As %String = localdeps(i,"Dependency","Name")
+
+        #dim depVersion As %String = $get(localdeps(i,"Dependency","Version"),
+                                     $get(localdeps(i,"Dependency","Path"))) ; create exportable list of deps
+
+        set deps(depName) = depVersion
+        if ..DebugMode {
+            write ?4, depName, ?20, depVersion, !
+        }
+        set i = $order(localdeps(i))
     }
+    if ..DebugMode { zw xmltree }
 
-    quit $$$NULLOREF
-
+    #dim p As CPM.IPackage = ##class(CPM.IPackage).Create(pkgName,"",pkgVersion)
+    merge p.Dependencies.Data = deps
+    quit p
 ]]></Implementation>
 </Method>
 </Class>

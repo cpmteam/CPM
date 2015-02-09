@@ -5,6 +5,7 @@
 #include CPM.DataTypes
 
 ProcessManifest(FileName,&pkg,&deps,Debug=0) [xmltree] {
+#if 0
     new xmltree
     do ##class(CPM.Utils.XmlArray).ArrayFromXml(FileName, $name(xmltree))
     merge pkg       = xmltree("Manifest", 1, "Package")
@@ -26,6 +27,15 @@ ProcessManifest(FileName,&pkg,&deps,Debug=0) [xmltree] {
         set i = $order(localdeps(i))
     }
     if Debug { zw xmltree }
+#else
+    #dim parser As CPM.Source.Xml = ##class(CPM.Source.Xml).%New()
+    set parser.DebugMode = Debug
+    do parser.Open(FileName)
+    #dim package As CPM.Source.IBase = parser.Parse()
+    if Debug {
+        write ?4, package.Name, ?20, package.Dependencies.Count(), !
+    }
+#endif
 }
 
 CreateManifestPath(rootdir,package) public {
