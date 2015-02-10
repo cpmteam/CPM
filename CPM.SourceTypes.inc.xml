@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Routine name="CPM.SourceTypes" type="INC"><![CDATA[
-#define PPV0EXTENSIONS ^||CPM.Extensions
-#define PPV0MANIFESTS  ^||CPM.Manifests
+#define PPV0EXTENSIONS  ^||CPM.Extensions
+#define PPV0MANIFESTS   ^||CPM.Manifests
 ]]></Routine>
 </Export>
