@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Project name="CPM-project" LastModified="2015-02-09 20:11:22.552213" TargetType="2" HttpServer="http://localhost:57772">
-  <Items>
     <ProjectItem name="CPM.DataTypes.INC" type="MAC"></ProjectItem>
+    <ProjectItem name="CPM.IPackage" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.Installer" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.Installer.Dependencies" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.Installer.Dependency" type="CLS"></ProjectItem>
@@ -14,6 +14,9 @@
     <ProjectItem name="CPM.MetaInfo.MAC" type="MAC"></ProjectItem>
     <ProjectItem name="CPM.Package" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.Sample.Installer" type="CLS"></ProjectItem>
+    <ProjectItem name="CPM.SourceType.IBase" type="CLS"></ProjectItem>
+    <ProjectItem name="CPM.SourceType.TarGz" type="CLS"></ProjectItem>
+    <ProjectItem name="CPM.SourceType.Xml" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.Utils.FileBinaryTar" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.LIB.Base" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.LIB.Config" type="CLS"></ProjectItem>

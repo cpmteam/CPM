@@ -1,30 +1,35 @@
 #CPM - Caché Package Manager
 ===
 
+_This is still work-in-progress, and we appreciate any help in implementation of missing features_
+
 ## TODO list (the nearest and long-term)
 
 - [ ] %CPM shell
-  - [ ] list
-  - [ ] install
+  - [X] list
+  - [X] search
+  - [X] install
+  - [X] help
   - [ ] uninstall
   - [ ] reinstall
   - [ ] package create
     - [ ] package ...
-  - [ ] shell extensions API
+  - [ ] package publish
+  - [ ] shell extensions API via extending basic class (_desired for 1.0, but not required_)
 
 - [ ] Multiple container types
   - [ ] XML
-  - [ ] TGZ
+  - [X] TGZ
 
 - [ ] Multiple metainfo formats
   - [ ] metainfo.xml
-  - [ ] package.json
+  - [X] package.json
   - [ ] package.toml
 
-- [ ] build step for source-binary packages
+- [ ] build step for source-binary packages (_not required for 1.0_)
   - [ ] CNA support
 
-- [ ] unit testing
+- [ ] unit testing (_not required for 1.0_)
 
 - [ ] OS command-line wrapper
   - [ ] Linux
@@ -33,7 +38,7 @@
 
 - [ ] site
   - [ ] dynamic part
-  - [ ] sttaic part on CDN
+  - [ ] static part on CDN
 
 - [ ] initial examples converted
   - [ ]  iknowSocial - *good*;

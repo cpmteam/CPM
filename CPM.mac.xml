@@ -4,6 +4,7 @@
 #include CPM.License
 #include %occInclude
 #include CPM.LIB
+
 SHELL
     new
     #; here goes interactive entry
@@ -69,24 +70,19 @@ INSTALL(packages...) ;;install package
         write !,"Nothing to install"
         quit
     }
-    
+    do RegisterAllSourceTypes()
     write !,"Installing packages: "
     for i=1:1:packages {
-        set package=packages(i)
-        set packageContent=""
-        if ##class(%File).Exists(package) {
-            set packageContent=$$UnpackPackage(package)
+        #dim package As %String = packages(i)
+        #dim packageFile As CPM.SourceType.IBase = ##class(CPM.SourceType.IBase).%OpenContainer(package)
+        if '$isobject(packageFile) {
+            continue
         }
-        continue:'$isobject(packageContent)
-        set packageContent=packageContent.GetNext()
-        set metaInfo=packageContent.GetAt("package.json")
-        continue:'$isobject(metaInfo)
-        #dim metaInfoData As %Stream.Object = metaInfo.fileData
-        continue:'##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(metaInfoData.Read(metaInfoData.Size),,.metaInfo)
-        set name=metaInfo.name
-        set description=$zconvert(metaInfo.description,"I","UTF8")
-        set version=metaInfo.version
-        write !?3,name,?25,version,?45,description
+        if packageFile.IsPacked {
+            do packageFile.Unpack()
+        }
+        #dim packageData As CPM.IPackage = packageFile.Parse()
+        write !?3, packageData.Name, ?25, packageData.Version, ?45, packageData.Description
     }
     quit
 UnpackPackage(pFileName) {
@@ -100,6 +96,12 @@ SEARCH(terms...) ;;search packages
     set cpm=##class(CPM.Main).%New()
     do cpm.Search(terms...)
     quit
+    
+RegisterAllSourceTypes() {
+    do ##class(CPM.SourceType.IBase).UnregisterExts()
+    do ##class(CPM.SourceType.IBase).ForEachSuccessor("RegisterExts")
+}
+
 LIST(args...) ;;list of installed packages
     new (args)
     set sql=##class(%SQL.Statement).%New()

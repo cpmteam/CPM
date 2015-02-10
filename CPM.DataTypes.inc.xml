@@ -9,6 +9,7 @@
 #define POPVALUE(%stack) set $li(%stack,*,*)=""
 
 #define INITQUEUE(%queue) set %queue=""
+#define IFINITQUEUE(%queue) if '$d(%queue) { $$$INITQUEUE(%queue) }
 #define QUEUEHEAD(%queue) ($select($ll(%queue):$li(%queue,1), 1:""))
 #define QUEUETAIL(%queue) ($select($ll(%queue):$li(%queue,*), 1:""))
 #define QUEUELEN(%queue)  $ll(%queue)
