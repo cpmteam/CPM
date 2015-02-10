@@ -20,17 +20,26 @@ DESCRIPTION
 </Parameter>
 
 <Method name="Install">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Packages:%String</FormalSpec>
+<FormalSpec>Packages...:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    set:'$listvalid(Packages) Packages=$lb(Packages)
-    for i=1:1:$ll(Packages) {
-        s package=$lg(Packages)
-        continue:package=""
+    if '$data(Packages) {
+        do ..Usage()
+        quit $$$OK
+    }
+    do ..Registry.Cache.Update()
+    
+    for i=1:1:Packages {
+        set packageName=$get(Packages(i))
+        continue:packageName=""
         
-        set meta=..GetMeta(package)
-        continue:'$isobject(meta)
+        if ##class(%File).%Exists(packageName){
+                    
+        } else {
+            set package=##class(CPM.Registry.Package).%OpenId(packageName)
+            continue:'$isobject(package)
+        }
+        
     }
     quit $$$OK
 ]]></Implementation>
