@@ -65,6 +65,10 @@ ALIASES
  ;LIST;L
 COMMANDS
 INSTALL(packages...) ;;install package
+    do RegisterAllSourceTypes()
+    set cpm=##class(CPM.Main).%New()
+    do cpm.Install(packages...)
+    quit
     new (packages)
     if '$data(packages) {
         write !,"Nothing to install"

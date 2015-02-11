@@ -127,27 +127,6 @@ Is used to get the value of an unknown property.</Description>
 ) GROUP BY id</SqlQuery>
 </Query>
 
-<Query name="ListByName">
-<Type>%SQLQuery</Type>
-<FormalSpec>Value:%String</FormalSpec>
-<SqlProc>1</SqlProc>
-<SqlQuery>SELECT id FROM package where name like STRING('%',:Value,'%')</SqlQuery>
-</Query>
-
-<Query name="ListByKeyword">
-<Type>%SQLQuery</Type>
-<FormalSpec>Value:%String</FormalSpec>
-<SqlProc>1</SqlProc>
-<SqlQuery>SELECT id FROM package where keywords like STRING('%',:Value,'%')</SqlQuery>
-</Query>
-
-<Query name="ListByDescription">
-<Type>%SQLQuery</Type>
-<FormalSpec>Value:%String</FormalSpec>
-<SqlProc>1</SqlProc>
-<SqlQuery>SELECT id FROM package where description like STRING('%',:Value,'%')</SqlQuery>
-</Query>
-
 <Storage name="Default">
 <Type>%Library.CacheStorage</Type>
 <DataLocation>^CPM.Registry.PackageD</DataLocation>

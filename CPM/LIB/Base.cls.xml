@@ -2,6 +2,7 @@
 <Export generator="Cache" version="25">
 <Class name="CPM.LIB.Base">
 <Abstract>1</Abstract>
+<IncludeCode>CPM.LIB</IncludeCode>
 <Super>%RegisteredObject</Super>
 <TimeCreated>63570,61555.098661</TimeCreated>
 
