@@ -10,6 +10,7 @@ SHELL
     #; here goes interactive entry
     set pattern=##class(%Regex.Matcher).%New("\b[^ ]+\b|\""([^\""]+)\""")
     #; aliases for commands
+    do ALIASES(.aliases)
     for i=1:1 {
         set line=$text(ALIASES+i)
         quit:$extract(line)'=" "
@@ -45,8 +46,12 @@ SHELL
         do BATCH(command, args...)
     }
     quit
-BATCH(command, args...)
+BATCH(command="help", args...)
     ; here goes batch entry
+    do ALIASES(.aliases)
+    set command=$zconvert(command,"U")
+    if $data(aliases(command),command)
+    
     if $text(@command)="" {
         write !,"Unrecognized command: ",command,!
         quit
@@ -58,11 +63,25 @@ BATCH(command, args...)
         write !,"Error occured: ",$zerror
     }
     quit
-ALIASES
+ALIASES(aliases)
  ;QUIT;Q
  ;INSTALL;I
  ;HELP;?
  ;LIST;L
+#; aliases for commands
+    new (aliases)
+    for i=1:1 {
+        set line=$text(ALIASES+i)
+        quit:$extract(line)'=" "
+        set command=$zstrip($piece(line,";",2),"<>WCP")
+        for j=3:1:$length(line,";") {
+            set alias=$zconvert($piece(line,";",j),"U")
+            continue:alias=""
+            continue:$data(aliases(alias))
+            set aliases(alias)=command
+        }
+    }
+    quit
 COMMANDS
 INSTALL(packages...) ;;install package
     new (packages)
