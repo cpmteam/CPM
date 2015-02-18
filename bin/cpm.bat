@@ -2,20 +2,90 @@
 
 setlocal ENABLEEXTENSIONS
 setlocal enabledelayedexpansion
-set KEY_NAME="HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Intersystems\Cache\Configurations"
-set INSTANCES
+SET INSTANCES=""
 
-FOR /F "usebackq" %%I IN (`REG QUERY %KEY_NAME% 2^>nul`) DO (
-	SET PRODUCT=`REG QUERY /ve %%I`
-	FOR /F "usebackq skip=2 tokens=3" %%P IN (`REG QUERY %%I\Product /ve 2^>nul`) DO (
-		SET "NOCACHE="
-		if %%P equ EMS SET NOCACHE=1
-		if %%P equ Globals SET NOCACHE=1
-		if not defined NOCACHE (
-			echo %%I %%P
-			SET INSTANCES[%%P]=%%I
-		)
-	)
+:GETCCONTROL
+REG QUERY HKLM\SOFTWARE\Wow6432Node /ve > nul 2>&1
+if %errorlevel% equ 0 ( SET KEY_NAME=HKLM\SOFTWARE\Wow6432Node\Intersystems\Cache\Configurations\
+) else ( SET KEY_NAME=HKLM\SOFTWARE\Intersystems\Cache\Configurations\ )
+
+:: searching ccontrol in current directory
+if exist "%cd%\ccontrol.exe" (
+  SET CACHEBIN=%cd%\
+  goto :GETRUNNING
 )
 
-echo %INSTANCES%
+:: searching ccontrol in GLOBALS_HOME variable
+if DEFINED GLOBALS_HOME (
+  if exist "%GLOBALS_HOME%\bin\ccontrol.exe" (
+    SET CACHEBIN=%GLOBALS_HOME%\bin\
+    goto GETRUNNING 
+  )
+)
+
+:: and searching ccontrol by windows registry 
+FOR /F "usebackq" %%I IN (`REG QUERY %KEY_NAME% 2^>nul`) DO (
+  FOR /F "usebackq skip=2 tokens=*" %%A IN (`REG QUERY %%I\Directory /ve 2^>nul`) DO (
+    SET directory=%%A
+    SET directory=!directory:*REG_SZ=!
+    FOR /F "tokens=* delims= " %%a IN ("!directory!") DO SET directory=%%a
+    IF exist "!directory!\bin\ccontrol.exe" ( 
+      SET CACHEBIN=!directory!\bin\
+      break
+    )
+  )
+)
+
+if not DEFINED CACHEBIN (
+  echo Something went wrong, where is your Cache installation? 1>&2
+  exit /b 1
+)
+
+:GETRUNNING
+
+:: get temp filename, for ccontrol output
+:GETTEMPNAME
+set TMPFILE=%TMP%\cpm-%RANDOM%.tmp
+if exist "%TMPFILE%" GOTO :GETTEMPNAME 
+
+"%CACHEBIN%ccontrol.exe" qlist nodisplay > "%TMPFILE%"
+set n=0
+for /f "tokens=1-8 delims=^" %%A in ('type "%TMPFILE%"') DO (
+  for /f "delims=, " %%s in ("%%D") do set STATE=%%s
+  if !STATE! equ running (
+    set INSTANCE=%%A
+    set DIRECTORY=%%B
+    set VERSION=%%C
+    
+    set /A n+=1
+    set INSTANCES[!n!]=!INSTANCE!
+
+    :: only first instance yet
+    break
+  )
+)
+
+if !n! equ 0 (
+  echo There are no running instances! 1>&2
+  exit /b 1
+)
+
+del "%TMPFILE%"
+
+set INSTANCE=!INSTANCES[1]!
+
+set ARGUMENTS=
+set ARGSCOUNT=0
+for %%x in (%*) do (
+  set /A ARGSCOUNT+=1
+  if !ARGSCOUNT! gtr 1 ( set ARGUMENTS=!ARGUMENTS!, )
+  set ARGUMENTS=!ARGUMENTS!""%%~x""
+)
+
+:: run command in cache
+cd "%CACHEBIN%"
+cache.exe -s..\mgr\ "BATCH^CPM(%ARGUMENTS%)"
+cd "%cd%"
+
+:eof
+exit /b 0
