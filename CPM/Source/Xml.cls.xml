@@ -161,9 +161,7 @@ override IsPacked property to be always returning 1</Description>
 <Method name="DumpManifest">
 <ClassMethod>1</ClassMethod>
 <FormalSpec>FileName:%String,Recursive:%Boolean=0,Debug:%Boolean=1</FormalSpec>
-<PublicList>queue,known</PublicList>
 <Implementation><![CDATA[
-    new queue, known
     $$$INITQUEUE(queue) $$$ENQUEUE(queue,"*")
 
     do {
@@ -171,9 +169,22 @@ override IsPacked property to be always returning 1</Description>
         #dim parser As CPM.Source.Xml = ..%New()
         set parser.DebugMode = Debug
         do parser.Open(FileName)
-        #dim package As CPM.Source.IBase = parser.Parse()
+        #dim package As CPM.IPackage = parser.Parse()
         if Debug {
             write ?4, package.Name, ?32, package.Dependencies.Count(), !
+        }
+        if Recursive {
+            set known(package.Name) = 1 ; mark itself as visited
+            #dim name As %String = ""
+            for {
+                #dim listItems = package.Dependencies.GetNext(.name)
+                quit:name=""
+                if '$data(known(name)) {
+                    $$$ENQUEUE(queue,name)
+                    set known(name) = 1
+                }
+            }
+            set FileName = parser.CreateManifestPath( $$$QUEUEHEAD(queue) )
         }
     } while Recursive && $$$QUEUELEN(queue)
 ]]></Implementation>
