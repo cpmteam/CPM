@@ -36,9 +36,8 @@ will be overriden in the successor</Description>
  cleanup process private variables used for .ext and manifest registration</Description>
 <ClassMethod>1</ClassMethod>
 <Implementation><![CDATA[
-    kill $$$PPV0EXTENSIONS
-    kill $$$PPV0MANIFESTS
-
+    kill $$$PpvExtensions
+    kill $$$PpvManifests
 ]]></Implementation>
 </Method>
 
@@ -52,19 +51,21 @@ register class extension and manifest name</Description>
     // 1. register package extensions
     for i=1:1:$length(..#EXTENSIONS, ",") {
         set ext = $piece(..#EXTENSIONS, ",", i)
-        set $$$PPV0EXTENSIONS(ext) = $CLASSNAME($this)
+        set $$$PpvExtensions(ext) = $CLASSNAME($this)
     }
 
     // 2. register manifest names
     for i=1:1:$length(..#MANIFEST, ",") {
         set ext = $piece(..#MANIFEST, ",", i)
-        set $$$PPV0MANIFESTS(ext) = $CLASSNAME($this)
+        set $$$PpvManifests(ext) = $CLASSNAME($this)
     }
-
 ]]></Implementation>
 </Method>
 
 <Method name="%OpenContainer">
+<Description>
+open "container" file generically (depending on the extension
+given different handler class will be called)</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>fileName:%String</FormalSpec>
 <ReturnType>CPM.Source.IBase</ReturnType>
@@ -72,37 +73,34 @@ register class extension and manifest name</Description>
     #dim ext As %String = $zcvt($piece(fileName,".",*), "U")
     #dim o As CPM.SourceType.IBase = $$$NULLOREF
     
-    if $d($$$PPV0EXTENSIONS(ext)) {
-        set o = $classmethod($$$PPV0EXTENSIONS(ext), "%New")
+    if $d($$$PpvExtensions(ext)) {
+        set o = $classmethod($$$PpvExtensions(ext), "%New")
         if $isobject(o) {
             do o.Open(fileName)
         }
     }
     quit o
-
 ]]></Implementation>
 </Method>
 
 <Method name="Open">
 <FormalSpec>fileName:%String</FormalSpec>
-<Implementation><![CDATA[
-]]></Implementation>
+<Implementation><![CDATA[]]></Implementation>
 </Method>
 
 <Method name="Unpack">
 <ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-    quit '$$$OK
-
+<Implementation><![CDATA[    quit '$$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="Parse">
 <ReturnType>CPM.IPackage</ReturnType>
-<Implementation><![CDATA[
-    quit $$$NULLOREF
-
+<Implementation><![CDATA[    quit $$$NULLOREF
 ]]></Implementation>
+</Method>
+
+<Method name="Install">
 </Method>
 
 <Method name="ForEachSuccessor">
@@ -113,8 +111,6 @@ register class extension and manifest name</Description>
     while rs.%Next() {
         do $classmethod(rs.Name, methodName, .Args)
     }
-
-
 ]]></Implementation>
 </Method>
 </Class>

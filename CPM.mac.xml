@@ -106,7 +106,8 @@ INSTALL(packages...) ;;install package
             do packageFile.Unpack()
         }
         #dim packageData As CPM.IPackage = packageFile.Parse()
-        write !?3, packageData.Name, ?25, packageData.Version, ?45, packageData.Description
+        write !?3, packageData.Name, ?25, packageData.Version, ?45, packageData.Description,!,packageData.Path,!
+        do packageFile.Install()
     }
     quit
 

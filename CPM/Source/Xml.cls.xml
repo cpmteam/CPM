@@ -189,5 +189,8 @@ override IsPacked property to be always returning 1</Description>
     } while Recursive && $$$QueueLen(queue)
 ]]></Implementation>
 </Method>
+
+<Method name="Install">
+</Method>
 </Class>
 </Export>
