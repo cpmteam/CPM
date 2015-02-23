@@ -3,17 +3,17 @@
 <Routine name="CPM.DataTypes" type="INC"><![CDATA[
 
 #; use $listbuild() facilities for very simplistic stack
-#define INITSTACK(%stack) set %stack=""
-#define TOPSTACK(%stack) ($select($ll(%stack):$li(%stack,*), 1:""))
-#define PUSHVALUE(%stack,%value) set $li(%stack,*+1)=%value
-#define POPVALUE(%stack) set $li(%stack,*,*)=""
+#define InitStack(%stack) set %stack=""
+#define TopStack(%stack) ($select($ll(%stack):$li(%stack,*), 1:""))
+#define PushValue(%stack,%value) set $li(%stack,*+1)=%value
+#define PopValue(%stack) set $li(%stack,*,*)=""
 
-#define INITQUEUE(%queue) set %queue=""
-#define IFINITQUEUE(%queue) if '$d(%queue) { $$$INITQUEUE(%queue) }
-#define QUEUEHEAD(%queue) ($select($ll(%queue):$li(%queue,1), 1:""))
-#define QUEUETAIL(%queue) ($select($ll(%queue):$li(%queue,*), 1:""))
-#define QUEUELEN(%queue)  $ll(%queue)
-#define ENQUEUE(%queue,%value) set $li(%queue,*+1)=%value
-#define DEQUEUE(%queue) set $li(%queue,1,1)=""
+#define InitQueue(%queue) set %queue=""
+#define IfInitQueue(%queue) if '$d(%queue) { $$$InitQueue(%queue) }
+#define QueueHead(%queue) ($select($ll(%queue):$li(%queue,1), 1:""))
+#define QueueTail(%queue) ($select($ll(%queue):$li(%queue,*), 1:""))
+#define QueueLen(%queue)  $ll(%queue)
+#define Enqueue(%queue,%value) set $li(%queue,*+1)=%value
+#define Dequeue(%queue) set $li(%queue,1,1)=""
 ]]></Routine>
 </Export>

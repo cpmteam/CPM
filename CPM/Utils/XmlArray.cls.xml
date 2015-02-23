@@ -90,13 +90,13 @@
 
     #dim modeStack As %ArrayOfDataTypes
     #dim arrayMode As %Boolean
-    $$$INITSTACK(modeStack)
+    $$$InitStack(modeStack)
 
     while ..xmlReader.Read() {
         // opening tag e.g. <Package>
         if ..xmlReader.NodeType = "element" {
             // push tag
-            set arrayMode =  $$$TOPSTACK(modeStack)
+            set arrayMode =  $$$TopStack(modeStack)
             if (arrayMode) {
                 set TargetArrayName = $name(@TargetArrayName@($increment(@TargetArrayName),..xmlReader.Name))
             } else {
@@ -105,7 +105,7 @@
             // we are switching to "array mode" if there is no
             // single attribute in the current tag 
             set arrayMode = '(..xmlReader.AttributeCount > 0)
-            $$$PUSHVALUE(modeStack,arrayMode)
+            $$$PushValue(modeStack,arrayMode)
             if arrayMode {
                 set @TargetArrayName = 0
             }
@@ -114,8 +114,8 @@
         elseif ..xmlReader.NodeType = "endelement" {
             // pop last tag
             // FIXME -make sure that the last popped subscript is the same as in ..xmlReader.Name
-            $$$POPVALUE(modeStack)
-            set arrayMode =  $$$TOPSTACK(modeStack)
+            $$$PopValue(modeStack)
+            set arrayMode =  $$$TopStack(modeStack)
             set TargetArrayName = $name(@TargetArrayName,$qlength(TargetArrayName) - (arrayMode + 1))
         }
         // xml tag attributes e.g. <Package Name="CPM-Installer-Sample" Version = "0.5.0" />

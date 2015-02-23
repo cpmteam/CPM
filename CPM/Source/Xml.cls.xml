@@ -162,10 +162,10 @@ override IsPacked property to be always returning 1</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>FileName:%String,Recursive:%Boolean=0,Debug:%Boolean=1</FormalSpec>
 <Implementation><![CDATA[
-    $$$INITQUEUE(queue) $$$ENQUEUE(queue,"*")
+    $$$InitQueue(queue) $$$Enqueue(queue,"*")
 
     do {
-        $$$DEQUEUE(queue)
+        $$$Dequeue(queue)
         #dim parser As CPM.Source.Xml = ..%New()
         set parser.DebugMode = Debug
         do parser.Open(FileName)
@@ -180,13 +180,13 @@ override IsPacked property to be always returning 1</Description>
                 #dim listItems = package.Dependencies.GetNext(.name)
                 quit:name=""
                 if '$data(known(name)) {
-                    $$$ENQUEUE(queue,name)
+                    $$$Enqueue(queue,name)
                     set known(name) = 1
                 }
             }
-            set FileName = parser.CreateManifestPath( $$$QUEUEHEAD(queue) )
+            set FileName = parser.CreateManifestPath( $$$QueueHead(queue) )
         }
-    } while Recursive && $$$QUEUELEN(queue)
+    } while Recursive && $$$QueueLen(queue)
 ]]></Implementation>
 </Method>
 </Class>
