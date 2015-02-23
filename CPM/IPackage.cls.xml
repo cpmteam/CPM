@@ -8,7 +8,15 @@
 <Type>%String</Type>
 </Property>
 
+<Property name="Path">
+<Type>%String</Type>
+</Property>
+
 <Property name="Version">
+<Type>%String</Type>
+</Property>
+
+<Property name="License">
 <Type>%String</Type>
 </Property>
 
@@ -23,13 +31,14 @@
 
 <Method name="Create">
 <ClassMethod>1</ClassMethod>
-<FormalSpec>name:%String,description:%String,version:%String</FormalSpec>
+<FormalSpec>name:%String,description:%String,version:%String,path:%String</FormalSpec>
 <ReturnType>CPM.IPackage</ReturnType>
 <Implementation><![CDATA[
     #dim object As CPM.IPackage = ..%New()
     set object.Name = name
     set object.Version = version
     set object.Description = description
+    set object.Path = path
     //merge object.Dependencies = deps
 
     quit object

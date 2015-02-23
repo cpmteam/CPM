@@ -40,18 +40,54 @@ override IsPacked property to be always returning 1</Description>
 ]]></Implementation>
 </Method>
 
+<Property name="RepoRootDir">
+<Type>%String</Type>
+<Private>1</Private>
+</Property>
+
+<Property name="DirectoryPath">
+<Type>%String</Type>
+<Private>1</Private>
+</Property>
+
+<Property name="ManifestPath">
+<Type>%String</Type>
+<Private>1</Private>
+</Property>
+
+<Property name="PackagePath">
+<Type>%String</Type>
+<Private>1</Private>
+</Property>
+
+<Method name="iCalcPaths">
+<FormalSpec>FileName:%String</FormalSpec>
+<Private>1</Private>
+<Implementation><![CDATA[
+    if '##class(%File).Exists(FileName) {
+        if ##class(%File).Exists(FileName) {
+        // directory, not file name given
+            set ..DirectoryPath = FileName
+            set ..ManifestPath = ##class(%Library.File).NormalizeFilename(..#MANIFEST,..DirectoryPath)
+            // ..PackagePath will be calculated later, upon parsing of manifest
+        }
+    } else {
+        // file name given, assume it's manifest
+        set ..DirectoryPath = ##class(%Library.File).GetDirectory(FileName)
+        set ..ManifestPath = FileName
+    }
+    set ..RepoRootDir = ##class(%Library.File).ParentDirectoryName(..DirectoryPath)
+
+    quit ..ManifestPath
+]]></Implementation>
+</Method>
+
 <Method name="Open">
 <FormalSpec>fileName:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-#if 0
-    #; not try to actually open file
-    set ..FileName = fileName
-    quit ##class(%File).Exists(..FileName).%OpenFile(fileName)
-#else
-    set ..xmlArrayReader = ##class(CPM.Utils.XmlArray).%OpenFile(fileName)
+    set ..xmlArrayReader = ##class(CPM.Utils.XmlArray).%OpenFile(..iCalcPaths(fileName))
     quit $isobject(..xmlArrayReader)
-#endif
 ]]></Implementation>
 </Method>
 
@@ -71,10 +107,13 @@ override IsPacked property to be always returning 1</Description>
     merge localdeps = xmltree("Manifest", 2, "Dependencies")
     merge ..PackageContent.Data = xmltree kill xmltree
     
-    #dim pkgName As %String = pkg("Name")
-    #dim pkgVersion As %String = $get(pkg("Version"),$get(pkg("Path")))
+    #dim p As CPM.IPackage = ##class(CPM.IPackage).%New()
+    set p.Name      = pkg("Name")
+    set p.Path      = $get(pkg("Path"))
+    set p.Version   = $get(pkg("Version"))
+    set p.License   = $get(pkg("License"))
     
-    if ..DebugMode { write pkgName,":",pkgVersion,! }
+    if ..DebugMode { write p.Name,":", p.Path,":", p.Version,! }
 
     #dim deps As %ArrayOfDataTypes
     
@@ -82,18 +121,20 @@ override IsPacked property to be always returning 1</Description>
     while i'="" {
         #dim depName As %String = localdeps(i,"Dependency","Name")
 
-        #dim depVersion As %String = $get(localdeps(i,"Dependency","Version"),
-                                     $get(localdeps(i,"Dependency","Path"))) ; create exportable list of deps
+        #dim depItemsList  = $lb("version",$get(localdeps(i,"Dependency","Version")),
+                                 "path",$get(localdeps(i,"Dependency","Path")))
 
-        set deps(depName) = depVersion
+        set deps(depName) = depItemsList
         if ..DebugMode {
+            #dim depVersion As %String = $get(localdeps(i,"Dependency","Version"),
+                                         $get(localdeps(i,"Dependency","Path"))) ; create exportable list of deps
             write ?4, depName, ?20, depVersion, !
         }
         set i = $order(localdeps(i))
     }
-    if ..DebugMode { zw ..PackageContent }
+    //if ..DebugMode { zw ..PackageContent }
 
-    #dim p As CPM.IPackage = ##class(CPM.IPackage).Create(pkgName,"",pkgVersion)
+    //#dim p As CPM.IPackage = ##class(CPM.IPackage).Create(pkgName,"",pkgVersion)
     merge p.Dependencies.Data = deps
     quit p
 ]]></Implementation>

@@ -5,37 +5,13 @@
 #include CPM.DataTypes
 
 ProcessManifest(FileName,&pkg,&deps,Debug=0) [xmltree] public {
-#if 0
-    new xmltree
-    do ##class(CPM.Utils.XmlArray).ArrayFromXml(FileName, $name(xmltree))
-    merge pkg       = xmltree("Manifest", 1, "Package")
-    merge localdeps = xmltree("Manifest", 2, "Dependencies")
-
-    if Debug { write pkg("Name"),":",! }
-
-    // FIXME - simpler for 1:1:deps?
-    set i = $order(localdeps(""))
-    while i'="" {
-        #dim name As %String = localdeps(i,"Dependency","Name")
-
-        set deps(name) = $get(localdeps(i,"Dependency","Version"),
-                              $get(localdeps(i,"Dependency","Path"))) ; create exportable list of deps
-
-        if Debug {
-            write ?4, name, ?20, deps(name), !
-        }
-        set i = $order(localdeps(i))
-    }
-    if Debug { zw xmltree }
-#else
     #dim parser As CPM.Source.Xml = ##class(CPM.Source.Xml).%New()
     set parser.DebugMode = Debug
     do parser.Open(FileName)
     #dim package As CPM.Source.IBase = parser.Parse()
     if Debug {
-        write ?4, package.Name, ?20, package.Dependencies.Count(), !
+        write ?4, package.Name, ?32, package.Dependencies.Count(), !
     }
-#endif
 }
 
 CreateManifestPath(rootdir,package) public {
