@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.Source.Xml">
+<IncludeCode>CPM.License,CPM.DataTypes</IncludeCode>
 <Super>%RegisteredObject,CPM.Source.IBase</Super>
 <TimeCreated>63578,69857.787389</TimeCreated>
 
@@ -137,6 +138,44 @@ override IsPacked property to be always returning 1</Description>
     //#dim p As CPM.IPackage = ##class(CPM.IPackage).Create(pkgName,"",pkgVersion)
     merge p.Dependencies.Data = deps
     quit p
+]]></Implementation>
+</Method>
+
+<Method name="CreatePackagePath">
+<FormalSpec>packageName:%String</FormalSpec>
+<Implementation><![CDATA[
+    if $Length(..RepoRootDir)=0 {
+        quit ""
+    }
+    #dim dir As %String = ##class(%Library.File).NormalizeDirectory(packageName,..RepoRootDir)
+    quit dir
+]]></Implementation>
+</Method>
+
+<Method name="CreateManifestPath">
+<FormalSpec>packageName:%String</FormalSpec>
+<Implementation><![CDATA[    quit ##class(%Library.File).NormalizeFilename(..#MANIFEST,..CreatePackagePath(packageName))
+]]></Implementation>
+</Method>
+
+<Method name="DumpManifest">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>FileName:%String,Recursive:%Boolean=0,Debug:%Boolean=1</FormalSpec>
+<PublicList>queue,known</PublicList>
+<Implementation><![CDATA[
+    new queue, known
+    $$$INITQUEUE(queue) $$$ENQUEUE(queue,"*")
+
+    do {
+        $$$DEQUEUE(queue)
+        #dim parser As CPM.Source.Xml = ..%New()
+        set parser.DebugMode = Debug
+        do parser.Open(FileName)
+        #dim package As CPM.Source.IBase = parser.Parse()
+        if Debug {
+            write ?4, package.Name, ?32, package.Dependencies.Count(), !
+        }
+    } while Recursive && $$$QUEUELEN(queue)
 ]]></Implementation>
 </Method>
 </Class>
