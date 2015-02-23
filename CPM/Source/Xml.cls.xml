@@ -64,6 +64,7 @@ override IsPacked property to be always returning 1</Description>
 <Method name="iCalcPaths">
 <FormalSpec>FileName:%String</FormalSpec>
 <Private>1</Private>
+<ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
     if '##class(%File).Exists(FileName) {
         if ##class(%File).DirectoryExists(FileName) {
@@ -80,6 +81,16 @@ override IsPacked property to be always returning 1</Description>
     set ..RepoRootDir = ##class(%Library.File).ParentDirectoryName(..DirectoryPath)
 
     quit ..ManifestPath
+]]></Implementation>
+</Method>
+
+<Method name="iFullPackagePath">
+<FormalSpec>FileName:%String</FormalSpec>
+<Private>1</Private>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    quit:FileName="" ""
+    quit ##class(%Library.File).NormalizeFilename(FileName,..DirectoryPath)
 ]]></Implementation>
 </Method>
 
@@ -110,7 +121,7 @@ override IsPacked property to be always returning 1</Description>
     
     #dim p As CPM.IPackage = ##class(CPM.IPackage).%New()
     set p.Name      = pkg("Name")
-    set p.Path      = $get(pkg("Path"))
+    set p.Path      = ..iFullPackagePath($get(pkg("Path")))
     set p.Version   = $get(pkg("Version"))
     set p.License   = $get(pkg("License"))
     
@@ -141,8 +152,12 @@ override IsPacked property to be always returning 1</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="CreatePackagePath">
+<Method name="iPackageBaseDir">
+<Description>
+create repo-based path using given package symbolic name</Description>
 <FormalSpec>packageName:%String</FormalSpec>
+<Private>1</Private>
+<ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
     if $Length(..RepoRootDir)=0 {
         quit ""
@@ -152,9 +167,11 @@ override IsPacked property to be always returning 1</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="CreateManifestPath">
+<Method name="iManifestPath">
 <FormalSpec>packageName:%String</FormalSpec>
-<Implementation><![CDATA[    quit ##class(%Library.File).NormalizeFilename(..#MANIFEST,..CreatePackagePath(packageName))
+<Private>1</Private>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[    quit ##class(%Library.File).NormalizeFilename(..#MANIFEST,..iPackageBaseDir(packageName))
 ]]></Implementation>
 </Method>
 
@@ -184,13 +201,21 @@ override IsPacked property to be always returning 1</Description>
                     set known(name) = 1
                 }
             }
-            set FileName = parser.CreateManifestPath( $$$QueueHead(queue) )
+            set FileName = parser.iManifestPath( $$$QueueHead(queue) )
         }
     } while Recursive && $$$QueueLen(queue)
 ]]></Implementation>
 </Method>
 
 <Method name="Install">
+<FormalSpec>package:CPM.IPackage</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim status As %Status = $$$OK
+    if ##class(%Library.File).Exists(package.Path) {
+        do $system.OBJ.Load(package.Path,"uk/compile=0")
+    }
+]]></Implementation>
 </Method>
 </Class>
 </Export>

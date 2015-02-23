@@ -101,6 +101,10 @@ given different handler class will be called)</Description>
 </Method>
 
 <Method name="Install">
+<FormalSpec>package:CPM.IPackage</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[    quit '$$$OK
+]]></Implementation>
 </Method>
 
 <Method name="ForEachSuccessor">
