@@ -213,8 +213,16 @@ create repo-based path using given package symbolic name</Description>
 <Implementation><![CDATA[
     #dim status As %Status = $$$OK
     if ##class(%Library.File).Exists(package.Path) {
-        do $system.OBJ.Load(package.Path,"uk/compile=0")
-    }
+        // 1. load list of items in the container
+        do $system.OBJ.Load(package.Path,"-d",,.list,1)
+        write !,"About to load these items from the package ", package.Name,!
+        #dim itemName As %String = ""
+        for  {
+            set itemName = $order(list(itemName))
+            quit:itemName=""
+            write ?8,itemName,!
+        }
+   }
 ]]></Implementation>
 </Method>
 </Class>
