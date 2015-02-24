@@ -17,12 +17,12 @@ _This is still work-in-progress, and we appreciate any help in implementation of
   - [ ] package publish
   - [ ] shell extensions API via extending basic class (_desired for 1.0, but not required_)
 
-- [ ] Multiple container types
-  - [ ] XML
+- [X] Multiple container types
+  - [X] XML
   - [X] TGZ
 
-- [ ] Multiple metainfo formats
-  - [ ] metainfo.xml
+- [X] Multiple metainfo formats
+  - [X] metainfo.xml
   - [X] package.json
   - [ ] package.toml
 
@@ -34,15 +34,15 @@ _This is still work-in-progress, and we appreciate any help in implementation of
 - [ ] OS command-line wrapper
   - [ ] Linux
   - [ ] Mac OS-X
-  - [ ] Windows
+  - [X] Windows
 
 - [ ] site
-  - [ ] dynamic part
-  - [ ] static part on CDN
+  - [ ] login frontend 
+  - [X] database backend - http://cpmiscregistry.couchappy.com/-/all/
 
 - [ ] initial examples converted
   - [ ]  iknowSocial - *good*;
-  - [ ]  webterminal - *good*;
+  - [X]  webterminal - *good*;
   - [ ]  MONLBL Viewer - *good*;
   - [ ]  coslint - OBJ (*good* for _deployed mode_);
   - [ ]  Atom-COS-Studio - mixed (*bad*);

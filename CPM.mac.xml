@@ -23,7 +23,7 @@ SHELL
         }
     }
     for {
-        write !,"CPM>> "
+        write !,"CPM:"_$Namespace_">> "
         read line
         set line=$zstrip(line,"<>WC")
         
@@ -46,6 +46,7 @@ SHELL
         do BATCH(command, args...)
     }
     quit
+
 BATCH(command="help", args...)
     ; here goes batch entry
     do ALIASES(.aliases)
@@ -63,6 +64,7 @@ BATCH(command="help", args...)
         write !,"Error occured: ",$zerror
     }
     quit
+
 ALIASES(aliases)
  ;QUIT;Q
  ;INSTALL;I
@@ -127,6 +129,7 @@ LIST(args...) ;;list of installed packages
         write !?3,tRS.Name,?15,tRS.Version,?25,tRS.Description
     }
     quit
+
 HELP(args...) ;;this help
     new (args)
     write !,"Cache Package Manager"
