@@ -120,7 +120,7 @@ SEARCH(string, args...) ;;search packages
 LIST(args...) ;;list of installed packages
     new (args)
     set sql=##class(%SQL.Statement).%New()
-    set tSC=sql.%Prepare("SELECT Name, Version, Description FROM CPM.Package")
+    set tSC=sql.%Prepare("SELECT Name, Version, Description FROM CPM_Registry.Package")
     quit:'$$$ISOK(tSC)
     set tRS=sql.%Execute()
     while tRS.%Next() {

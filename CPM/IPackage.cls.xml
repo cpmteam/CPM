@@ -5,28 +5,62 @@
 <TimeCreated>63577,81977.364523</TimeCreated>
 
 <Property name="Name">
+<Description>
+package short-name</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Author">
 <Type>%String</Type>
 </Property>
 
 <Property name="Path">
+<Description>
+container name/path</Description>
 <Type>%String</Type>
 </Property>
 
 <Property name="Version">
+<Description>
+actual version used</Description>
 <Type>%String</Type>
 </Property>
 
 <Property name="License">
+<Description>
+license of a package (MIT, BSD, etc)</Description>
 <Type>%String</Type>
+</Property>
+
+<Property name="Keywords">
+<Type>%String</Type>
+<Collection>list</Collection>
 </Property>
 
 <Property name="Description">
+<Description>
+description of a package</Description>
 <Type>%String</Type>
-<Parameter name="MAXLEN" value="2000"/>
+<Parameter name="TRUNCATE" value="0"/>
 </Property>
 
 <Property name="Dependencies">
-<Type>%ArrayOfDataTypes</Type>
+<Description>
+external dependencies</Description>
+<Type>%String</Type>
+<Collection>list</Collection>
+</Property>
+
+<Property name="Items">
+<Description>
+items defined by this package</Description>
+<Type>%String</Type>
+<Collection>list</Collection>
+</Property>
+
+<Property name="Maintainers">
+<Type>%String</Type>
+<Collection>list</Collection>
 </Property>
 </Class>
 </Export>

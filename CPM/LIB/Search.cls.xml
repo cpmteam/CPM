@@ -21,7 +21,7 @@
         for i=1:1:package.maintainers.Size {
             set $list(authors,i)="="_package.maintainers.GetAt(i)
         }
-        set line=$listbuild(id,$listtostring(authors," "),$piece(package.modified," "),package.latestVersion,package.description)
+        set line=$listbuild(id,$listtostring(authors," "),$piece(package.modified," "),package.latestVersion,package.Description)
         set result($increment(result))=line
     }
     if $data(result) {

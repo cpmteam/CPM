@@ -1,46 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.Registry.Package">
-<Super>%Persistent</Super>
+<Super>%Persistent,CPM.IPackage</Super>
 <TimeCreated>63577,86035.524325</TimeCreated>
-
-<Property name="name">
-<Type>%String</Type>
-</Property>
 
 <Index name="byName">
 <IdKey>1</IdKey>
-<Properties>name</Properties>
+<Properties>Name</Properties>
 </Index>
-
-<Property name="description">
-<Type>%String</Type>
-<Parameter name="TRUNCATE" value="0"/>
-</Property>
-
-<Property name="latestVersion">
-<Type>%String</Type>
-</Property>
-
-<Property name="keywords">
-<Type>%String</Type>
-<Collection>list</Collection>
-</Property>
 
 <Index name="byKeywords">
-<Properties>keywords(ELEMENTS)</Properties>
+<Properties>Keywords(ELEMENTS)</Properties>
 </Index>
 
-<Property name="author">
-<Type>%String</Type>
-</Property>
-
-<Property name="maintainers">
-<Type>%String</Type>
-<Collection>list</Collection>
-</Property>
-
-<Property name="modified">
+<Property name="Modified">
 <Type>%TimeStamp</Type>
 </Property>
 
@@ -55,30 +28,30 @@
 <FormalSpec>Package,Value:%ZEN.proxyObject</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    set package=..%OpenId(Package)
+    #dim package As CPM.Registry.Package = ..%OpenId(Package)
     set:'$isobject(package) package=..%New()
-    set package.name=Package
-    set package.description=Value.description
+    set package.Name        = Package
+    set package.Description = Value.description
     
-    do package.keywords.Clear()
+    do package.Keywords.Clear()
     for i=1:1:Value.keywords.Size {
-        do package.keywords.Insert(Value.keywords.GetAt(i))
+        do package.Keywords.Insert(Value.keywords.GetAt(i))
     }
-    do package.maintainers.Clear()
+    do package.Maintainers.Clear()
     if Value.maintainers.%IsA("%ListOfObjects") {
         for i=1:1:Value.maintainers.Size {
-            do package.maintainers.Insert(Value.maintainers.GetAt(i).name)
+            do package.Maintainers.Insert(Value.maintainers.GetAt(i).name)
         }
     }
-    set package.author=$select($isobject(Value.author):Value.author.name, 1:"")
-    set package.modified=$tr(Value.time.modified,"TZ"," ")
+    set package.Author   = $select($isobject(Value.author):Value.author.name, 1:"")
+    set package.Modified = $tr(Value.time.modified,"TZ"," ")
     do Value.versions.%CopyToArray(.versions)
     set tVersion=""
     for {
-        set tVersion=$o(versions(tVersion),1,latest)
+        set tVersion = $order(versions(tVersion),1,latest)
         quit:tVersion=""
         continue:latest'="latest"
-        set package.latestVersion=tVersion
+        set package.Version = tVersion
     }
     quit package.%Save()
 ]]></Implementation>
@@ -139,31 +112,43 @@ Is used to get the value of an unknown property.</Description>
 <Storage name="Default">
 <Type>%Library.CacheStorage</Type>
 <DataLocation>^CPM.Registry.PackageD</DataLocation>
-<DefaultData>packageDefaultData</DefaultData>
+<DefaultData>PackageDefaultData</DefaultData>
 <IdLocation>^CPM.Registry.PackageD</IdLocation>
 <IndexLocation>^CPM.Registry.PackageI</IndexLocation>
 <StreamLocation>^CPM.Registry.PackageS</StreamLocation>
-<Data name="packageDefaultData">
+<Data name="PackageDefaultData">
 <Value name="1">
 <Value>%%CLASSNAME</Value>
 </Value>
 <Value name="2">
-<Value>description</Value>
+<Value>Author</Value>
 </Value>
 <Value name="3">
-<Value>latestVersion</Value>
+<Value>Modified</Value>
 </Value>
 <Value name="4">
-<Value>keywords</Value>
+<Value>Version</Value>
 </Value>
 <Value name="5">
-<Value>author</Value>
+<Value>License</Value>
 </Value>
 <Value name="6">
-<Value>maintainers</Value>
+<Value>Keywords</Value>
 </Value>
 <Value name="7">
-<Value>modified</Value>
+<Value>Description</Value>
+</Value>
+<Value name="8">
+<Value>Dependencies</Value>
+</Value>
+<Value name="9">
+<Value>Items</Value>
+</Value>
+<Value name="10">
+<Value>Maintainers</Value>
+</Value>
+<Value name="11">
+<Value>Path</Value>
 </Value>
 </Data>
 </Storage>

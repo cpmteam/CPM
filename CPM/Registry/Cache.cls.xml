@@ -78,7 +78,7 @@ Is used to get the value of an unknown property.</Description>
         quit:Property="_updated" ..Config.updated
     } else {
         set package=##class(CPM.Registry.Package).%OpenId(Property)
-        set package.name=Property
+        set package.Name=Property
         quit package
     }
     quit ""
