@@ -222,6 +222,11 @@ create repo-based path using given package symbolic name</Description>
             quit:itemName=""
             write ?8,itemName,!
         }
+        // TODO: Ask interactively to install
+        // TODO: Actual installation
+        #dim storedPackage As CPM.Registry.Package = ##class(CPM.Registry.Package).%New(package)
+        zw storedPackage
+        set status = storedPackage.%Save()
    }
 ]]></Implementation>
 </Method>

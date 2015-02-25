@@ -47,20 +47,17 @@ description of a package</Description>
 <Property name="Dependencies">
 <Description>
 external dependencies</Description>
-<Type>%String</Type>
-<Collection>list</Collection>
+<Type>%ArrayOfDataTypes</Type>
 </Property>
 
 <Property name="Items">
 <Description>
 items defined by this package</Description>
-<Type>%String</Type>
-<Collection>list</Collection>
+<Type>%ArrayOfDataTypes</Type>
 </Property>
 
 <Property name="Maintainers">
-<Type>%String</Type>
-<Collection>list</Collection>
+<Type>%ArrayOfDataTypes</Type>
 </Property>
 </Class>
 </Export>

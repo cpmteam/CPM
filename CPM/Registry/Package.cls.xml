@@ -9,17 +9,35 @@
 <Properties>Name</Properties>
 </Index>
 
-<Index name="byKeywords">
-<Properties>Keywords(ELEMENTS)</Properties>
-</Index>
-
 <Property name="Modified">
 <Type>%TimeStamp</Type>
 </Property>
 
+<Index name="byKeywords">
+<Properties>Keywords(ELEMENTS)</Properties>
+</Index>
+
 <Method name="%OnNew">
+<FormalSpec>initvalue:CPM.IPackage</FormalSpec>
 <ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[    quit $$$OK
+<Implementation><![CDATA[
+#if 1
+    set ..Author = initvalue.Author
+    set ..Name = initvalue.Name
+    set ..Path  = initvalue.Path
+    set ..Version  = initvalue.Version
+    set ..License  = initvalue.License
+    set ..Description  = initvalue.Description
+
+    set cloned = $$$OK
+    set ..Dependencies = initvalue.Dependencies.%ConstructClone(1,.cloned)
+    set ..Keywords = initvalue.Keywords.%ConstructClone(1,.cloned)
+    set ..Maintainers = initvalue.Maintainers.%ConstructClone(1,.cloned)
+    set ..Items = initvalue.Items.%ConstructClone(1,.cloned)
+    quit cloned
+#else
+    quit $$$OK
+#endif
 ]]></Implementation>
 </Method>
 
@@ -124,7 +142,7 @@ Is used to get the value of an unknown property.</Description>
 <Value>Author</Value>
 </Value>
 <Value name="3">
-<Value>Modified</Value>
+<Value>Path</Value>
 </Value>
 <Value name="4">
 <Value>Version</Value>
@@ -148,7 +166,7 @@ Is used to get the value of an unknown property.</Description>
 <Value>Maintainers</Value>
 </Value>
 <Value name="11">
-<Value>Path</Value>
+<Value>Modified</Value>
 </Value>
 </Data>
 </Storage>
