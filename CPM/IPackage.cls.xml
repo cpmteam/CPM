@@ -8,22 +8,30 @@
 <Description>
 package short-name</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="300"/>
+<Parameter name="TRUNCATE" value="0"/>
 </Property>
 
 <Property name="Author">
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="300"/>
+<Parameter name="TRUNCATE" value="0"/>
 </Property>
 
 <Property name="Path">
 <Description>
 container name/path</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="300"/>
+<Parameter name="TRUNCATE" value="0"/>
 </Property>
 
 <Property name="Version">
 <Description>
 actual version used</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="128"/>
+<Parameter name="TRUNCATE" value="0"/>
 </Property>
 
 <Property name="License">
@@ -41,23 +49,30 @@ license of a package (MIT, BSD, etc)</Description>
 <Description>
 description of a package</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="3000"/>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>
 
 <Property name="Dependencies">
 <Description>
 external dependencies</Description>
-<Type>%ArrayOfDataTypes</Type>
+<Type>%String</Type>
+<Collection>array</Collection>
+<Parameter name="MAXLEN" value="300"/>
 </Property>
 
 <Property name="Items">
 <Description>
 items defined by this package</Description>
-<Type>%ArrayOfDataTypes</Type>
+<Type>%String</Type>
+<Collection>array</Collection>
+<Parameter name="MAXLEN" value="100"/>
 </Property>
 
 <Property name="Maintainers">
-<Type>%ArrayOfDataTypes</Type>
+<Type>%String</Type>
+<Collection>array</Collection>
+<Parameter name="MAXLEN" value="300"/>
 </Property>
 </Class>
 </Export>

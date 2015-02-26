@@ -147,7 +147,17 @@ override IsPacked property to be always returning 1</Description>
     //if ..DebugMode { zw ..PackageContent }
 
     //#dim p As CPM.IPackage = ##class(CPM.IPackage).Create(pkgName,"",pkgVersion)
+#if 0 
+    // %ArrayOfDataTypes provides us convenient multi-dimensional property .Data
+    // unfortunately we can't redefine MAXLEN for %ArrayOfDataTypes
     merge p.Dependencies.Data = deps
+#else
+    set i="" for  {
+        #dim value As %String
+        set i=$order(deps(i),1,value) quit:i=""
+        do p.Dependencies.SetAt(value,i)
+    }
+#endif
     quit p
 ]]></Implementation>
 </Method>
@@ -225,8 +235,8 @@ create repo-based path using given package symbolic name</Description>
         // TODO: Ask interactively to install
         // TODO: Actual installation
         #dim storedPackage As CPM.Registry.Package = ##class(CPM.Registry.Package).%New(package)
-        zw storedPackage
         set status = storedPackage.%Save()
+        
    }
 ]]></Implementation>
 </Method>
