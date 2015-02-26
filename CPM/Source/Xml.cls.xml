@@ -144,9 +144,6 @@ override IsPacked property to be always returning 1</Description>
         }
         set i = $order(localdeps(i))
     }
-    //if ..DebugMode { zw ..PackageContent }
-
-    //#dim p As CPM.IPackage = ##class(CPM.IPackage).Create(pkgName,"",pkgVersion)
 #if 0 
     // %ArrayOfDataTypes provides us convenient multi-dimensional property .Data
     // unfortunately we can't redefine MAXLEN for %ArrayOfDataTypes
@@ -231,12 +228,14 @@ create repo-based path using given package symbolic name</Description>
             set itemName = $order(list(itemName))
             quit:itemName=""
             write ?8,itemName,!
+            do package.Items.SetAt(1,itemName)
         }
-        // TODO: Ask interactively to install
-        // TODO: Actual installation
+        // TODO: 2. Ask interactively to install
+        // TODO: 3. Actual installation
+        // 4. save package instance to the registry
         #dim storedPackage As CPM.Registry.Package = ##class(CPM.Registry.Package).%New(package)
         set status = storedPackage.%Save()
-        
+        quit status
    }
 ]]></Implementation>
 </Method>

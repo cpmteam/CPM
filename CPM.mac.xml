@@ -121,12 +121,28 @@ SEARCH(string, args...) ;;search packages
 
 LIST(args...) ;;list of installed packages
     new (args)
+    #dim verbose As %Boolean = 0
+    for i=1:1:$get(args) {
+        // FIXME - rework as generic getopt() parser
+        if $get(args(i)) = "/verbose" {
+            set verbose = 1
+        }
+    }
     set sql=##class(%SQL.Statement).%New()
-    set tSC=sql.%Prepare("SELECT Name, Version, Description FROM CPM_Registry.Package")
+    set tSC=sql.%Prepare("SELECT %ID, Name, Version, Description FROM CPM_Registry.Package")
     quit:'$$$ISOK(tSC)
     set tRS=sql.%Execute()
     while tRS.%Next() {
-        write !?3,tRS.Name,?15,tRS.Version,?25,tRS.Description
+        write !?3,tRS.Name,?32,tRS.Version,?42,tRS.Description
+        if verbose {
+            #dim o As CPM.Registry.Package = ##class(CPM.Registry.Package).%OpenId(tRS.ID)
+            #dim items As array of %String = o.Items
+            #dim key As %String = ""
+            for  {
+                set key = items.Next(key) quit:key=""
+                write ?10,key,!
+            }
+        }
     }
     quit
 

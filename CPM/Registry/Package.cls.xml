@@ -21,7 +21,6 @@
 <FormalSpec>initvalue:CPM.IPackage</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-#if 1
     set ..Author = initvalue.Author
     set ..Name = initvalue.Name
     set ..Path  = initvalue.Path
@@ -29,15 +28,12 @@
     set ..License  = initvalue.License
     set ..Description  = initvalue.Description
 
-    set cloned = $$$OK
-    set ..Dependencies = initvalue.Dependencies.%ConstructClone(1,.cloned)
-    set ..Keywords = initvalue.Keywords.%ConstructClone(1,.cloned)
-    set ..Maintainers = initvalue.Maintainers.%ConstructClone(1,.cloned)
-    set ..Items = initvalue.Items.%ConstructClone(1,.cloned)
-    quit cloned
-#else
+    set ..Dependencies = initvalue.Dependencies
+    set ..Keywords = initvalue.Keywords
+    set ..Maintainers = initvalue.Maintainers
+    set ..Items = initvalue.Items
+
     quit $$$OK
-#endif
 ]]></Implementation>
 </Method>
 
@@ -134,6 +130,21 @@ Is used to get the value of an unknown property.</Description>
 <IdLocation>^CPM.Registry.PackageD</IdLocation>
 <IndexLocation>^CPM.Registry.PackageI</IndexLocation>
 <StreamLocation>^CPM.Registry.PackageS</StreamLocation>
+<Data name="Dependencies">
+<Attribute>Dependencies</Attribute>
+<Structure>subnode</Structure>
+<Subscript>"Dependencies"</Subscript>
+</Data>
+<Data name="Items">
+<Attribute>Items</Attribute>
+<Structure>subnode</Structure>
+<Subscript>"Items"</Subscript>
+</Data>
+<Data name="Maintainers">
+<Attribute>Maintainers</Attribute>
+<Structure>subnode</Structure>
+<Subscript>"Maintainers"</Subscript>
+</Data>
 <Data name="PackageDefaultData">
 <Value name="1">
 <Value>%%CLASSNAME</Value>
@@ -157,15 +168,6 @@ Is used to get the value of an unknown property.</Description>
 <Value>Description</Value>
 </Value>
 <Value name="8">
-<Value>Dependencies</Value>
-</Value>
-<Value name="9">
-<Value>Items</Value>
-</Value>
-<Value name="10">
-<Value>Maintainers</Value>
-</Value>
-<Value name="11">
 <Value>Modified</Value>
 </Value>
 </Data>
