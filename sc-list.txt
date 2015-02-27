@@ -18,4 +18,5 @@ CPM.Registry.Cache.CLS
 CPM.Registry.Client.CLS
 CPM.Registry.Package.CLS
 CPM.Sample.Installer.CLS
+CPM.SourceTypes.INC
 CPM.Utils.FileBinaryTar.CLS

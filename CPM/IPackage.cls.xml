@@ -5,34 +5,74 @@
 <TimeCreated>63577,81977.364523</TimeCreated>
 
 <Property name="Name">
+<Description>
+package short-name</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="300"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="Author">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="300"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="Path">
+<Description>
+container name/path</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="300"/>
+<Parameter name="TRUNCATE" value="0"/>
 </Property>
 
 <Property name="Version">
+<Description>
+actual version used</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="128"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="License">
+<Description>
+license of a package (MIT, BSD, etc)</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Keywords">
+<Type>%String</Type>
+<Collection>list</Collection>
 </Property>
 
 <Property name="Description">
+<Description>
+description of a package</Description>
 <Type>%String</Type>
-<Parameter name="MAXLEN" value="2000"/>
+<Parameter name="MAXLEN" value="3000"/>
+<Parameter name="TRUNCATE" value="0"/>
 </Property>
 
 <Property name="Dependencies">
+<Description>
+external dependencies</Description>
 <Type>%String</Type>
 <Collection>array</Collection>
+<Parameter name="MAXLEN" value="300"/>
 </Property>
 
-<Method name="Create">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>name:%String,description:%String,version:%String</FormalSpec>
-<Implementation><![CDATA[
-    #dim object As CPM.IPackage = ..%New()
-    set object.Name = name
-    set object.Version = version
-    set object.Description = description
+<Property name="Items">
+<Description>
+items defined by this package</Description>
+<Type>%String</Type>
+<Collection>array</Collection>
+<Parameter name="MAXLEN" value="100"/>
+</Property>
 
-    quit object
-]]></Implementation>
-</Method>
+<Property name="Maintainers">
+<Type>%String</Type>
+<Collection>array</Collection>
+<Parameter name="MAXLEN" value="300"/>
+</Property>
 </Class>
 </Export>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Routine name="CPM.SourceTypes" type="INC"><![CDATA[
+#define PpvExtensions  ^||CPM.Extensions
+#define PpvManifests   ^||CPM.Manifests
+]]></Routine>
+</Export>

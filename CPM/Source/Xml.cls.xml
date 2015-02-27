@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.Source.Xml">
+<IncludeCode>CPM.License,CPM.DataTypes</IncludeCode>
+<Super>%RegisteredObject,CPM.Source.IBase</Super>
+<TimeCreated>63578,69857.787389</TimeCreated>
+
+<Parameter name="EXTENSIONS">
+<Type>%String</Type>
+<Default>XML</Default>
+</Parameter>
+
+<Parameter name="MANIFEST">
+<Type>%String</Type>
+<Default>manifest.xml</Default>
+</Parameter>
+
+<Property name="xmlArrayReader">
+<Type>CPM.Utils.XmlArray</Type>
+</Property>
+
+<Property name="DebugMode">
+<Type>%Boolean</Type>
+<InitialExpression>0</InitialExpression>
+</Property>
+
+<Method name="IsPackedGet">
+<Description>
+override IsPacked property to be always returning 1</Description>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[    quit 0
+]]></Implementation>
+</Method>
+
+<Method name="IsPackedSet">
+<FormalSpec>Val:%Boolean</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #; simply ignore
+    quit $$$OK
+]]></Implementation>
+</Method>
+
+<Property name="RepoRootDir">
+<Type>%String</Type>
+<Private>1</Private>
+</Property>
+
+<Property name="DirectoryPath">
+<Type>%String</Type>
+<Private>1</Private>
+</Property>
+
+<Property name="ManifestPath">
+<Type>%String</Type>
+<Private>1</Private>
+</Property>
+
+<Property name="PackagePath">
+<Type>%String</Type>
+<Private>1</Private>
+</Property>
+
+<Method name="iCalcPaths">
+<FormalSpec>FileName:%String</FormalSpec>
+<Private>1</Private>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    if '##class(%File).Exists(FileName) {
+        if ##class(%File).DirectoryExists(FileName) {
+        // directory, not file name given
+            set ..DirectoryPath = FileName
+            set ..ManifestPath = ##class(%Library.File).NormalizeFilename(..#MANIFEST,..DirectoryPath)
+            // ..PackagePath will be calculated later, upon parsing of manifest
+        }
+    } else {
+        // file name given, assume it's manifest
+        set ..DirectoryPath = ##class(%Library.File).GetDirectory(FileName)
+        set ..ManifestPath = FileName
+    }
+    set ..RepoRootDir = ##class(%Library.File).ParentDirectoryName(..DirectoryPath)
+
+    quit ..ManifestPath
+]]></Implementation>
+</Method>
+
+<Method name="iFullPackagePath">
+<FormalSpec>FileName:%String</FormalSpec>
+<Private>1</Private>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    quit:FileName="" ""
+    quit ##class(%Library.File).NormalizeFilename(FileName,..DirectoryPath)
+]]></Implementation>
+</Method>
+
+<Method name="Open">
+<FormalSpec>fileName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set ..xmlArrayReader = ##class(CPM.Utils.XmlArray).%OpenFile(..iCalcPaths(fileName))
+    quit $isobject(..xmlArrayReader)
+]]></Implementation>
+</Method>
+
+<Method name="Unpack">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[    quit '$$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Parse">
+<PublicList>xmltree</PublicList>
+<ReturnType>CPM.IPackage</ReturnType>
+<Implementation><![CDATA[
+    new xmltree
+    do ..xmlArrayReader.ParseXml($name(xmltree))
+    merge pkg       = xmltree("Manifest", 1, "Package")
+    merge localdeps = xmltree("Manifest", 2, "Dependencies")
+    merge ..PackageContent.Data = xmltree kill xmltree
+    
+    #dim p As CPM.IPackage = ##class(CPM.IPackage).%New()
+    set p.Name      = pkg("Name")
+    set p.Path      = ..iFullPackagePath($get(pkg("Path")))
+    set p.Version   = $get(pkg("Version"))
+    set p.License   = $get(pkg("License"))
+    
+    if ..DebugMode { write p.Name,":", p.Path,":", p.Version,! }
+
+    #dim deps As %ArrayOfDataTypes
+    
+    set i = $order(localdeps(""))
+    while i'="" {
+        #dim depName As %String = localdeps(i,"Dependency","Name")
+
+        #dim depItemsList  = $lb("version",$get(localdeps(i,"Dependency","Version")),
+                                 "path",$get(localdeps(i,"Dependency","Path")))
+
+        set deps(depName) = depItemsList
+        if ..DebugMode {
+            #dim depVersion As %String = $get(localdeps(i,"Dependency","Version"),
+                                         $get(localdeps(i,"Dependency","Path"))) ; create exportable list of deps
+            write ?4, depName, ?20, depVersion, !
+        }
+        set i = $order(localdeps(i))
+    }
+#if 0 
+    // %ArrayOfDataTypes provides us convenient multi-dimensional property .Data
+    // unfortunately we can't redefine MAXLEN for %ArrayOfDataTypes
+    merge p.Dependencies.Data = deps
+#else
+    set i="" for  {
+        #dim value As %String
+        set i=$order(deps(i),1,value) quit:i=""
+        do p.Dependencies.SetAt(value,i)
+    }
+#endif
+    quit p
+]]></Implementation>
+</Method>
+
+<Method name="iPackageBaseDir">
+<Description>
+create repo-based path using given package symbolic name</Description>
+<FormalSpec>packageName:%String</FormalSpec>
+<Private>1</Private>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    if $Length(..RepoRootDir)=0 {
+        quit ""
+    }
+    #dim dir As %String = ##class(%Library.File).NormalizeDirectory(packageName,..RepoRootDir)
+    quit dir
+]]></Implementation>
+</Method>
+
+<Method name="iManifestPath">
+<FormalSpec>packageName:%String</FormalSpec>
+<Private>1</Private>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[    quit ##class(%Library.File).NormalizeFilename(..#MANIFEST,..iPackageBaseDir(packageName))
+]]></Implementation>
+</Method>
+
+<Method name="DumpManifest">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>FileName:%String,Recursive:%Boolean=0,Debug:%Boolean=1</FormalSpec>
+<Implementation><![CDATA[
+    $$$InitQueue(queue) $$$Enqueue(queue,"*")
+
+    do {
+        $$$Dequeue(queue)
+        #dim parser As CPM.Source.Xml = ..%New()
+        set parser.DebugMode = Debug
+        do parser.Open(FileName)
+        #dim package As CPM.IPackage = parser.Parse()
+        if Debug {
+            write ?4, package.Name, ?32, package.Dependencies.Count(), !
+        }
+        if Recursive {
+            set known(package.Name) = 1 ; mark itself as visited
+            #dim name As %String = ""
+            for {
+                #dim listItems = package.Dependencies.GetNext(.name)
+                quit:name=""
+                if '$data(known(name)) {
+                    $$$Enqueue(queue,name)
+                    set known(name) = 1
+                }
+            }
+            set FileName = parser.iManifestPath( $$$QueueHead(queue) )
+        }
+    } while Recursive && $$$QueueLen(queue)
+]]></Implementation>
+</Method>
+
+<Method name="Install">
+<FormalSpec>package:CPM.IPackage</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim status As %Status = $$$OK
+    if ##class(%Library.File).Exists(package.Path) {
+        // 1. load list of items in the container
+        do $system.OBJ.Load(package.Path,"-d",,.list,1)
+        write !,"About to load these items from the package ", package.Name,!
+        #dim itemName As %String = ""
+        for  {
+            set itemName = $order(list(itemName))
+            quit:itemName=""
+            write ?8,itemName,!
+            do package.Items.SetAt(1,itemName)
+        }
+        // TODO: 2. Ask interactively to install
+        // TODO: 3. Actual installation
+        // 4. save package instance to the registry
+        #dim storedPackage As CPM.Registry.Package = ##class(CPM.Registry.Package).%New(package)
+        set status = storedPackage.%Save()
+        quit status
+   }
+]]></Implementation>
+</Method>
+</Class>
+</Export>

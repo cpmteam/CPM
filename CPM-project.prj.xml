@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
-<Project name="CPM-project" LastModified="2015-01-28 03:20:55.859513" Target="INSTALL^CPM(&quot;C:\Users\Timur\Documents\Intersystems\src\CPM\t\tgz\webterminal-2.0.0-beta.6.tgz&quot;)" TargetType="0">
+<Project name="CPM-project" LastModified="2015-02-25 16:35:10.291044" Target="INSTALL^CPM(&quot;C:\Users\Timur\Documents\Intersystems\src\CPM\t\simple\manifest.xml&quot;)" TargetType="0">
   <Items>
     <ProjectItem name="CPM.DataTypes.INC" type="MAC"></ProjectItem>
     <ProjectItem name="CPM.IPackage" type="CLS"></ProjectItem>
@@ -13,14 +13,18 @@
     <ProjectItem name="CPM.License.INC" type="MAC"></ProjectItem>
     <ProjectItem name="CPM.MAC" type="MAC"></ProjectItem>
     <ProjectItem name="CPM.Main" type="CLS"></ProjectItem>
-    <ProjectItem name="CPM.MetaInfo.MAC" type="MAC"></ProjectItem>
-    <ProjectItem name="CPM.Package" type="CLS"></ProjectItem>
     <ProjectItem name="CPM.Registry" type="PKG"></ProjectItem>
     <ProjectItem name="CPM.Sample.Installer" type="CLS"></ProjectItem>
-    <ProjectItem name="CPM.SourceType.IBase" type="CLS"></ProjectItem>
-    <ProjectItem name="CPM.SourceType.TarGz" type="CLS"></ProjectItem>
-    <ProjectItem name="CPM.SourceType.Xml" type="CLS"></ProjectItem>
+    <ProjectItem name="CPM.Source.IBase" type="CLS"></ProjectItem>
+    <ProjectItem name="CPM.Source.TarGz" type="CLS"></ProjectItem>
+    <ProjectItem name="CPM.Source.Xml" type="CLS"></ProjectItem>
+    <ProjectItem name="CPM.SourceTypes.INC" type="MAC"></ProjectItem>
     <ProjectItem name="CPM.Utils.FileBinaryTar" type="CLS"></ProjectItem>
+    <ProjectItem name="CPM.Utils.XmlArray" type="CLS"></ProjectItem>
   </Items>
+  <BreakPoints>
+    <BreakPoint Routine="CPM.Source.Xml.CLS" Offset="Install+15"></BreakPoint>
+    <BreakPoint Routine="CPM.MAC" Offset="73"></BreakPoint>
+  </BreakPoints>
 </Project>
 </Export>
