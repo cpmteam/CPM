@@ -8,7 +8,6 @@
 SHELL
     new
     #; here goes interactive entry
-    set pattern=##class(%Regex.Matcher).%New("\b[^ ]+\b|\""([^\""]+)\""")
     #; aliases for commands
     do ALIASES(.aliases)
     for i=1:1 {
@@ -25,17 +24,7 @@ SHELL
     for {
         write !,"CPM:"_$Namespace_">> "
         read line
-        set line=$zstrip(line,"<>WC")
-        
-        set command=$piece(line," ")
-        set line=$extract(line,$find(line," ")+1,*)
-        kill args
-        set args=0
-        set pattern.Text=line
-        while pattern.Locate() {
-            set argument=$zstrip(pattern.Group,"<>WC")
-            set args($increment(args))=$zstrip(argument,"<>","""")
-        }
+        do ExtractArgs(.line, .command, .args)
         
         continue:command=""
         set command=$zconvert(command,"U")
@@ -46,6 +35,26 @@ SHELL
         do BATCH(command, args...)
     }
     quit
+
+ExtractArgs(&line,&command,&args) {
+    #dim pattern As %String = ##class(%Regex.Matcher).%New("[\b/-][^ ]+\b|\""([^\""]+)\""")
+
+    set line    = $zstrip(line,"<>WC")
+    set command = $piece(line," ")
+    set line    = $piece(line," ",2,*)
+
+    kill args
+    set args = 0
+    set pattern.Text = line
+    while pattern.Locate() {
+#if 0
+        set argument = $zstrip(pattern.Group,"<>WC")
+#else
+        set argument = pattern.Group
+#endif
+        set args($increment(args)) = $zstrip(argument, "<>", """")
+    }
+}
 
 BATCH(command="help", args...)
     ; here goes batch entry
