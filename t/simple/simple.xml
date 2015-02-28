@@ -1,0 +1,1308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2015.2 (Build 536U)" ts="2015-02-21 01:17:33">
+<Class name="Sample.Address">
+<Description>
+This is a sample embeddable class representing an address.</Description>
+<StorageStrategy>AddressState</StorageStrategy>
+<Super>%SerialObject,%Populate,%XML.Adaptor</Super>
+<TimeChanged>63565,18</TimeChanged>
+<TimeCreated>59269,38836.251</TimeCreated>
+
+<Property name="Street">
+<Description>
+The street address.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="80"/>
+<Parameter name="POPSPEC" value="Street()"/>
+</Property>
+
+<Property name="City">
+<Description>
+The city name.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="80"/>
+<Parameter name="POPSPEC" value="City()"/>
+</Property>
+
+<Property name="State">
+<Description>
+The 2-letter state abbreviation.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="2"/>
+<Parameter name="POPSPEC" value="USState()"/>
+</Property>
+
+<Property name="Zip">
+<Description>
+The 5-digit U.S. Zone Improvement Plan (ZIP) code.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="5"/>
+<Parameter name="POPSPEC" value="USZip()"/>
+</Property>
+
+<Storage name="AddressState">
+<Type>%Library.CacheSerialState</Type>
+<State>AddressState</State>
+<StreamLocation>^Sample.AddressS</StreamLocation>
+<Data name="AddressState">
+<Value name="1">
+<Value>Street</Value>
+</Value>
+<Value name="2">
+<Value>City</Value>
+</Value>
+<Value name="3">
+<Value>State</Value>
+</Value>
+<Value name="4">
+<Value>Zip</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="Sample.Company">
+<Description><![CDATA[
+This sample persistent class represents a company.<br>]]></Description>
+<Super>%Persistent,%Populate,%XML.Adaptor</Super>
+<TimeChanged>63565,3808.388175</TimeChanged>
+<TimeCreated>59269,38836.352</TimeCreated>
+
+<Index name="NameIdx">
+<Description><![CDATA[
+Define an index for <property>Name</property>.]]></Description>
+<Type>index</Type>
+<Properties>Name</Properties>
+</Index>
+
+<Index name="TaxIDIdx">
+<Description><![CDATA[
+Define a unique index for <property>TaxID</property>.]]></Description>
+<Type>index</Type>
+<Properties>TaxID</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Property name="Name">
+<Description>
+The company's name.</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN" value="80"/>
+<Parameter name="POPSPEC" value="Company()"/>
+</Property>
+
+<Property name="Mission">
+<Description>
+The company's mission statement.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+<Parameter name="POPSPEC" value="Mission()"/>
+</Property>
+
+<Property name="TaxID">
+<Description>
+The unique Tax ID number for the company.</Description>
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Property name="Revenue">
+<Description>
+The last reported revenue for the company.</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="Employees">
+<Description><![CDATA[
+The <class>Employee</class> objects associated with this <class>Company</class>.]]></Description>
+<Type>Employee</Type>
+<Cardinality>many</Cardinality>
+<Inverse>Company</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Method name="PrintPayroll">
+<Description><![CDATA[
+This method prints out the payroll for this company by iterating over 
+all the <class>Employee</class> objects related to it and printing 
+their names and salaries.<br>
+You can try this out from the <i>Cach&eacute;</i> command line by opening 
+an instance of <class>Company</class> object and invoking this method:
+<example>
+Set company = ##class(Sample.Company).%OpenId(1)
+
+Do company.PrintPayroll()
+</example>]]></Description>
+<Implementation><![CDATA[
+	Set total = 0
+	Set key = ""
+	
+	Write !, "Payroll for ", ..Name, ":"
+	
+	Do {
+		Set emp = ..Employees.GetNext(.key)
+		If (emp '= "") {
+			Set total = total + emp.Salary
+			Write !, ?5, emp.Name, ?40, $J($FN(emp.Salary,","),12)
+			Do ..Employees.%UnSwizzleAt(key)
+		}
+	} while (key '= "")
+	
+	Write !, "Total: ", ?40, $J($FN(total,","),12)
+	Quit
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Sample.CompanyD</DataLocation>
+<DefaultData>CompanyDefaultData</DefaultData>
+<IdLocation>^Sample.CompanyD</IdLocation>
+<IndexLocation>^Sample.CompanyI</IndexLocation>
+<StreamLocation>^Sample.CompanyS</StreamLocation>
+<ExtentSize>20</ExtentSize>
+<Data name="CompanyDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Mission</Value>
+</Value>
+<Value name="3">
+<Value>Name</Value>
+</Value>
+<Value name="4">
+<Value>Revenue</Value>
+</Value>
+<Value name="5">
+<Value>TaxID</Value>
+</Value>
+</Data>
+<Property name="%%CLASSNAME">
+<Selectivity>100.0000%</Selectivity>
+<AverageFieldSize>1</AverageFieldSize>
+</Property>
+<Property name="%%ID">
+<Selectivity>1</Selectivity>
+<AverageFieldSize>1.55</AverageFieldSize>
+</Property>
+<Property name="Mission">
+<Selectivity>5.0000%</Selectivity>
+<AverageFieldSize>99.5</AverageFieldSize>
+</Property>
+<Property name="Name">
+<Selectivity>5.0000%</Selectivity>
+<AverageFieldSize>16.95</AverageFieldSize>
+</Property>
+<Property name="Revenue">
+<Selectivity>5.0000%</Selectivity>
+<AverageFieldSize>8.95</AverageFieldSize>
+</Property>
+<Property name="TaxID">
+<Selectivity>1</Selectivity>
+<AverageFieldSize>4.9</AverageFieldSize>
+</Property>
+<SQLMap name="IDKEY">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="NameIdx">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="TaxIDIdx">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+</Storage>
+</Class>
+
+
+<Class name="Sample.Customer">
+<Super>%SerialObject</Super>
+<TimeChanged>63565,18</TimeChanged>
+<TimeCreated>59855,70764.188023</TimeCreated>
+
+<Property name="Name">
+<Type>%String</Type>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="MailingAddresses">
+<Type>Address</Type>
+<Collection>list</Collection>
+<Parameter name="JAVATYPE" value="java.util.List"/>
+</Property>
+
+<Property name="Addresses">
+<Type>Address</Type>
+<Collection>array</Collection>
+<Parameter name="JAVATYPE" value="java.util.Map"/>
+</Property>
+
+<Property name="MyAddress">
+<Type>Address</Type>
+</Property>
+
+<Property name="Status">
+<Type>%String</Type>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="TS">
+<Type>%TimeStamp</Type>
+</Property>
+
+<Method name="%OnNew">
+<Description><![CDATA[
+This callback method is invoked by the <METHOD>%New</METHOD> method to 
+provide notification that a new instance of an object is being created.
+
+<P>If this method returns an error then the object will not be created.]]></Description>
+<FormalSpec>initvalue:%CacheString</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..SetDefault()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="SetDefault">
+<Implementation><![CDATA[
+	Do ..MailingAddresses.Clear()
+	Do ..Addresses.Clear()
+	
+	Set l = $listbuild("One Memorial Dr.","Cambridge","MA","02142")
+	Set l1 = $listbuild(l,"Sample.Address")
+	Set a = ##class(Sample.Address).%Open(l1)
+	Do ..MailingAddresses.Insert(a)
+	
+	Set l = $listbuild("768 Beacon St.","Brookline","MA","02446")
+	Set l1 = $listbuild(l,"Sample.Address")
+	Set a = ##class(Sample.Address).%Open(l1)
+	Do ..MailingAddresses.Insert(a)
+	
+	Set l = $listbuild("825 Third Ave.","New York","NY","10022")
+	Set l1 = $listbuild(l,"Sample.Address")
+	Set a = ##class(Sample.Address).%Open(l1)
+	Do ..Addresses.SetAt(a, "Residence")
+	
+	Set l = $listbuild("7722 Main St.","Detroit","MI","48224")
+	Set l1 = $listbuild(l,"Sample.Address")
+	Set a = ##class(Sample.Address).%Open(l1)
+	Do ..Addresses.SetAt(a, "Business")
+	
+	Set l = $listbuild("25 Glen Ave","Newton","MA","02459")
+	Set l1 = $listbuild(l,"Sample.Address")
+	Set a = ##class(Sample.Address).%Open(l1)
+	
+	Set ..MyAddress = a
+	Set ..Name = "Joe Doe, Jr."
+	Set ..Status = "Prospect"
+]]></Implementation>
+</Method>
+
+<Method name="ToStringWrapper">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Arg1:%Binary</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	Set customer = ##class(Sample.Customer).%Open(Arg1)
+	Quit ..ToString(customer)
+]]></Implementation>
+</Method>
+
+<Method name="ToString">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>customer:%IStruct</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	Quit:customer="" "{}"
+	Set l = customer.MailingAddresses
+	Set m = customer.Addresses
+	Set str = customer.Name_"Addresses: "_m.Count()_": "
+	
+	Set key = ""
+	For  {
+		Set addr = m.GetNext(.key)
+		Quit:key=""
+		Set str = str_"<"_key_">"
+		Do ..writeAddr(.str, addr)
+	}
+
+	Set str = str_"Mailing: "_l.Count()_": "
+	For i=1:1:l.Count() {
+		Set addr = l.GetAt(i)
+		Do ..writeAddr(.str, addr)
+	}
+	Set str = str_"; "_customer.Status
+	
+	Set str = str_". My Address: "
+	Do ..writeAddr(.str,customer.MyAddress)
+	
+	Quit str
+]]></Implementation>
+</Method>
+
+<Method name="writeAddr">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&str:%String,addr:Address]]></FormalSpec>
+<Implementation><![CDATA[
+	Set str =str_"{"
+	Set str = str_"Street: "_addr.Street
+	Set str = str_"; City: "_addr.City
+	Set str = str_"; State: "_addr.State
+	Set str = str_"; Zip:  "_addr.Zip
+	Set str =str_"}  "
+	Quit
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheSerialState</Type>
+<State>CustomerState</State>
+<StreamLocation>^Sample.CustomerS</StreamLocation>
+<Data name="CustomerState">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>Addresses</Value>
+</Value>
+<Value name="2">
+<Value>MailingAddresses</Value>
+</Value>
+<Value name="3">
+<Value>MyAddress</Value>
+</Value>
+<Value name="4">
+<Value>Name</Value>
+</Value>
+<Value name="5">
+<Value>Status</Value>
+</Value>
+<Value name="6">
+<Value>TS</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="Sample.Employee">
+<Description><![CDATA[
+This sample persistent class represents an employee.<br>]]></Description>
+<Super>Person</Super>
+<TimeChanged>63565,3808.61206</TimeChanged>
+<TimeCreated>59269,38836.422</TimeCreated>
+
+<Property name="Title">
+<Description>
+The employee's job title.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="50"/>
+<Parameter name="POPSPEC" value="Title()"/>
+</Property>
+
+<Property name="Salary">
+<Description>
+The employee's current salary.</Description>
+<Type>%Integer</Type>
+<Parameter name="MAXVAL" value="100000"/>
+<Parameter name="MINVAL" value="0"/>
+</Property>
+
+<Property name="Notes">
+<Description>
+A character stream containing notes about this employee.</Description>
+<Type>%Stream.GlobalCharacter</Type>
+</Property>
+
+<Property name="Picture">
+<Description>
+A picture of the employee</Description>
+<Type>%Stream.GlobalBinary</Type>
+</Property>
+
+<Property name="Company">
+<Description>
+The company this employee works for.</Description>
+<Type>Company</Type>
+<Cardinality>one</Cardinality>
+<Inverse>Employees</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Method name="PrintPerson">
+<Description><![CDATA[
+This method overrides the method in <class>Person</class>.<br>
+Prints the properties <property>Name</property> and <property>Title</property> 
+to the console.]]></Description>
+<Implementation><![CDATA[
+	Write !,"Name: ", ..Name, ?30, "Title: ", ..Title
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="WritePicture">
+<Description>
+writes a .png file containing the picture, if any, of this employee
+the purpose of this method is to prove that Picture really contains an image</Description>
+<Implementation><![CDATA[
+	if (..Picture="") {quit}
+	set name=$TR(..Name,".") ; strip off trailing period
+	set name=$TR(name,", ","__") ; replace commas and spaces
+	set filename=name_".png"
+	
+	set file=##class(%Stream.FileBinary).%New()
+	set file.Filename=filename
+	do file.CopyFrom(..Picture)
+	do file.%Save()
+	write !, "Generated file: "_filename
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>EmployeeDefaultData</DefaultData>
+<ExtentSize>100</ExtentSize>
+<Data name="EmployeeDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"Employee"</Subscript>
+<Value name="1">
+<Value>Company</Value>
+</Value>
+<Value name="2">
+<Value>Notes</Value>
+</Value>
+<Value name="3">
+<Value>Salary</Value>
+</Value>
+<Value name="4">
+<Value>Title</Value>
+</Value>
+<Value name="5">
+<Value>Picture</Value>
+</Value>
+</Data>
+<Property name="%%CLASSNAME">
+<Selectivity>100.0000%</Selectivity>
+<AverageFieldSize>17</AverageFieldSize>
+</Property>
+<Property name="%%ID">
+<Selectivity>1</Selectivity>
+<AverageFieldSize>3</AverageFieldSize>
+</Property>
+<Property name="Age">
+<Selectivity>1.7241%</Selectivity>
+<AverageFieldSize>1.87</AverageFieldSize>
+</Property>
+<Property name="Company">
+<Selectivity>5.2632%</Selectivity>
+<AverageFieldSize>1.56</AverageFieldSize>
+</Property>
+<Property name="DOB">
+<Selectivity>1.0101%</Selectivity>
+<AverageFieldSize>5</AverageFieldSize>
+</Property>
+<Property name="FavoriteColors">
+<Selectivity>1.8158%</Selectivity>
+<OutlierSelectivity>.31:</OutlierSelectivity>
+<AverageFieldSize>7.52</AverageFieldSize>
+</Property>
+<Property name="Home">
+<Selectivity>1.0000%,City:3.8462%,State:2.3256%,Street:1.0000%,Zip:1.0000%</Selectivity>
+<AverageFieldSize>36.15,City:7.1,State:2,Street:16.73,Zip:5</AverageFieldSize>
+</Property>
+<Property name="Name">
+<Selectivity>1.0000%</Selectivity>
+<AverageFieldSize>15.69</AverageFieldSize>
+</Property>
+<Property name="Notes">
+<Selectivity>100.0000%</Selectivity>
+</Property>
+<Property name="Office">
+<Selectivity>1.0000%,City:4.0000%,State:2.2222%,Street:1.0000%,Zip:1.0000%</Selectivity>
+<AverageFieldSize>36.06,City:6.94,State:2,Street:16.67,Zip:5</AverageFieldSize>
+</Property>
+<Property name="Picture">
+<Selectivity>100.0000%</Selectivity>
+</Property>
+<Property name="SSN">
+<Selectivity>1</Selectivity>
+<AverageFieldSize>11</AverageFieldSize>
+</Property>
+<Property name="Salary">
+<Selectivity>1.0000%</Selectivity>
+<AverageFieldSize>4.88</AverageFieldSize>
+</Property>
+<Property name="Spouse">
+<Selectivity>1.5152%</Selectivity>
+<AverageFieldSize>1.9</AverageFieldSize>
+</Property>
+<Property name="Title">
+<Selectivity>1.3889%</Selectivity>
+<AverageFieldSize>20.43</AverageFieldSize>
+</Property>
+<SQLMap name="$Employee">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+</Storage>
+</Class>
+
+
+<Class name="Sample.Person">
+<Description><![CDATA[
+This sample persistent class represents a person.
+<p>Maintenance note: This class is used by some of the bindings samples.]]></Description>
+<Super>%Persistent,%Populate,%XML.Adaptor</Super>
+<TimeChanged>63565,3808.660629</TimeChanged>
+<TimeCreated>59269,38836.623</TimeCreated>
+
+<Parameter name="EXTENTQUERYSPEC">
+<Default>Name,SSN,Home.City,Home.State</Default>
+</Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+// define indices for this class
+
+]]></Content>
+</UDLText>
+
+<Index name="SSNKey">
+<Description><![CDATA[
+Define a unique index for <property>SSN</property>.]]></Description>
+<Type>index</Type>
+<Properties>SSN</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Index name="NameIDX">
+<Description><![CDATA[
+Define an index for <property>Name</property>.]]></Description>
+<Data>Name</Data>
+<Properties>Name</Properties>
+</Index>
+
+<Index name="ZipCode">
+<Description><![CDATA[
+Define an index for embedded object property <b>ZipCode</b>.]]></Description>
+<Type>bitmap</Type>
+<Properties>Home.Zip</Properties>
+</Index>
+
+<UDLText name="T">
+<Content><![CDATA[
+// define properties for this class
+
+]]></Content>
+</UDLText>
+
+<Property name="Name">
+<Description>
+Person's name.</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="POPSPEC" value="Name()"/>
+</Property>
+
+<Property name="SSN">
+<Description>
+Person's Social Security number. This is validated using pattern match.</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="PATTERN" value="3N1&quot;-&quot;2N1&quot;-&quot;4N"/>
+</Property>
+
+<Property name="DOB">
+<Description>
+Person's Date of Birth.</Description>
+<Type>%Date</Type>
+<Parameter name="POPSPEC" value="Date()"/>
+</Property>
+
+<Property name="Home">
+<Description>
+Person's home address. This uses an embedded object.</Description>
+<Type>Address</Type>
+</Property>
+
+<Property name="Office">
+<Description>
+Person's office address. This uses an embedded object.</Description>
+<Type>Address</Type>
+</Property>
+
+<Property name="Spouse">
+<Description>
+Person's spouse. This is a reference to another persistent object.</Description>
+<Type>Person</Type>
+</Property>
+
+<Property name="FavoriteColors">
+<Description>
+A collection of strings representing the person's favorite colors.</Description>
+<Type>%String</Type>
+<Collection>list</Collection>
+<Parameter name="JAVATYPE" value="java.util.List"/>
+<Parameter name="POPSPEC" value="ValueList(&quot;,Red,Orange,Yellow,Green,Blue,Purple,Black,White&quot;):2"/>
+</Property>
+
+<Property name="Age">
+<Description><![CDATA[
+Person's age.<br>
+This is a calculated field whose value is derived from <property>DOB</property>.]]></Description>
+<Type>%Integer</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Age}=##class(Sample.Person).CurrentAge({DOB})
+</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<SqlComputeOnChange>DOB</SqlComputeOnChange>
+</Property>
+
+<Method name="CurrentAge">
+<Description><![CDATA[
+This class method calculates a current age given a date of birth <var>date</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec>date:%Date=""</FormalSpec>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[$Select(date="":"",1:($ZD($H,8)-$ZD(date,8)\10000))
+]]></Implementation>
+</Method>
+
+<Method name="PrintPerson">
+<Description><![CDATA[
+Prints the property <property>Name</property> to the console.]]></Description>
+<Implementation><![CDATA[
+	Write !, "Name: ", ..Name
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="Addition">
+<Description><![CDATA[
+A simple, sample method: add two numbers (<var>x</var> and <var>y</var>) 
+and return the result.]]></Description>
+<FormalSpec>x:%Integer=1,y:%Integer=1</FormalSpec>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[	Quit x + y // comment
+]]></Implementation>
+</Method>
+
+<Method name="NinetyNine">
+<Description>
+A simple, sample expression method: returns the value 99.</Description>
+<CodeMode>expression</CodeMode>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[99
+]]></Implementation>
+</Method>
+
+<Method name="PrintPersons">
+<Description><![CDATA[
+Invoke the <method>PrintPerson</method> on all <class>Person</class> objects 
+within the database.]]></Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	// use the extent result set to find all person
+	Set extent = ##class(%ResultSet).%New("Sample.Person:Extent")
+	Do extent.Execute()
+	
+	While (extent.Next()) {
+		Set person = ..%OpenId(extent.GetData(1))
+		Do person.PrintPerson()
+	}
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="PrintPersonsSQL">
+<Description>
+Prints out data on all persons within the database using SQL to 
+iterate over all the person data.</Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	// use dynamic SQL result set to find person data
+	Set query = ##class(%ResultSet).%New("%DynamicQuery:SQL")
+	Do query.Prepare("SELECT ID, Name, SSN FROM Sample.Person ORDER BY Name")
+	Do query.Execute()
+	
+	While (query.Next()) {
+		Write !,"Name: ", query.Get("Name"), ?30, query.Get("SSN")
+	}
+	
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="StoredProcTest">
+<Description><![CDATA[
+This is a sample of how to define an SQL stored procedure using a 
+class method. This method can be called as a stored procedure via 
+ODBC or JDBC.<br>
+In this case this method returns the concatenation of a string value.]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[name:%String,&response:%String]]></FormalSpec>
+<ReturnType>%Integer</ReturnType>
+<SqlName>Stored_Procedure_Test</SqlName>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	// Set response to the concatenation of name.
+	Set response = name _ "||" _ name
+	QUIT 29
+]]></Implementation>
+</Method>
+
+<Method name="UpdateProcTest">
+<Description><![CDATA[
+This is a sample of how to define an SQL stored procedure using a 
+class method. This method can be called as a stored procedure via 
+ODBC or JDBC.<br>
+This method performs an SQL update operation on the database 
+using embedded SQL. The update modifies the embedded properties 
+<var>Home.City</var> and <var>Home.State</var> for all rows whose 
+<var>Home.Zip</var> is equal to <var>zip</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>zip:%String,city:%String,state:%String</FormalSpec>
+<ReturnType>%Integer</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	New %ROWCOUNT,%ROWID
+	
+	&sql(UPDATE Sample.Person 
+	SET Home_City = :city, Home_State = :state 
+	WHERE Home_Zip = :zip)
+	
+	// Return context information to client via %SQLProcContext object
+	If ($g(%sqlcontext)'=$$$NULLOREF) { 
+		Set %sqlcontext.SQLCode = SQLCODE
+		Set %sqlcontext.RowCount = %ROWCOUNT
+	}
+	QUIT 1
+]]></Implementation>
+</Method>
+
+<Query name="ByName">
+<Description><![CDATA[
+A sample class query that defines a result set that returns Person data 
+ordered by <property>Name</property>.<br>
+This query can be used within another Cach&eacute; method (using the
+<class>%ResultSet</class> class), from Java, or from ActiveX.<br>
+This query is also accessible from ODBC and/or JDBC as the SQL stored procedure 
+<b>SP_Sample_By_Name</b>.]]></Description>
+<Type>%SQLQuery</Type>
+<FormalSpec>name:%String=""</FormalSpec>
+<SqlName>SP_Sample_By_Name</SqlName>
+<SqlProc>1</SqlProc>
+<SqlQuery>SELECT ID, Name, DOB, SSN
+FROM Sample.Person
+WHERE (Name %STARTSWITH :name)
+ORDER BY Name</SqlQuery>
+<Parameter name="CONTAINID" value="1"/>
+<Parameter name="SELECTMODE" value="RUNTIME"/>
+</Query>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Sample.PersonD</DataLocation>
+<DefaultData>PersonDefaultData</DefaultData>
+<IdLocation>^Sample.PersonD</IdLocation>
+<IndexLocation>^Sample.PersonI</IndexLocation>
+<StreamLocation>^Sample.PersonS</StreamLocation>
+<ExtentSize>200</ExtentSize>
+<Data name="PersonDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+<Value name="3">
+<Value>SSN</Value>
+</Value>
+<Value name="4">
+<Value>DOB</Value>
+</Value>
+<Value name="5">
+<Value>Home</Value>
+</Value>
+<Value name="6">
+<Value>Office</Value>
+</Value>
+<Value name="7">
+<Value>Spouse</Value>
+</Value>
+<Value name="8">
+<Value>FavoriteColors</Value>
+</Value>
+</Data>
+<Property name="%%CLASSNAME">
+<Selectivity>50.0000%</Selectivity>
+<AverageFieldSize>8.5</AverageFieldSize>
+</Property>
+<Property name="%%ID">
+<Selectivity>1</Selectivity>
+<AverageFieldSize>2.46</AverageFieldSize>
+</Property>
+<Property name="Age">
+<Selectivity>1.2048%</Selectivity>
+<AverageFieldSize>1.88</AverageFieldSize>
+</Property>
+<Property name="DOB">
+<Selectivity>0.5051%</Selectivity>
+<AverageFieldSize>5</AverageFieldSize>
+</Property>
+<Property name="FavoriteColors">
+<Selectivity>1.3333%</Selectivity>
+<OutlierSelectivity>.28:</OutlierSelectivity>
+<AverageFieldSize>7.6</AverageFieldSize>
+</Property>
+<Property name="Home">
+<Selectivity>0.5000%,City:3.8462%,State:2.0000%,Street:0.5000%,Zip:0.5000%</Selectivity>
+<AverageFieldSize>36.32,City:7.19,State:2,Street:16.78,Zip:5</AverageFieldSize>
+</Property>
+<Property name="Name">
+<Selectivity>0.5000%</Selectivity>
+<AverageFieldSize>15.96</AverageFieldSize>
+</Property>
+<Property name="Office">
+<Selectivity>0.5000%,City:3.8462%,State:2.0408%,Street:0.5000%,Zip:0.5000%</Selectivity>
+<AverageFieldSize>36.35,City:7.12,State:2,Street:16.83,Zip:5</AverageFieldSize>
+</Property>
+<Property name="SSN">
+<Selectivity>1</Selectivity>
+<AverageFieldSize>11</AverageFieldSize>
+</Property>
+<Property name="Spouse">
+<Selectivity>0.7576%</Selectivity>
+<OutlierSelectivity>.5:</OutlierSelectivity>
+<AverageFieldSize>.95</AverageFieldSize>
+</Property>
+<SQLMap name="$Person">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="IDKEY">
+<BlockCount>-20</BlockCount>
+</SQLMap>
+<SQLMap name="NameIDX">
+<BlockCount>-12</BlockCount>
+</SQLMap>
+<SQLMap name="SSNKey">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+<SQLMap name="ZipCode">
+<BlockCount>-8</BlockCount>
+</SQLMap>
+</Storage>
+</Class>
+
+
+<Class name="Sample.USZipCode">
+<Description>
+This class represents a U.S. ZIP (Zone Improvement Plan) 
+Code and corresponding State and City name. The sample dataset
+includes values for the northeastern United States.</Description>
+<Final>1</Final>
+<Super>%Persistent,%XML.Adaptor</Super>
+<TimeChanged>63565,18</TimeChanged>
+<TimeCreated>59269,38836.844</TimeCreated>
+
+<Index name="ZipIDX">
+<Description>
+This index specifies that objects are identified by the ZipCode property.</Description>
+<IdKey>1</IdKey>
+<Properties>ZipCode</Properties>
+</Index>
+
+<Property name="ZipCode">
+<Description>
+The 5-digit ZIP Code value.</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN" value="5"/>
+</Property>
+
+<Property name="State">
+<Description>
+A 2 letter state abbreviation.</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN" value="2"/>
+</Property>
+
+<Property name="City">
+<Description>
+A city name.</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN" value="50"/>
+</Property>
+
+<Property name="Longitude">
+<Type>%Numeric</Type>
+<Parameter name="SCALE" value="6"/>
+</Property>
+
+<Property name="Latitude">
+<Type>%Numeric</Type>
+<Parameter name="SCALE" value="6"/>
+</Property>
+
+<Storage name="Default">
+<Type>%CacheStorage</Type>
+<DataLocation>^ZipCodeData</DataLocation>
+<DefaultData>Data</DefaultData>
+<IdLocation>^ZipCodeData</IdLocation>
+<IndexLocation>^ZipCodeDataIdx</IndexLocation>
+<StreamLocation>^Sample.USZipCodeS</StreamLocation>
+<Data name="Data">
+<Value name="1">
+<Value>State</Value>
+</Value>
+<Value name="2">
+<Value>City</Value>
+</Value>
+<Value name="3">
+<Value>Longitude</Value>
+</Value>
+<Value name="4">
+<Value>Latitude</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="Sample.Utils">
+<Description>
+This class contains a method to generate data for Sample package</Description>
+<Super>%RegisteredObject</Super>
+<TimeChanged>63565,18</TimeChanged>
+<TimeCreated>61895,40724</TimeCreated>
+
+<Method name="Generate">
+<Description>
+Invoke this method to set up the data for these classes.
+Create one company for every five people.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>personCount:%Integer=100</FormalSpec>
+<Implementation><![CDATA[
+    //make sure we always have at least 1 person
+    If (personCount < 1) {
+        Set personCount=1
+        }
+        
+    //never use %KillExtent() in a real application
+    do ##class(Sample.Company).%KillExtent()
+    do ##class(Sample.Person).%KillExtent()
+    do ##class(Sample.Employee).%KillExtent()
+    //do ##class(Sample.Vendor).%KillExtent() ; doesn't work with %CacheSQLStorage 
+    
+    Set companyCount= personCount \ 5
+    If (companyCount < 1) {
+        Set companyCount=1
+        }
+
+    Do ##class(Sample.Company).Populate(companyCount)
+	Do ##class(Sample.Person).Populate(personCount)
+	Do ##class(Sample.Employee).Populate(personCount,,,,2)
+	Do ##class(Sample.Vendor).Populate(personCount)
+	
+	//specify values for stream properties in Sample.Employee
+	//do this for the first lucky 10 employees, for reasons of space
+	
+	set e1=personCount+1 ; ID of the first employee
+	for i=e1:1:e1+9 {
+		set employee=##class(Sample.Employee).%OpenId(i)
+		set firstname=$PIECE(employee.Name,",",2)
+		set firstname=$PIECE(firstname," ",1)
+		set text=firstname_" used to work at "_##class(%PopulateUtils).Company()
+		         _" as a(n) "_##class(%PopulateUtils).Title()
+		         
+		do employee.Notes.Write(text)
+		
+		//add a stock picture (yes, all these employees look alike)
+		do employee.Picture.Write($G(^EmployeePictures))
+		
+		do employee.%Save()
+		}
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Class name="Sample.Vendor">
+<Description><![CDATA[
+The <class>Vendor</class> class is a persistent class 
+containing vendor information.<br>
+This class demonstrates how to use the <class>%CacheSQLStorage</class> storage 
+class to provide custom storage for a persistent class. Typically the 
+<class>%CacheSQLStorage</class> storage class is used to provide object access 
+to previously existing storage structures.]]></Description>
+<SqlRowIdName>Vendor</SqlRowIdName>
+<StorageStrategy>SQLStorage</StorageStrategy>
+<Super>%Persistent,%Populate,%XML.Adaptor</Super>
+<TimeChanged>63565,3808.715744</TimeChanged>
+<TimeCreated>59269,38836.793</TimeCreated>
+
+<UDLText name="T">
+<Content><![CDATA[
+// define properties for this class
+
+]]></Content>
+</UDLText>
+
+<Property name="Name">
+<Description>
+Vendor name.</Description>
+<Type>%String</Type>
+<Parameter name="POPSPEC" value="Company()"/>
+</Property>
+
+<Property name="Address">
+<Description>
+Vendor address.</Description>
+<Type>Address</Type>
+<Parameter name="POPSPEC" value="##class(Address).PopulateSerial()"/>
+</Property>
+
+<Property name="Contact">
+<Description>
+Name of primary vendor contact.</Description>
+<Type>%String</Type>
+<Parameter name="POPSPEC" value="Name()"/>
+</Property>
+
+<Property name="DiscRate">
+<Description>
+Discount rate.</Description>
+<Type>%Float</Type>
+<Parameter name="MAXVAL" value="100"/>
+<Parameter name="MINVAL" value="0"/>
+</Property>
+
+<Property name="DiscDays">
+<Description>
+Discount days.</Description>
+<Type>%Integer</Type>
+<Parameter name="MAXVAL" value="999"/>
+<Parameter name="MINVAL" value="0"/>
+</Property>
+
+<Property name="NetDays">
+<Description>
+Net days.</Description>
+<Type>%Integer</Type>
+<Parameter name="MAXVAL" value="999"/>
+<Parameter name="MINVAL" value="0"/>
+</Property>
+
+<Property name="DaysClear">
+<Description>
+Days clear.</Description>
+<Type>%Integer</Type>
+<Parameter name="MAXVAL" value="999"/>
+<Parameter name="MINVAL" value="0"/>
+</Property>
+
+<Property name="PayFlag">
+<Description>
+Payment Flag</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Never,Minimum"/>
+<Parameter name="VALUELIST" value=",N,M"/>
+</Property>
+
+<Property name="MinPayment">
+<Description>
+Minimum Payment.</Description>
+<Type>%Float</Type>
+<Parameter name="MAXVAL" value="999999"/>
+<Parameter name="MINVAL" value="0"/>
+</Property>
+
+<Property name="LastInvDate">
+<Description>
+Last Invoice Date.</Description>
+<Type>%Date</Type>
+<Parameter name="MAXVAL"/>
+<Parameter name="MINVAL"/>
+</Property>
+
+<Property name="LastPayDate">
+<Description>
+Last Payment Date.</Description>
+<Type>%Date</Type>
+<Parameter name="MAXVAL"/>
+<Parameter name="MINVAL"/>
+</Property>
+
+<Property name="Balance">
+<Description>
+Balance.</Description>
+<Type>%Float</Type>
+<Parameter name="MAXVAL" value="999999999"/>
+<Parameter name="MINVAL" value="-999999999"/>
+</Property>
+
+<Property name="TaxReporting">
+<Description>
+Vendor tax reporting status.</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Exempt,Required"/>
+<Parameter name="VALUELIST" value=",E,"/>
+</Property>
+
+<Storage name="SQLStorage">
+<Type>%CacheSQLStorage</Type>
+<SqlIdExpression>$i(^VendorData)</SqlIdExpression>
+<StreamLocation>^Sample.VendorS</StreamLocation>
+<ExtentSize>100</ExtentSize>
+<Property name="%%ID">
+<Selectivity>1</Selectivity>
+<AverageFieldSize>1.92</AverageFieldSize>
+</Property>
+<Property name="Address">
+<Selectivity>1.0000%,City:4.0000%,State:2.1739%,Street:1.0000%,Zip:1.0000%</Selectivity>
+<AverageFieldSize>36.57,City:7.49,State:2,Street:16.72,Zip:5</AverageFieldSize>
+</Property>
+<Property name="Balance">
+<Selectivity>1.0000%</Selectivity>
+<AverageFieldSize>9.39</AverageFieldSize>
+</Property>
+<Property name="Contact">
+<Selectivity>1.0000%</Selectivity>
+<AverageFieldSize>16.24</AverageFieldSize>
+</Property>
+<Property name="DaysClear">
+<Selectivity>1.0989%</Selectivity>
+<AverageFieldSize>2.91</AverageFieldSize>
+</Property>
+<Property name="DiscDays">
+<Selectivity>1.0309%</Selectivity>
+<AverageFieldSize>2.86</AverageFieldSize>
+</Property>
+<Property name="DiscRate">
+<Selectivity>1.5625%</Selectivity>
+<AverageFieldSize>1.94</AverageFieldSize>
+</Property>
+<Property name="LastInvDate">
+<Selectivity>1.0000%</Selectivity>
+<AverageFieldSize>5</AverageFieldSize>
+</Property>
+<Property name="LastPayDate">
+<Selectivity>1.0000%</Selectivity>
+<AverageFieldSize>5</AverageFieldSize>
+</Property>
+<Property name="MinPayment">
+<Selectivity>1.0000%</Selectivity>
+<AverageFieldSize>5.88</AverageFieldSize>
+</Property>
+<Property name="Name">
+<Selectivity>1.0000%</Selectivity>
+<AverageFieldSize>17.56</AverageFieldSize>
+</Property>
+<Property name="NetDays">
+<Selectivity>1.0753%</Selectivity>
+<AverageFieldSize>2.91</AverageFieldSize>
+</Property>
+<Property name="PayFlag">
+<Selectivity>50.0000%</Selectivity>
+<AverageFieldSize>1</AverageFieldSize>
+</Property>
+<Property name="TaxReporting">
+<Selectivity>50.0000%</Selectivity>
+<AverageFieldSize>.47</AverageFieldSize>
+</Property>
+<SQLMap name="DataMasterMap">
+<Type>data</Type>
+<Global>^VendorData</Global>
+<Structure>list</Structure>
+<BlockCount>-8</BlockCount>
+<Subscript name="1">
+<Expression>{Vendor}</Expression>
+</Subscript>
+<Data name="Address">
+<Piece>2</Piece>
+</Data>
+<Data name="Balance">
+<Node>1</Node>
+<Piece>3</Piece>
+</Data>
+<Data name="Contact">
+<Piece>3</Piece>
+</Data>
+<Data name="DaysClear">
+<Piece>7</Piece>
+</Data>
+<Data name="DiscDays">
+<Piece>5</Piece>
+</Data>
+<Data name="DiscRate">
+<Piece>4</Piece>
+</Data>
+<Data name="LastInvDate">
+<Node>1</Node>
+<Piece>1</Piece>
+</Data>
+<Data name="LastPayDate">
+<Node>1</Node>
+<Piece>2</Piece>
+</Data>
+<Data name="MinPayment">
+<Piece>9</Piece>
+</Data>
+<Data name="Name">
+<Piece>1</Piece>
+</Data>
+<Data name="NetDays">
+<Piece>6</Piece>
+</Data>
+<Data name="PayFlag">
+<Piece>8</Piece>
+</Data>
+<Data name="TaxReporting">
+<Piece>10</Piece>
+</Data>
+</SQLMap>
+<SQLMap name="IndexNName">
+<Type>index</Type>
+<Global>^VendorIndex</Global>
+<Structure>list</Structure>
+<BlockCount>-4</BlockCount>
+<Subscript name="1">
+<Expression>"N"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>$$SQLUPPER({Name})</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{Vendor}</Expression>
+</Subscript>
+</SQLMap>
+</Storage>
+</Class>
+
+
+<Project name="simple" LastModified="2015-02-21 01:17:08.558884">
+  <ProjectDescription>Example project containing the Sample classes</ProjectDescription>
+  <Items>
+    <ProjectItem name="Sample.Address" type="CLS"></ProjectItem>
+    <ProjectItem name="Sample.Company" type="CLS"></ProjectItem>
+    <ProjectItem name="Sample.Customer" type="CLS"></ProjectItem>
+    <ProjectItem name="Sample.Employee" type="CLS"></ProjectItem>
+    <ProjectItem name="Sample.Person" type="CLS"></ProjectItem>
+    <ProjectItem name="Sample.USZipCode" type="CLS"></ProjectItem>
+    <ProjectItem name="Sample.Utils" type="CLS"></ProjectItem>
+    <ProjectItem name="Sample.Vendor" type="CLS"></ProjectItem>
+  </Items>
+</Project>
+</Export>

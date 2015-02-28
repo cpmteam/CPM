@@ -51,6 +51,16 @@ search for packages
         }
         set name=package.name
         set:$length(name)>20 name=$extract(name,1,20)_"…"
+        set keywords=""
+        for i=1:1:package.keywords.Size {
+            set keyword="="_package.keywords.GetAt(i)
+            if $length(maintainer)+$l(keywords) > 20 {
+                set keywords=keywords_"…"
+                quit
+            }
+            set:i>1 keywords=keywords_" "
+            set keywords=keywords_keyword
+        }
         set line=$listbuild(name,description,authors,$piece(package.modified," "),version,keywords)
         set result($increment(result))=line
         quit:result>=100

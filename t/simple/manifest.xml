@@ -1,6 +1,6 @@
 <Manifest>
 <Package Name="CPM-Installer-Sample" Version = "0.5.0" 
-         License="MIT" Path="https://github.com/intersystems/monlbl-viewer.git" />
+         License="MIT" Path="simple.xml" />
 <Dependencies>
 <Dependency Name="async" Version=">= 0.2.10"/>
 <Dependency Name="fsplus" Version=">= 0.1.0"/>
