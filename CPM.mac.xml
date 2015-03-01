@@ -55,7 +55,55 @@ ExtractArgs(&line,&command,&args) {
         set args($increment(args)) = $zstrip(argument, "<>", """")
     }
 }
+#if 0
+D ; debugger entry point
+    new
+    kill args 
+    set args=5,args(1)="/o",args(2)="all",args(3)="/verbose",args(4)="the",args(5)="rest"
+    set option = 0, verbose = 0
+    do GetOptions^CPM(.args,"-o",.option,"-v|-verbose",.verbose)
+    zw
+    quit
+#endif
 
+/// GetOptions(.args,"-o",.option,"/verbose|/v",.verbose,"/include=",.include)
+GetOptions(&args,&fmtDest...) public {
+    #dim known ; known options
+
+    // 1. scan options
+    for i=1:2:$get(fmtDest) {
+        #dim opts As %String = $get(fmtDest(i))
+        continue:opts=""
+        for j=1:1:$length(opts,"|") {
+            #dim opt As %String = $zstrip($piece(opts,"|",j), "<>", "-/")
+            set known(opt) = i + 1 ; remember destination argument pointer
+        }
+    }
+    
+    #dim argsN = "" ; new args without processed known options
+    // 2. process passed args while creating new modified args (without known /options)
+    for i=1:1:$get(args) {
+        #dim arg As %String = $get(args(i))
+        #dim isOption As %Boolean = $case($extract(arg,1),"/":1, "-":1, :0)
+
+        if isOption {
+            #dim index As %Integer = $get(known($zstrip(arg, "<>", "-/")))
+
+            if index>0 {
+                set fmtDest(index) = 1 ; TODO - handle not only boolean options
+            } else {
+                return i ; unknown /option - bails out
+            }
+        } else {
+            set argsN($i(argsN)) = arg
+        }
+    }
+    // 3. save not consumed arguments back to args array
+    if $get(argsN)<$get(args) {
+        kill args merge args = argsN
+    }
+    quit 0
+}
 BATCH(command="help", args...)
     ; here goes batch entry
     do ALIASES(.aliases)
