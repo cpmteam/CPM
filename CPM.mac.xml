@@ -179,12 +179,8 @@ SEARCH(string, args...) ;;search packages
 LIST(args...) ;;list of installed packages
     new (args)
     #dim verbose As %Boolean = 0
-    for i=1:1:$get(args) {
-        // FIXME - rework as generic getopt() parser
-        if $get(args(i)) = "/verbose" {
-            set verbose = 1
-        }
-    }
+    do GetOptions(.args, "/v|/verbose", .verbose)
+
     set sql=##class(%SQL.Statement).%New()
     set tSC=sql.%Prepare("SELECT %ID, Name, Version, Description FROM CPM_Registry.Package")
     quit:'$$$ISOK(tSC)
