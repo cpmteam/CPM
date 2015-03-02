@@ -234,6 +234,7 @@ create repo-based path using given package symbolic name</Description>
         // TODO: 3. Actual installation
         // 4. save package instance to the registry
         #dim storedPackage As CPM.Registry.Package = ##class(CPM.Registry.Package).%New(package)
+        set storedPackage.Modified = $ZDT($ZTS,3,,3)
         set status = storedPackage.%Save()
         quit status
    }
