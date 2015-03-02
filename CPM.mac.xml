@@ -37,7 +37,7 @@ SHELL
     quit
 
 ExtractArgs(&line,&command,&args) {
-    #dim pattern As %String = ##class(%Regex.Matcher).%New("[\b/-][^ ]+\b|\""([^\""]+)\""")
+    #dim pattern As %String = ##class(%Regex.Matcher).%New("[^ ]+|\""([^\""]+)\""")
 
     set line    = $zstrip(line,"<>WC")
     set command = $piece(line," ")
@@ -47,24 +47,11 @@ ExtractArgs(&line,&command,&args) {
     set args = 0
     set pattern.Text = line
     while pattern.Locate() {
-#if 0
-        set argument = $zstrip(pattern.Group,"<>WC")
-#else
         set argument = pattern.Group
-#endif
+        zw argument
         set args($increment(args)) = $zstrip(argument, "<>", """")
     }
 }
-#if 0
-D ; debugger entry point
-    new
-    kill args 
-    set args=5,args(1)="/o",args(2)="all",args(3)="/verbose",args(4)="the",args(5)="rest"
-    set option = 0, verbose = 0
-    do GetOptions^CPM(.args,"-o",.option,"-v|-verbose",.verbose)
-    zw
-    quit
-#endif
 
 /// GetOptions(.args,"-o",.option,"/verbose|/v",.verbose,"/include=",.include)
 GetOptions(&args,&fmtDest...) public {
@@ -169,6 +156,16 @@ INSTALL(packages...) ;;install package
         do packageFile.Install(packageData)
     }
     quit
+
+PACKAGE(args...) ;;package creation commands
+    new (args)
+    #dim verbose As %Boolean = 0
+    #dim create As %Boolean = 0
+    #dim fromStudioPRJ As %Boolean = 0
+    do GetOptions(.args, "/v|/verbose", .verbose, "/c|/create", .create, "/prj|/fromPRJ", .fromStudioPRJ)
+    quit
+    
+
 
 SEARCH(string, args...) ;;search packages
     set cpm=##class(CPM.Main).%New()
