@@ -21,19 +21,47 @@
 <FormalSpec>initvalue:CPM.IPackage</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    set ..Author = initvalue.Author
-    set ..Name = initvalue.Name
-    set ..Path  = initvalue.Path
-    set ..Version  = initvalue.Version
-    set ..License  = initvalue.License
-    set ..Description  = initvalue.Description
+    if $data(initvalue) && $isobject(initvalue) {
+        set ..Author = initvalue.Author
+        set ..Name = initvalue.Name
+        set ..Path  = initvalue.Path
+        set ..Version  = initvalue.Version
+        set ..License  = initvalue.License
+        set ..Description  = initvalue.Description
 
-    set ..Dependencies = initvalue.Dependencies
-    set ..Keywords = initvalue.Keywords
-    set ..Maintainers = initvalue.Maintainers
-    set ..Items = initvalue.Items
+        set ..Dependencies = initvalue.Dependencies
+        set ..Keywords = initvalue.Keywords
+        set ..Maintainers = initvalue.Maintainers
+        set ..Items = initvalue.Items
+    }
 
     quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnBeforeSave">
+<FormalSpec>insert:%Boolean</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    // FIXME: bad, bad me - we should not modify state of the object upon saving!
+    set ..Modified = $ZDT($ZTS,3,,3)
+
+    quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="CreateOrOpenId">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String</FormalSpec>
+<ReturnType>CPM.Registry.Package</ReturnType>
+<Implementation><![CDATA[
+    if ..%ExistsId(id) {
+        set o = ..%OpenId(id)
+    } else {
+        set o = ..%New()
+        set o.Name = id
+    }
+    quit o
 ]]></Implementation>
 </Method>
 

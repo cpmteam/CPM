@@ -3,7 +3,7 @@
 <Routine name="CPM.LIB" type="INC"><![CDATA[
 
 #; get value from array with default
-#define getParam(%arr,%name,%def) $select($data(%arr(%name),tmpRes)&&(tmpRes'=""):tmpRes,1:%def)
+#define GetParam(%arr,%name,%def) $select($data(%arr(%name),tmpRes)&&(tmpRes'=""):tmpRes,1:%def)
 
 #define UrlParser(%url,%parsed) if $data(%url)=1 { do ##class(%Net.URLParser).Parse(%url, .%parsed) } else { merge %parsed=%url } 
 ]]></Routine>

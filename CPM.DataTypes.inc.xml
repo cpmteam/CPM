@@ -15,5 +15,8 @@
 #define QueueLen(%queue)  $ll(%queue)
 #define Enqueue(%queue,%value) set $li(%queue,*+1)=%value
 #define Dequeue(%queue) set $li(%queue,1,1)=""
+
+#define PopArrValue(%array) %array($i(%array,-1)+1)
+#define PushArrValue(%array,%value) set %array($i(%array))=%value
 ]]></Routine>
 </Export>
