@@ -1,10 +1,10 @@
 CPM-project.PRJ
+CPM.PKG
 CPM.DataTypes.INC
 CPM.Installer.CLS
 CPM.Installer.Dependencies.CLS
 CPM.Installer.Dependency.CLS
 CPM.Installer.Package.CLS
-CPM.LIB
 CPM.LIB.Base.CLS
 CPM.LIB.Config.CLS
 CPM.LIB.Help.CLS
@@ -16,7 +16,6 @@ CPM.MAC
 CPM.Main.CLS
 CPM.MetaInfo.MAC
 CPM.Package.CLS
-CPM.Registry
 CPM.Registry.Cache.CLS
 CPM.Registry.Client.CLS
 CPM.Registry.Package.CLS
