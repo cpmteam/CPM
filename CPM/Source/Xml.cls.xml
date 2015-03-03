@@ -228,7 +228,7 @@ create repo-based path using given package symbolic name</Description>
             set itemName = $order(list(itemName))
             quit:itemName=""
             write ?8,itemName,!
-            do package.Items.SetAt(1,itemName)
+            do package.Items.Insert(itemName)
         }
         // TODO: 2. Ask interactively to install
         // TODO: 3. Actual installation

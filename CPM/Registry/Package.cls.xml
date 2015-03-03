@@ -150,55 +150,5 @@ Is used to get the value of an unknown property.</Description>
 <SqlProc>1</SqlProc>
 <SqlQuery>SELECT id FROM package where description like STRING('%',:Value,'%')</SqlQuery>
 </Query>
-
-<Storage name="Default">
-<Type>%Library.CacheStorage</Type>
-<DataLocation>^CPM.Registry.PackageD</DataLocation>
-<DefaultData>PackageDefaultData</DefaultData>
-<IdLocation>^CPM.Registry.PackageD</IdLocation>
-<IndexLocation>^CPM.Registry.PackageI</IndexLocation>
-<StreamLocation>^CPM.Registry.PackageS</StreamLocation>
-<Data name="Dependencies">
-<Attribute>Dependencies</Attribute>
-<Structure>subnode</Structure>
-<Subscript>"Dependencies"</Subscript>
-</Data>
-<Data name="Items">
-<Attribute>Items</Attribute>
-<Structure>subnode</Structure>
-<Subscript>"Items"</Subscript>
-</Data>
-<Data name="Maintainers">
-<Attribute>Maintainers</Attribute>
-<Structure>subnode</Structure>
-<Subscript>"Maintainers"</Subscript>
-</Data>
-<Data name="PackageDefaultData">
-<Value name="1">
-<Value>%%CLASSNAME</Value>
-</Value>
-<Value name="2">
-<Value>Author</Value>
-</Value>
-<Value name="3">
-<Value>Path</Value>
-</Value>
-<Value name="4">
-<Value>Version</Value>
-</Value>
-<Value name="5">
-<Value>License</Value>
-</Value>
-<Value name="6">
-<Value>Keywords</Value>
-</Value>
-<Value name="7">
-<Value>Description</Value>
-</Value>
-<Value name="8">
-<Value>Modified</Value>
-</Value>
-</Data>
-</Storage>
 </Class>
 </Export>
