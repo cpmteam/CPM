@@ -46,7 +46,6 @@ SHELL
         do BATCH(command, args...)
     }
     quit
-
 BATCH(command="help", args...)
     ; here goes batch entry
     do ALIASES(.aliases)
@@ -120,8 +119,6 @@ SEARCH(terms...) ;;search packages
     set cpm=##class(CPM.Main).%New()
     do cpm.Search(terms...)
     quit
-    
-
 LIST(args...) ;;list of installed packages
     new (args)
     #dim verbose As %Boolean = 0

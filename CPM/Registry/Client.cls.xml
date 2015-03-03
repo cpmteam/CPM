@@ -52,7 +52,7 @@ Get SSL Configuration by Server as a name for configuration</Description>
     set request.Timeout=$$$GetParam(Params,"timeout",30)
     
     set request.Server=url("host")
-    set:$get(url("port"))'="" request.Port=$get(url("port")) ; FIXME - port
+    set:$data(url("port"))&&(port'="") request.Port=port
     if url("scheme")="https" {
         set request.Https=1
         set request.SSLConfiguration=..GetCertificate(request.Server)
