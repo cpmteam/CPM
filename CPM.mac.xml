@@ -219,8 +219,7 @@ PACKAGE(args...) ;;package creation commands
 
 
 SEARCH(string, args...) ;;search packages
-    set cpm=##class(CPM.Main).%New()
-    do cpm.Search(string)
+    do $$$CpmInstance.Search(string)
     quit
     
 
