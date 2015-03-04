@@ -14,5 +14,8 @@
 #define CpmInstall  $$$CpmInstance.install
 #define CpmSearch   $$$CpmInstance.search
 
+#define CpmLastPkgName ^||CPM.LastPkgName
+
+
 ]]></Routine>
 </Export>

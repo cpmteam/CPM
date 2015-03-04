@@ -104,6 +104,17 @@ GetOptions(&args,&fmtDest...) public {
     }
     quit 0
 }
+PopArrValue(&args)
+{
+    #dim value 
+    #dim key As %String = $order(args(""),1,value)
+    if $d(args(key)) {
+        kill args(key)
+        return value
+    }
+    return ""
+}
+
 BATCH(command="help", args...)
     ; here goes batch entry
     do ALIASES(.aliases)
@@ -170,8 +181,6 @@ INSTALL(packages...) ;;install package
     }
     quit
 
-#define LastPkgName ^||CPM.LastPkgName
-
 PACKAGE(args...) ;;package creation commands
     new (args)
     #dim debug As %Boolean = 0
@@ -192,10 +201,10 @@ PACKAGE(args...) ;;package creation commands
     #dim status As %Status = $$$OK
     
     if create {
-        set pkgName = $$$PopArrValue(args)
-        set $$$LastPkgName = pkgName
+        set pkgName = $$PopArrValue(.args)
+        set $$$CpmLastPkgName = pkgName
     } else {
-        set pkgName = $$$LastPkgName
+        set pkgName = $$$CpmLastPkgName
     }
     #dim p As CPM.Registry.Package = ##class(CPM.Registry.Package).CreateOrOpenId(pkgName)
     $$$THROWONERROR(status,$isobject(p))
@@ -239,10 +248,37 @@ LIST(args...) ;;list of installed packages
             #dim items As list of %String = o.Items
             #dim i As %Integer
             for i=1:1:items.Count() {
-                write ?10,items.GetAt(i),!
+                write !,?10,items.GetAt(i)
             }
+            write !
         }
     }
+    quit
+
+CONFIG(args...) ;; get/set configuration parameters
+    new (args)
+    #dim debug As %Boolean = 0
+    #dim getOp As %Boolean = 0
+    #dim setOp As %Boolean = 0
+    do GetOptions(.args, "/g|/get", .getOp, "/s|/set", .setOp, "/debug", .debug)
+
+    #dim nameParam As %String = ""
+    #dim valueParam As %String = ""
+    
+    if getOp {
+        set nameParam  = $$PopArrValue(.args)
+        write !,nameParam, ?14, " = ", $property( $$$CpmConfig, nameParam)
+    }
+    elseif setOp {
+        set nameParam  = $$PopArrValue(.args)
+        set valueParam = $$PopArrValue(.args)
+        set $property($$$CpmConfig, nameParam) = valueParam
+        write !,nameParam, ?14, " = ", $property( $$$CpmConfig, nameParam)
+    }
+    else {
+        // TODO - show whole configuration
+    } 
+    if debug { zw }
     quit
 
 HELP(args...) ;;this help
