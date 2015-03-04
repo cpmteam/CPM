@@ -22,7 +22,10 @@ search for packages
     for i=1:1:Terms {
         set terms=terms_$lb(Terms(i))
     }
-    do ..Registry.Cache.Update()
+    try {
+        ;do ..Registry.Cache.Update()
+    } catch {
+    }
     
     set tST=##class(%SQL.Statement).%New()
     set tSC=tST.%PrepareClassQuery("CPM.Registry.Package","Search")
@@ -32,8 +35,8 @@ search for packages
         set id=tRes.%Get("ID")
         set package=##class(CPM.Registry.Package).%OpenId(id)
         set authors=""
-        for i=1:1:package.maintainers.Size {
-            set maintainer="="_package.maintainers.GetAt(i)
+        for i=1:1:package.Maintainers.Size {
+            set maintainer="="_package.Maintainers.GetAt(i)
             if $length(maintainer)+$l(authors) > 20 {
                 set authors=authors_"…"
                 quit
@@ -41,19 +44,19 @@ search for packages
             set:i>1 authors=authors_" "
             set authors=authors_maintainer
         }
-        set version=package.latestVersion
+        set version=package.Version
         set:$length(version)>10 version=$extract(version,1,10)_"…"
-        set description=$zstrip(package.description,"*C")
+        set description=$zstrip(package.Description,"*C")
         if $length(description)>30 {
             set description=$extract(description,1,30)
             set $piece(description," ",*)=""
             set $extract(description,*)="…"
         }
-        set name=package.name
+        set name=package.Name
         set:$length(name)>20 name=$extract(name,1,20)_"…"
         set keywords=""
-        for i=1:1:package.keywords.Size {
-            set keyword="="_package.keywords.GetAt(i)
+        for i=1:1:package.Keywords.Size {
+            set keyword="="_package.Keywords.GetAt(i)
             if $length(maintainer)+$l(keywords) > 20 {
                 set keywords=keywords_"…"
                 quit
@@ -61,7 +64,7 @@ search for packages
             set:i>1 keywords=keywords_" "
             set keywords=keywords_keyword
         }
-        set line=$listbuild(name,description,authors,$piece(package.modified," "),version,keywords)
+        set line=$listbuild(name,description,authors,$piece(package.Modified," "),version,keywords)
         set result($increment(result))=line
         quit:result>=100
     }

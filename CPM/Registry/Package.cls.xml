@@ -17,22 +17,27 @@
 <Properties>Keywords(ELEMENTS)</Properties>
 </Index>
 
+<Index name="byMaintainers">
+<Properties>Maintainers(ELEMENTS)</Properties>
+</Index>
+
 <Method name="%OnNew">
 <FormalSpec>initvalue:CPM.IPackage</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    set ..Author = initvalue.Author
-    set ..Name = initvalue.Name
-    set ..Path  = initvalue.Path
-    set ..Version  = initvalue.Version
-    set ..License  = initvalue.License
-    set ..Description  = initvalue.Description
+    if $data(initvalue) && $isobject(initvalue) {
+        set ..Author = initvalue.Author
+        set ..Name = initvalue.Name
+        set ..Path  = initvalue.Path
+        set ..Version  = initvalue.Version
+        set ..License  = initvalue.License
+        set ..Description  = initvalue.Description
 
-    set ..Dependencies = initvalue.Dependencies
-    set ..Keywords = initvalue.Keywords
-    set ..Maintainers = initvalue.Maintainers
-    set ..Items = initvalue.Items
-
+        set ..Dependencies = initvalue.Dependencies
+        set ..Keywords = initvalue.Keywords
+        set ..Maintainers = initvalue.Maintainers
+        set ..Items = initvalue.Items
+    }
     quit $$$OK
 ]]></Implementation>
 </Method>
@@ -119,11 +124,6 @@ Is used to get the value of an unknown property.</Description>
 <Structure>subnode</Structure>
 <Subscript>"Items"</Subscript>
 </Data>
-<Data name="Maintainers">
-<Attribute>Maintainers</Attribute>
-<Structure>subnode</Structure>
-<Subscript>"Maintainers"</Subscript>
-</Data>
 <Data name="PackageDefaultData">
 <Value name="1">
 <Value>%%CLASSNAME</Value>
@@ -148,6 +148,9 @@ Is used to get the value of an unknown property.</Description>
 </Value>
 <Value name="8">
 <Value>Modified</Value>
+</Value>
+<Value name="9">
+<Value>Maintainers</Value>
 </Value>
 </Data>
 </Storage>
