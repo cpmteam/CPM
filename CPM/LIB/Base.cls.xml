@@ -64,11 +64,14 @@ pHighlight - highlighted text</Description>
         write !
         set pos=0
         for j=1:1:$listlength(line) {
-            set value=$listget(line,j)
+            set value=$listget(line,j,"")
             if $length(value)>(maxWidth-pos) {
                 set value=$extract(value,1,maxWidth-pos-1)_"…"
             }
-            if pHighlight'="" set re.Text=value,value=re.ReplaceAll($$$redText_"$1"_$$$clear)
+            if pHighlight'="" && (value'="")  {
+                set re.Text=value
+                set value=re.ReplaceAll($$$redText_"$1"_$$$clear)
+            }
             w ?pos,value
             set pos=pos+$get(cols(j))    
         }
