@@ -78,7 +78,7 @@ set ARGUMENTS=
 set ARGSCOUNT=0
 for %%x in (%*) do (
   set /A ARGSCOUNT+=1
-  if !ARGSCOUNT! gtr 1 ( set ARGUMENTS=!ARGUMENTS!, )
+  if !ARGSCOUNT! gtr 1 ( set ARGUMENTS=!ARGUMENTS!,)
   set ARGUMENTS=!ARGUMENTS!""%%~x""
 )
 

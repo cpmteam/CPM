@@ -1,4 +1,5 @@
 CPM-project.PRJ
+CPM.PKG
 CPM.DataTypes.INC
 CPM.Installer.CLS
 CPM.Installer.Dependencies.CLS
@@ -6,6 +7,7 @@ CPM.Installer.Dependency.CLS
 CPM.Installer.Package.CLS
 CPM.LIB.Base.CLS
 CPM.LIB.Config.CLS
+CPM.LIB.Help.CLS
 CPM.LIB.INC
 CPM.LIB.Install.CLS
 CPM.LIB.Search.CLS

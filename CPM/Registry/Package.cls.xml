@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.Registry.Package">
+<IncludeCode>CPM.LIB</IncludeCode>
 <Super>%Persistent,CPM.IPackage</Super>
 <TimeCreated>63577,86035.524325</TimeCreated>
 
@@ -17,23 +18,54 @@
 <Properties>Keywords(ELEMENTS)</Properties>
 </Index>
 
+<Index name="byMaintainers">
+<Properties>Maintainers(ELEMENTS)</Properties>
+</Index>
+
 <Method name="%OnNew">
 <FormalSpec>initvalue:CPM.IPackage</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    set ..Author = initvalue.Author
-    set ..Name = initvalue.Name
-    set ..Path  = initvalue.Path
-    set ..Version  = initvalue.Version
-    set ..License  = initvalue.License
-    set ..Description  = initvalue.Description
+    if $data(initvalue) && $isobject(initvalue) {
+        set ..Author = initvalue.Author
+        set ..Name = initvalue.Name
+        set ..Path  = initvalue.Path
+        set ..Version  = initvalue.Version
+        set ..License  = initvalue.License
+        set ..Description  = initvalue.Description
 
-    set ..Dependencies = initvalue.Dependencies
-    set ..Keywords = initvalue.Keywords
-    set ..Maintainers = initvalue.Maintainers
-    set ..Items = initvalue.Items
+        set ..Dependencies = initvalue.Dependencies
+        set ..Keywords = initvalue.Keywords
+        set ..Maintainers = initvalue.Maintainers
+        set ..Items = initvalue.Items
+    }
+    quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnBeforeSave">
+<FormalSpec>insert:%Boolean</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    // FIXME: bad, bad me - we should not modify state of the object upon saving!
+    set ..Modified = $ZDT($ZTS,3,,3)
 
     quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="CreateOrOpenId">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String</FormalSpec>
+<ReturnType>CPM.Registry.Package</ReturnType>
+<Implementation><![CDATA[
+    if ..%ExistsId(id) {
+        set o = ..%OpenId(id)
+    } else {
+        set o = ..%New()
+        set o.Name = id
+    }
+    quit o
 ]]></Implementation>
 </Method>
 
@@ -71,6 +103,48 @@
 ]]></Implementation>
 </Method>
 
+<Method name="Export">
+<Description>
+common method for exporting package to the staging area
+regardless of a format it should generate package.json pointing to the 
+appropriate container</Description>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim DirectoryName As %String = $$$CpmConfig.tempdir
+    #dim fileName As %String = ##class(%Library.File).NormalizeFilename("package.json",DirectoryName)
+    // 1. export/generate metainfo
+    do ..ExportJSON(fileName, $this) // FIXME - attribute case
+    // 2. export container
+    // FIXME - at the moment exporting only using XML
+    set fileName = ##class(%Library.File).NormalizeFilename("sample.xml",DirectoryName)
+    #dim listItems = $lts(..Items.Serialize(),",")
+    do $system.OBJ.Export(listItems,fileName)
+]]></Implementation>
+</Method>
+
+<Method name="ExportJSON">
+<Description>
+FIXME - at the moment we output attributes at the same case as properties written
+but we need them in low case eventually</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>FileName:%String,o:%Library.RegisteredObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set io = $io
+    set file = FileName
+    open file:"WNS":0 else  quit $$$ERROR($$$FileCanNotOpen,file)
+    use file
+    if $isobject(o) {
+        Do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(o)
+    }
+    use io
+    close file
+
+    quit $$$OK
+]]></Implementation>
+</Method>
+
 <Method name="%DispatchSetProperty">
 <Description>
 is used to set the value of an unknown property.</Description>
@@ -92,35 +166,14 @@ Is used to get the value of an unknown property.</Description>
 <FormalSpec>Value:%String</FormalSpec>
 <SqlProc>1</SqlProc>
 <SqlQuery>SELECT id from (
-    SELECT id FROM package where name = :Value
+    SELECT id FROM package where UPPER(name) %INLIST UPPER(:Value)
     union all
-    SELECT id FROM package where name like STRING('%',:Value,'%')
+    SELECT id FROM package where FOR SOME %ELEMENT(keywords) (%VALUE %INLIST(:Value))
     union all
-    SELECT id FROM package where keywords like STRING('%',:Value,'%')
+    SELECT id FROM package where description %CONTAINSTERM(:Value)
     union all
-    SELECT id FROM package where description like STRING('%',:Value,'%')
+    SELECT id FROM package where FOR SOME %ELEMENT(maintainers) (%VALUE %INLIST(:Value))
 ) GROUP BY id</SqlQuery>
-</Query>
-
-<Query name="ListByName">
-<Type>%SQLQuery</Type>
-<FormalSpec>Value:%String</FormalSpec>
-<SqlProc>1</SqlProc>
-<SqlQuery>SELECT id FROM package where name like STRING('%',:Value,'%')</SqlQuery>
-</Query>
-
-<Query name="ListByKeyword">
-<Type>%SQLQuery</Type>
-<FormalSpec>Value:%String</FormalSpec>
-<SqlProc>1</SqlProc>
-<SqlQuery>SELECT id FROM package where keywords like STRING('%',:Value,'%')</SqlQuery>
-</Query>
-
-<Query name="ListByDescription">
-<Type>%SQLQuery</Type>
-<FormalSpec>Value:%String</FormalSpec>
-<SqlProc>1</SqlProc>
-<SqlQuery>SELECT id FROM package where description like STRING('%',:Value,'%')</SqlQuery>
 </Query>
 
 <Storage name="Default">
@@ -130,16 +183,6 @@ Is used to get the value of an unknown property.</Description>
 <IdLocation>^CPM.Registry.PackageD</IdLocation>
 <IndexLocation>^CPM.Registry.PackageI</IndexLocation>
 <StreamLocation>^CPM.Registry.PackageS</StreamLocation>
-<Data name="Dependencies">
-<Attribute>Dependencies</Attribute>
-<Structure>subnode</Structure>
-<Subscript>"Dependencies"</Subscript>
-</Data>
-<Data name="Items">
-<Attribute>Items</Attribute>
-<Structure>subnode</Structure>
-<Subscript>"Items"</Subscript>
-</Data>
 <Data name="Maintainers">
 <Attribute>Maintainers</Attribute>
 <Structure>subnode</Structure>
@@ -168,7 +211,16 @@ Is used to get the value of an unknown property.</Description>
 <Value>Description</Value>
 </Value>
 <Value name="8">
+<Value>Dependencies</Value>
+</Value>
+<Value name="9">
+<Value>Items</Value>
+</Value>
+<Value name="10">
 <Value>Modified</Value>
+</Value>
+<Value name="9">
+<Value>Maintainers</Value>
 </Value>
 </Data>
 </Storage>

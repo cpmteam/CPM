@@ -48,7 +48,7 @@ license of a package (MIT, BSD, etc)</Description>
 <Property name="Description">
 <Description>
 description of a package</Description>
-<Type>%String</Type>
+<Type>%Text</Type>
 <Parameter name="MAXLEN" value="3000"/>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>
@@ -57,7 +57,7 @@ description of a package</Description>
 <Description>
 external dependencies</Description>
 <Type>%String</Type>
-<Collection>array</Collection>
+<Collection>list</Collection>
 <Parameter name="MAXLEN" value="300"/>
 </Property>
 
@@ -65,13 +65,13 @@ external dependencies</Description>
 <Description>
 items defined by this package</Description>
 <Type>%String</Type>
-<Collection>array</Collection>
+<Collection>list</Collection>
 <Parameter name="MAXLEN" value="100"/>
 </Property>
 
 <Property name="Maintainers">
 <Type>%String</Type>
-<Collection>array</Collection>
+<Collection>list</Collection>
 <Parameter name="MAXLEN" value="300"/>
 </Property>
 </Class>

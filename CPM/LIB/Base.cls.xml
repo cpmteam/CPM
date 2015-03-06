@@ -2,6 +2,7 @@
 <Export generator="Cache" version="25">
 <Class name="CPM.LIB.Base">
 <Abstract>1</Abstract>
+<IncludeCode>CPM.LIB</IncludeCode>
 <Super>%RegisteredObject</Super>
 <TimeCreated>63570,61555.098661</TimeCreated>
 
@@ -13,6 +14,9 @@
 <Property name="Registry">
 <Type>CPM.Registry.Client</Type>
 </Property>
+
+<Parameter name="USAGE">
+</Parameter>
 
 <Method name="%OnNew">
 <FormalSpec>Config,Registry</FormalSpec>
@@ -57,23 +61,45 @@ pHighlight - highlighted text</Description>
     #; Terminal's width
     set maxWidth=80
     
-    set:pHighlight'="" re=##class(%Regex.Matcher).%New("(?i)(terminal)")
+    if $listvalid(pHighlight) {
+        set terms=""
+        for t=1:1:$listlength(pHighlight) {
+            set term=$listget(pHighlight,t)
+            set terms=terms_$listbuild($zconvert(term,"L"))
+        }
+        set re=##class(%Regex.Matcher).%New("(?i)("_$listtostring(terms,"|")_")")
+    }
     
     for i=0:1:size {
         set line=$get(Array(i))
         write !
         set pos=0
         for j=1:1:$listlength(line) {
-            set value=$listget(line,j)
+            set value=$listget(line,j,"")
             if $length(value)>(maxWidth-pos) {
                 set value=$extract(value,1,maxWidth-pos-1)_"…"
             }
-            if pHighlight'="" set re.Text=value,value=re.ReplaceAll($$$redText_"$1"_$$$clear)
+            if pHighlight'="" && (value'="")  {
+                set re.Text=value
+                set value=re.ReplaceAll($$$redText_"$1"_$$$clear)
+            }
             w ?pos,value
             set pos=pos+$get(cols(j))    
         }
         
     }
+]]></Implementation>
+</Method>
+
+<Method name="Usage">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+    set usage=##class(%Dictionary.CompiledParameter).%OpenId(..%ClassName(1)_"||USAGE")
+    set usage=usage.Description
+    set re=##class(%Regex.Matcher).%New("(?im)^(?:\<pre\>)?([\n.]*)(?:\<\/pre\>)?$")
+    set re.Text=usage
+    set usage=re.ReplaceAll("$1")
+    write !,usage
 ]]></Implementation>
 </Method>
 </Class>

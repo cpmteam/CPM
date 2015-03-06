@@ -4,30 +4,74 @@
 <Super>Base</Super>
 <TimeCreated>63576,66371.397831</TimeCreated>
 
+<Parameter name="USAGE">
+<Description><![CDATA[
+<pre>
+search for packages
+
+   cpm search [search terms...]
+
+</pre>]]></Description>
+</Parameter>
+
 <Method name="Search">
-<FormalSpec>String</FormalSpec>
+<FormalSpec>Terms...</FormalSpec>
 <Implementation><![CDATA[
-    set String=$zconvert($zstrip(String,"<>WC"),"U")
-    do ..Registry.Cache.Update()
+    write !
+    set terms=""
+    for i=1:1:Terms {
+        set terms=terms_$lb(Terms(i))
+    }
+    try {
+        ;do ..Registry.Cache.Update()
+    } catch {
+    }
     
     set tST=##class(%SQL.Statement).%New()
     set tSC=tST.%PrepareClassQuery("CPM.Registry.Package","Search")
     $$$ThrowOnError(tSC)
-    #dim tRes As %Library.ProcedureContext = tST.%Execute(String)
+    #dim tRes As %Library.ProcedureContext = tST.%Execute(terms)
     while tRes.%Next() {
         set id=tRes.%Get("ID")
         set package=##class(CPM.Registry.Package).%OpenId(id)
         set authors=""
-        for i=1:1:package.maintainers.Size {
-            set $list(authors,i)="="_package.maintainers.GetAt(i)
+        for i=1:1:package.Maintainers.Size {
+            set maintainer="="_package.Maintainers.GetAt(i)
+            if $length(maintainer)+$l(authors) > 20 {
+                set authors=authors_"…"
+                quit
+            }
+            set:i>1 authors=authors_" "
+            set authors=authors_maintainer
         }
-        set line=$listbuild(id,$listtostring(authors," "),$piece(package.modified," "),package.latestVersion,package.Description)
+        set version=package.Version
+        set:$length(version)>10 version=$extract(version,1,10)_"…"
+        set description=$zstrip(package.Description,"*C")
+        if $length(description)>30 {
+            set description=$extract(description,1,30)
+            set $piece(description," ",*)=""
+            set $extract(description,*)="…"
+        }
+        set name=package.Name
+        set:$length(name)>20 name=$extract(name,1,20)_"…"
+        set keywords=""
+        for i=1:1:package.Keywords.Size {
+            set keyword="="_package.Keywords.GetAt(i)
+            if $length(maintainer)+$l(keywords) > 20 {
+                set keywords=keywords_"…"
+                quit
+            }
+            set:i>1 keywords=keywords_" "
+            set keywords=keywords_keyword
+        }
+        set line=$listbuild(name,description,authors,$piece(package.Modified," "),version,keywords)
         set result($increment(result))=line
+        quit:result>=100
     }
     if $data(result) {
-        set result(0)=$listbuild("NAME","AUTHOR","DATE","VERSION","DESCRIPTION")
+        set result(0)=$listbuild("NAME","DESCRIPTION","AUTHOR","DATE","VERSION","KEYWORDS")
     }
-    do ..ShowTable(.result, String)
+    do ..ShowTable(.result, terms)
     quit $$$OK
 ]]></Implementation>
 </Method>
