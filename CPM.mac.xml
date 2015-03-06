@@ -228,8 +228,6 @@ PACKAGE(args...) ;;package creation commands
     do p.%Save()
 
     quit
-    
-
 
 SEARCH(terms...) ;;search packages
     do $$$CpmInstance.Search(terms...)
