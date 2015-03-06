@@ -228,10 +228,16 @@ create repo-based path using given package symbolic name</Description>
             set itemName = $order(list(itemName))
             quit:itemName=""
             write ?8,itemName,!
-            do package.Items.SetAt(1,itemName)
         }
         // TODO: 2. Ask interactively to install
         // TODO: 3. Actual installation
+        do $system.OBJ.Load(package.Path,"ck",.errorlog,.list,1)
+        set itemName = "" for {
+            set itemName = $order(list(itemName))
+            quit:itemName=""
+            do package.Items.Insert(itemName)
+        }
+        // TODO - check errorlog
         // 4. save package instance to the registry
         #dim storedPackage As CPM.Registry.Package = ##class(CPM.Registry.Package).%New(package)
         set status = storedPackage.%Save()

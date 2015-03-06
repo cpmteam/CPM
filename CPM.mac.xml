@@ -4,11 +4,11 @@
 #include CPM.License
 #include %occInclude
 #include CPM.LIB
+#include CPM.DataTypes
 
 SHELL
     new
     #; here goes interactive entry
-    set pattern=##class(%Regex.Matcher).%New("\b[^ ]+\b|\""([^\""]+)\""")
     #; aliases for commands
     do ALIASES(.aliases)
     for i=1:1 {
@@ -25,17 +25,7 @@ SHELL
     for {
         write !,"CPM:"_$Namespace_">> "
         read line
-        set line=$zstrip(line,"<>WC")
-        
-        set command=$piece(line," ")
-        set line=$extract(line,$length(command)+1,*)
-        kill args
-        set args=0
-        set pattern.Text=line
-        while pattern.Locate() {
-            set argument=$zstrip(pattern.Group,"<>WC")
-            set args($increment(args))=$zstrip(argument,"<>","""")
-        }
+        do ExtractArgs(.line, .command, .args)
         
         continue:command=""
         set command=$zconvert(command,"U")
@@ -46,6 +36,85 @@ SHELL
         do BATCH(command, args...)
     }
     quit
+
+ExtractArgs(&line,&command,&args) {
+    #dim pattern As %String = ##class(%Regex.Matcher).%New("[^ ]+|\""([^\""]+)\""")
+
+    set line    = $zstrip(line,"<>WC")
+    set command = $piece(line," ")
+    set line    = $piece(line," ",2,*)
+
+    kill args
+    set args = 0
+    set pattern.Text = line
+    while pattern.Locate() {
+        set argument = pattern.Group
+        set args($increment(args)) = $zstrip(argument, "<>", """")
+    }
+}
+
+#define OptionBoolean 1
+#define OptionString 2
+
+/// GetOptions(.args,"-o",.option,"/verbose|/v",.verbose,"/include:",.include)
+GetOptions(&args,&fmtDest...) public {
+    #dim known ; known options
+
+    // 1. scan options
+    for i=1:2:$get(fmtDest) {
+        #dim opts As %String = $get(fmtDest(i))
+        continue:opts=""
+        for j=1:1:$length(opts,"|") {
+            #dim opt As %String = $zstrip($piece(opts,"|",j), "<>", "-/")
+            #dim lastC As %String = $e(opt,*)
+            #dim optType As %Integer = $case(lastC, ":":$$$OptionString, :$$$OptionBoolean)
+            set opt = $zstrip(opt,"<>",":")
+            
+            set known(opt) = $lb(optType, i + 1) ; remember option type and destination argument pointer
+        }
+    }
+    
+    #dim argsN = "" ; new args without processed known options
+    // 2. process passed args while creating new modified args (without known /options)
+    for i=1:1:$get(args) {
+        #dim arg As %String = $get(args(i))
+        #dim isOption As %Boolean = $case($extract(arg,1),"/":1, "-":1, :0)
+
+        if isOption {
+            #dim optInfo = $get(known($zstrip(arg, "<>", "-/:")))
+
+            if $length(optInfo)>0 {
+                #dim type As %Integer = $li(optInfo,1)
+                #dim index As %Integer = $li(optInfo,2)
+                if type=$$$OptionBoolean {
+                    set fmtDest(index) = 1
+                } else {
+                    set fmtDest(index) = $get(args($i(i)))
+                }
+            } else {
+                return i ; unknown /option - bails out
+            }
+        } else {
+            set argsN($i(argsN)) = arg
+        }
+    }
+    // 3. save not consumed arguments back to args array
+    if $get(argsN)<$get(args) {
+        kill args merge args = argsN
+    }
+    quit 0
+}
+PopArrValue(&args)
+{
+    #dim value 
+    #dim key As %String = $order(args(""),1,value)
+    if $d(args(key)) {
+        kill args(key)
+        return value
+    }
+    return ""
+}
+
 BATCH(command="help", args...)
     ; here goes batch entry
     do ALIASES(.aliases)
@@ -115,19 +184,61 @@ INSTALL(packages...) ;;install package
         do packageFile.Install(packageData)
     }
     quit
+
+PACKAGE(args...) ;;package creation commands
+    new (args)
+    #dim debug As %Boolean = 0
+    #dim create As %Boolean = 0
+    #dim prjName As %String = ""
+    #dim pkgAuthor As %String = ""
+    #dim pkgDescription As %String = ""
+    #dim pkgLicense As %String = ""
+    #dim pkgVersion As %String = ""
+    
+    do GetOptions(.args, 
+                  "/debug", .debug,
+                  "/c|/create", .create, "/prj:|/from:", .prjName,
+                  "/author:", .pkgAuthor, "/description:", .pkgDescription,
+                  "/license:", .pkgLicense, "/version:", .pkgVersion)
+
+    #dim pkgName As %String = ""
+    #dim status As %Status = $$$OK
+    
+    if create {
+        set pkgName = $$PopArrValue(.args)
+        set $$$CpmLastPkgName = pkgName
+    } else {
+        set pkgName = $$$CpmLastPkgName
+    }
+    #dim p As CPM.Registry.Package = ##class(CPM.Registry.Package).CreateOrOpenId(pkgName)
+    $$$THROWONERROR(status,$isobject(p))
+    
+#define SetIf(%val,%init) if %init'="" { set %val = %init }
+
+    $$$SetIf(p.Author,pkgAuthor)
+    $$$SetIf(p.Description,pkgDescription)
+    $$$SetIf(p.License,pkgLicense)
+    $$$SetIf(p.Version,pkgVersion)
+    
+    // link package to the project content
+    if prjName '= "" {
+        #dim prj As %Studio.Project = ##class(%Studio.Project).%OpenId(prjName)
+    }
+    if debug { zw p }
+    do p.%Save()
+
+    quit
+    
+
+
 SEARCH(terms...) ;;search packages
-    set cpm=##class(CPM.Main).%New()
-    do cpm.Search(terms...)
+    do $$$CpmInstance.Search(terms...)
     quit
 LIST(args...) ;;list of installed packages
     new (args)
     #dim verbose As %Boolean = 0
-    for i=1:1:$get(args) {
-        // FIXME - rework as generic getopt() parser
-        if $get(args(i)) = "/verbose" {
-            set verbose = 1
-        }
-    }
+    do GetOptions(.args, "/v|/verbose", .verbose)
+
     set sql=##class(%SQL.Statement).%New()
     set tSC=sql.%Prepare("SELECT %ID, Name, Version, Description FROM CPM_Registry.Package")
     quit:'$$$ISOK(tSC)
@@ -136,15 +247,42 @@ LIST(args...) ;;list of installed packages
         write !?3,tRS.Name,?32,tRS.Version,?42,tRS.Description
         if verbose {
             #dim o As CPM.Registry.Package = ##class(CPM.Registry.Package).%OpenId(tRS.ID)
-            #dim items As array of %String = o.Items
-            #dim key As %String = ""
-            for  {
-                set key = items.Next(key) quit:key=""
-                write ?10,key,!
+            #dim items As list of %String = o.Items
+            #dim i As %Integer
+            for i=1:1:items.Count() {
+                write !,?10,items.GetAt(i)
             }
+            write !
         }
     }
     quit
+
+CONFIG(args...) ;; get/set configuration parameters
+    new (args)
+    #dim debug As %Boolean = 0
+    #dim getOp As %Boolean = 0
+    #dim setOp As %Boolean = 0
+    do GetOptions(.args, "/g|/get", .getOp, "/s|/set", .setOp, "/debug", .debug)
+
+    #dim nameParam As %String = ""
+    #dim valueParam As %String = ""
+    
+    if getOp {
+        set nameParam  = $$PopArrValue(.args)
+        write !,nameParam, ?14, " = ", $property( $$$CpmConfig, nameParam)
+    }
+    elseif setOp {
+        set nameParam  = $$PopArrValue(.args)
+        set valueParam = $$PopArrValue(.args)
+        set $property($$$CpmConfig, nameParam) = valueParam
+        write !,nameParam, ?14, " = ", $property( $$$CpmConfig, nameParam)
+    }
+    else {
+        // TODO - show whole configuration
+    } 
+    if debug { zw }
+    quit
+
 HELP(command="",args...) ;;this help
     new (command,args)
     if command'="" {

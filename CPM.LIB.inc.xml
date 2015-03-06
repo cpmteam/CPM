@@ -8,5 +8,16 @@
 #define GetParam(%arr,%name,%def) $select($data(%arr(%name),tmpRes)&&(tmpRes'=""):tmpRes,1:%def)
 
 #define UrlParser(%url,%parsed) if $data(%url)=1 { do ##class(%Net.URLParser).Parse(%url, .%parsed) } else { merge %parsed=%url } 
+
+#define CpmVar  ^||CPM.Main
+#define CpmInstance ##class(CPM.Main).%Instance()
+#define CpmConfig   $$$CpmInstance.Config
+#define CpmRegistry $$$CpmInstance.Registry
+#define CpmInstall  $$$CpmInstance.install
+#define CpmSearch   $$$CpmInstance.search
+
+#define CpmLastPkgName ^||CPM.LastPkgName
+
+
 ]]></Routine>
 </Export>
