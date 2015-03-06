@@ -25,6 +25,11 @@
 <ReadOnly>1</ReadOnly>
 </Property>
 
+<Property name="help">
+<Type>CPM.LIB.Help</Type>
+<ReadOnly>1</ReadOnly>
+</Property>
+
 <Method name="%Instance">
 <ClassMethod>1</ClassMethod>
 <ReturnType>CPM.Main</ReturnType>
@@ -47,6 +52,7 @@
     set i%Registry=##class(CPM.Registry.Client).%New(..Config)
     set i%install=##class(CPM.LIB.Install).%New(..Config,..Registry)
     set i%search=##class(CPM.LIB.Search).%New(..Config,..Registry)
+    set i%help=##class(CPM.LIB.Help).%New(..Config,..Registry)
     quit $$$OK
 ]]></Implementation>
 </Method>
@@ -64,6 +70,14 @@
 <FormalSpec>Args...</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[..search.Search(Args...)
+]]></Implementation>
+</Method>
+
+<Method name="Help">
+<CodeMode>expression</CodeMode>
+<FormalSpec>Args...</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[..help.Help(Args...)
 ]]></Implementation>
 </Method>
 </Class>

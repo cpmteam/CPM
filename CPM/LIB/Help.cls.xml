@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.LIB.Help">
+<Super>CPM.LIB.Base</Super>
+<TimeCreated>63588,34142.214817</TimeCreated>
+
+<Parameter name="USAGE">
+</Parameter>
+
+<Method name="Help">
+<FormalSpec>Command="",Args...</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    try {
+        set className=..%PackageName()_"."_$zcvt(Command,"W")
+        do $classmethod(className,"Usage")
+    } catch ex {
+        write !,"Command """_Command_""" not found"
+    }
+    quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

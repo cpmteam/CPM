@@ -15,6 +15,10 @@
 <Private>1</Private>
 </Property>
 
+<Property name="LatestUploaded">
+<Type>%String</Type>
+</Property>
+
 <Method name="%OnNew">
 <FormalSpec>Config,Registry</FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -43,7 +47,7 @@
     try {
         set response=..Registry.Get(.url,.params)
     } catch exception {
-        if exception.Code="6059" {
+        if exception.Code=$$$HttpRequestConnect {
             write !,"Connection error!",!
         } else {
             throw exception
@@ -76,10 +80,9 @@ Is used to get the value of an unknown property.</Description>
 <Implementation><![CDATA[
     if $e(Property)="_" {
         quit:Property="_updated" ..Config.updated
+        quit:Property="_latest" $get(i%latest)
     } else {
-        set package=##class(CPM.Registry.Package).%OpenId(Property)
-        set package.Name=Property
-        quit package
+        quit:##class(CPM.Registry.Package).%ExistsId(Property) ##class(CPM.Registry.Package).%OpenId(Property)
     }
     quit ""
 ]]></Implementation>
@@ -97,7 +100,8 @@ is used to set the value of an unknown property.</Description>
         }
     } else {
         set tSC=##class(CPM.Registry.Package).Load(Property, Val)
-        $$$ThrowOnError(tSC)
+        set ..LatestUploaded=Property
+        //$$$ThrowOnError(tSC)
     }
     quit $$$OK
 ]]></Implementation>

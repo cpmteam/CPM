@@ -4,18 +4,73 @@
 <Super>Base</Super>
 <TimeCreated>63569,56031.260241</TimeCreated>
 
+<Parameter name="USAGE">
+<Description><![CDATA[
+<pre>
+install a package
+
+    cpm install <tarball file>
+    cpm install <packagename>
+
+DESCRIPTION
+
+    cpm install <tarball file>
+           
+</pre>]]></Description>
+</Parameter>
+
 <Method name="Install">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Packages:%String</FormalSpec>
+<FormalSpec>Packages...:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    set:'$listvalid(Packages) Packages=$lb(Packages)
-    for i=1:1:$ll(Packages) {
-        s package=$lg(Packages)
-        continue:package=""
+    if '$data(Packages) {
+        do ..Usage()
+        quit $$$OK
+    }
+    do ..Registry.Cache.Update()
+    set tempDir=##class(%File).NormalizeDirectory($zh, ..Config.tempdir)
+    
+    for i=1:1:Packages {
+        set packageName=$get(Packages(i))
+        continue:packageName=""
+        if ##class(%File).Exists(packageName) {
+            set package=##class(CPM.SourceType.IBase).%OpenContainer(packageName)
+            continue:'$isobject(package)
+        } elseif $match(packageName,"https?\:\/\/.*") {
+            
+        } else {
+            set tag=$piece(packageName,"@",2)
+            set:tag="" tag="latest"
+            set packageName=$piece(packageName,"@")
+            set package=##class(CPM.Registry.Package).%OpenId(packageName)
+            continue:'$isobject(package)
+            set url=..Config.registry_"/"_packageName_"/"_tag
+            $$$UrlParser(url,url)
+            
+            #dim response As %Net.HttpResponse = ..Registry.Get(.url)
+            
+            #dim data As %ZEN.proxyObject
+            set tSC=##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(response.Data,,.data,1)
+            $$$ThrowOnError(tSC)
+            
+            set destUrl=data.dist.tarball
+            set destSha=data.dist.shasum
+            
+            set response=..Registry.Get(destUrl)
+            set package=##class(%Stream.FileBinary).%New()
+            set fileName="test.tgz"
+            set package.Filename=##class(%File).NormalizeFilename(fileName, tempDir)
+            do package.CopyFromAndSave(response.Data)
+            kill response
+            quit
+#;            set package=##class(CPM.SourceType.IBase).%OpenContainer(package.Filename)
+        }
         
-        set meta=..GetMeta(package)
-        continue:'$isobject(meta)
+        if package.IsPacked {
+            do package.Unpack()
+        }
+        #dim packageData As CPM.IPackage = package.Parse()
+        write !?3, packageData.Name, ?25, packageData.Version, ?45, packageData.Description
     }
     quit $$$OK
 ]]></Implementation>

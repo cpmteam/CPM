@@ -159,6 +159,10 @@ RegisterAllSourceTypes() {
     do ##class(CPM.Source.IBase).ForEachSuccessor("RegisterExts")
 }
 INSTALL(packages...) ;;install package
+    do RegisterAllSourceTypes()
+    set cpm=##class(CPM.Main).%New()
+    do cpm.Install(packages...)
+    quit
     new (packages)
     if '$data(packages) {
         write !,"Nothing to install"
@@ -224,14 +228,10 @@ PACKAGE(args...) ;;package creation commands
     do p.%Save()
 
     quit
-    
 
-
-SEARCH(string, args...) ;;search packages
-    do $$$CpmInstance.Search(string)
+SEARCH(terms...) ;;search packages
+    do $$$CpmInstance.Search(terms...)
     quit
-    
-
 LIST(args...) ;;list of installed packages
     new (args)
     #dim verbose As %Boolean = 0
@@ -281,8 +281,13 @@ CONFIG(args...) ;; get/set configuration parameters
     if debug { zw }
     quit
 
-HELP(args...) ;;this help
-    new (args)
+HELP(command="",args...) ;;this help
+    new (command,args)
+    if command'="" {
+        set cpm=##class(CPM.Main).%New()
+        do cpm.Help(command,args...)
+        quit 
+    }
     write !,"Cache Package Manager"
     write !!,"Available commands:"
     for i=1:1 {
