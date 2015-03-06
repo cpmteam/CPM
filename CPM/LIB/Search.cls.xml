@@ -35,8 +35,8 @@ search for packages
         set id=tRes.%Get("ID")
         set package=##class(CPM.Registry.Package).%OpenId(id)
         set authors=""
-        for i=1:1:package.Maintainers.Size {
-            set maintainer="="_package.Maintainers.GetAt(i)
+        for i=1:1:package.maintainers.Size {
+            set maintainer="="_package.maintainers.GetAt(i)
             if $length(maintainer)+$l(authors) > 20 {
                 set authors=authors_"…"
                 quit
@@ -44,19 +44,19 @@ search for packages
             set:i>1 authors=authors_" "
             set authors=authors_maintainer
         }
-        set version=package.Version
+        set version=package.version
         set:$length(version)>10 version=$extract(version,1,10)_"…"
-        set description=$zstrip(package.Description,"*C")
+        set description=$zstrip(package.description,"*C")
         if $length(description)>30 {
             set description=$extract(description,1,30)
             set $piece(description," ",*)=""
             set $extract(description,*)="…"
         }
-        set name=package.Name
+        set name=package.name
         set:$length(name)>20 name=$extract(name,1,20)_"…"
         set keywords=""
-        for i=1:1:package.Keywords.Size {
-            set keyword="="_package.Keywords.GetAt(i)
+        for i=1:1:package.keywords.Size {
+            set keyword="="_package.keywords.GetAt(i)
             if $length(maintainer)+$l(keywords) > 20 {
                 set keywords=keywords_"…"
                 quit

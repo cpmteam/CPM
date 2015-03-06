@@ -4,7 +4,7 @@
 <Super>%RegisteredObject</Super>
 <TimeCreated>63577,81977.364523</TimeCreated>
 
-<Property name="Name">
+<Property name="name">
 <Description>
 package short-name</Description>
 <Type>%String</Type>
@@ -12,13 +12,13 @@ package short-name</Description>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>
 
-<Property name="Author">
+<Property name="author">
 <Type>%String</Type>
 <Parameter name="MAXLEN" value="300"/>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>
 
-<Property name="Path">
+<Property name="path">
 <Description>
 container name/path</Description>
 <Type>%String</Type>
@@ -26,7 +26,7 @@ container name/path</Description>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>
 
-<Property name="Version">
+<Property name="version">
 <Description>
 actual version used</Description>
 <Type>%String</Type>
@@ -34,18 +34,18 @@ actual version used</Description>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>
 
-<Property name="License">
+<Property name="license">
 <Description>
 license of a package (MIT, BSD, etc)</Description>
 <Type>%String</Type>
 </Property>
 
-<Property name="Keywords">
+<Property name="keywords">
 <Type>%String</Type>
 <Collection>list</Collection>
 </Property>
 
-<Property name="Description">
+<Property name="description">
 <Description>
 description of a package</Description>
 <Type>%Text</Type>
@@ -53,7 +53,7 @@ description of a package</Description>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>
 
-<Property name="Dependencies">
+<Property name="dependencies">
 <Description>
 external dependencies</Description>
 <Type>%String</Type>
@@ -61,7 +61,7 @@ external dependencies</Description>
 <Parameter name="MAXLEN" value="300"/>
 </Property>
 
-<Property name="Items">
+<Property name="items">
 <Description>
 items defined by this package</Description>
 <Type>%String</Type>
@@ -69,7 +69,7 @@ items defined by this package</Description>
 <Parameter name="MAXLEN" value="100"/>
 </Property>
 
-<Property name="Maintainers">
+<Property name="maintainers">
 <Type>%String</Type>
 <Collection>list</Collection>
 <Parameter name="MAXLEN" value="300"/>

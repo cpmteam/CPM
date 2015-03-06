@@ -70,7 +70,7 @@ DESCRIPTION
             do package.Unpack()
         }
         #dim packageData As CPM.IPackage = package.Parse()
-        write !?3, packageData.Name, ?25, packageData.Version, ?45, packageData.Description
+        write !?3, packageData.name, ?25, packageData.version, ?45, packageData.description
     }
     quit $$$OK
 ]]></Implementation>

@@ -168,7 +168,7 @@ INSTALL(packages...) ;;install package
         write !,"Nothing to install"
         quit
     }
-    do RegisterAllSourceTypes()
+#if 0
     write !,"Installing packages: "
     for i=1:1:packages {
         #dim package As %String = packages(i)
@@ -180,9 +180,10 @@ INSTALL(packages...) ;;install package
             do packageFile.Unpack()
         }
         #dim packageData As CPM.IPackage = packageFile.Parse()
-        write !?3, packageData.Name, ?25, packageData.Version, ?45, packageData.Description,!,packageData.Path,!
+        write !?3, packageData.name, ?25, packageData.version, ?45, packageData.description,!,packageData.path,!
         do packageFile.Install(packageData)
     }
+#endif
     quit
 
 PACKAGE(args...) ;;package creation commands
@@ -215,10 +216,10 @@ PACKAGE(args...) ;;package creation commands
     
 #define SetIf(%val,%init) if %init'="" { set %val = %init }
 
-    $$$SetIf(p.Author,pkgAuthor)
-    $$$SetIf(p.Description,pkgDescription)
-    $$$SetIf(p.License,pkgLicense)
-    $$$SetIf(p.Version,pkgVersion)
+    $$$SetIf(p.author,pkgAuthor)
+    $$$SetIf(p.description,pkgDescription)
+    $$$SetIf(p.license,pkgLicense)
+    $$$SetIf(p.version,pkgVersion)
     
     // link package to the project content
     if prjName '= "" {
