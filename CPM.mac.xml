@@ -108,6 +108,7 @@ PopArrValue(&args)
 {
     #dim value 
     #dim key As %String = $order(args(""),1,value)
+    quit:key=""
     if $d(args(key)) {
         kill args(key)
         return value

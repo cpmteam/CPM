@@ -34,7 +34,7 @@ DESCRIPTION
         set packageName=$get(Packages(i))
         continue:packageName=""
         if ##class(%File).Exists(packageName) {
-            set package=##class(CPM.SourceType.IBase).%OpenContainer(packageName)
+            set package=##class(CPM.Source.IBase).%OpenContainer(packageName)
             continue:'$isobject(package)
         } elseif $match(packageName,"https?\:\/\/.*") {
             
@@ -63,7 +63,7 @@ DESCRIPTION
             do package.CopyFromAndSave(response.Data)
             kill response
             quit
-#;            set package=##class(CPM.SourceType.IBase).%OpenContainer(package.Filename)
+#;            set package=##class(CPM.Source.IBase).%OpenContainer(package.Filename)
         }
         
         if package.IsPacked {

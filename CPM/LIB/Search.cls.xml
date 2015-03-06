@@ -23,7 +23,7 @@ search for packages
         set terms=terms_$lb(Terms(i))
     }
     try {
-        ;do ..Registry.Cache.Update()
+        do ..Registry.Cache.Update()
     } catch {
     }
     
