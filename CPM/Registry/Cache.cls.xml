@@ -33,10 +33,10 @@
     if .."_updated"'="" {
         quit:..GetTime()-.."_updated"<60000 $$$OK
         set url("query")="stale=update_after&startkey="_.."_updated"
-        set url("path")=$$$getParam(url, "path", "/-/all/since")
+        set url("path")=$$$GetParam(url, "path", "/-/all/since")
         write "Updating index",!
     } else {
-        set url("path")=$$$getParam(url, "path", "/-/all/")
+        set url("path")=$$$GetParam(url, "path", "/-/all/")
         write "Building the local index for the first time",!
     }
     #dim exception As %Exception.AbstractException
