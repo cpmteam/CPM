@@ -109,7 +109,7 @@ PopArrValue(&args)
     #dim value 
     #dim key As %String = $order(args(""),1,value)
     quit:key=""
-    if $d(args(key)) {
+    if $data(args(key)) {
         kill args(key)
         return value
     }
@@ -161,15 +161,15 @@ RegisterAllSourceTypes() {
 }
 INSTALL(packages...) ;;install package
     do RegisterAllSourceTypes()
-    set cpm=##class(CPM.Main).%New()
-    do cpm.Install(packages...)
+#if 0
+    do $$$CpmInstance.Install(packages...)
     quit
+#else
     new (packages)
     if '$data(packages) {
         write !,"Nothing to install"
         quit
     }
-#if 0
     write !,"Installing packages: "
     for i=1:1:packages {
         #dim package As %String = packages(i)
