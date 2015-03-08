@@ -231,20 +231,37 @@ PACKAGE(args...) ;;package creation commands
 
     quit
 
+EXPORT(args...) ;; prepare to publish - export package(s)
+    new (args)
+    #dim verbose As %Boolean = 0
+    do GetOptions(.args, "/v|/verbose", .verbose)
+    for i=1:1:$get(args) {
+        #dim packageName As %String = $get(args(i))
+        continue:packageName=""
+        
+        #dim p As CPM.Registry.Package = ##class(CPM.Registry.Package).%OpenId(packageName)
+        if $isobject(p) {
+            do p.Export(verbose)
+        }
+    }
+    quit
+
 SEARCH(terms...) ;;search packages
     do $$$CpmInstance.Search(terms...)
     quit
+
 LIST(args...) ;;list of installed packages
     new (args)
     #dim verbose As %Boolean = 0
     do GetOptions(.args, "/v|/verbose", .verbose)
 
-    set sql=##class(%SQL.Statement).%New()
-    set tSC=sql.%Prepare("SELECT %ID, Name, Version, Description FROM CPM_Registry.Package")
+    #dim sql As %SQL.Statement = ##class(%SQL.Statement).%New()
+    #dim tSC As %Status = sql.%Prepare("SELECT %ID, Name, Version, Description FROM CPM_Registry.Package")
     quit:'$$$ISOK(tSC)
-    set tRS=sql.%Execute()
+
+    #dim tRS As %SQL.StatementResult = sql.%Execute()
     while tRS.%Next() {
-        write !?3,tRS.Name,?32,tRS.Version,?42,tRS.Description
+        write !?3,tRS.Name, ?32,tRS.Version, ?42,tRS.Description
         if verbose {
             #dim o As CPM.Registry.Package = ##class(CPM.Registry.Package).%OpenId(tRS.ID)
             #dim items As list of %String = o.items

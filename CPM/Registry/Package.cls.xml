@@ -79,7 +79,7 @@
     set package.name        = Package
     set package.description = Value.description
     
-    do package.Keywords.Clear()
+    do package.keywords.Clear()
     for i=1:1:Value.keywords.Size {
         do package.keywords.Insert(Value.keywords.GetAt(i))
     }
@@ -108,6 +108,7 @@
 common method for exporting package to the staging area
 regardless of a format it should generate package.json pointing to the 
 appropriate container</Description>
+<FormalSpec>verbose:%Boolean</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     #dim DirectoryName As %String = $$$CpmConfig.tempdir
@@ -117,7 +118,7 @@ appropriate container</Description>
     // 2. export container
     // FIXME - at the moment exporting only using XML
     set fileName = ##class(%Library.File).NormalizeFilename("sample.xml",DirectoryName)
-    #dim listItems = $lts(..Items.Serialize(),",")
+    #dim listItems = $lts(..items.Serialize(),",")
     do $system.OBJ.Export(listItems,fileName)
 ]]></Implementation>
 </Method>
@@ -175,5 +176,49 @@ Is used to get the value of an unknown property.</Description>
     SELECT id FROM package where FOR SOME %ELEMENT(maintainers) (%VALUE %INLIST(:Value))
 ) GROUP BY id</SqlQuery>
 </Query>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^CPM.Registry.PackageD</DataLocation>
+<DefaultData>PackageDefaultData</DefaultData>
+<IdLocation>^CPM.Registry.PackageD</IdLocation>
+<IndexLocation>^CPM.Registry.PackageI</IndexLocation>
+<StreamLocation>^CPM.Registry.PackageS</StreamLocation>
+<Data name="PackageDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Modified</Value>
+</Value>
+<Value name="3">
+<Value>path</Value>
+</Value>
+<Value name="4">
+<Value>version</Value>
+</Value>
+<Value name="5">
+<Value>license</Value>
+</Value>
+<Value name="6">
+<Value>keywords</Value>
+</Value>
+<Value name="7">
+<Value>description</Value>
+</Value>
+<Value name="8">
+<Value>dependencies</Value>
+</Value>
+<Value name="9">
+<Value>items</Value>
+</Value>
+<Value name="10">
+<Value>maintainers</Value>
+</Value>
+<Value name="11">
+<Value>author</Value>
+</Value>
+</Data>
+</Storage>
 </Class>
 </Export>
