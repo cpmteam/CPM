@@ -233,15 +233,20 @@ create repo-based path using given package symbolic name</Description>
             do package.items.Insert(itemName)
         }
         // TODO - check errorlog
+        
         // 4.0. check whether there is same name duplicate
-        // TODO - later we need to be more vocal, at the moment - just overwrite
-        //        it sliently
+        #dim storedPackage As CPM.Registry.Package
         if ##class(CPM.Registry.Package).%ExistsId(package.name) {
-            do ##class(CPM.Registry.Package).%DeleteId(package.name)
+            // TODO - later we need to be more vocal, at the moment - just overwrite
+            //        it sliently
+            set storedPackage = ##class(CPM.Registry.Package).%OpenId(package.name)
+            do storedPackage.%OnNew(package)
+        } else {
+            set storedPackage = ##class(CPM.Registry.Package).%New(package)
         }
         // 4. save package instance to the registry
-        #dim storedPackage As CPM.Registry.Package = ##class(CPM.Registry.Package).%New(package)
         set status = storedPackage.%Save()
+
         quit status
    }
 ]]></Implementation>

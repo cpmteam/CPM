@@ -161,7 +161,7 @@ RegisterAllSourceTypes() {
 }
 INSTALL(packages...) ;;install package
     do RegisterAllSourceTypes()
-#if 0
+#if 1
     do $$$CpmInstance.Install(packages...)
     quit
 #else
@@ -247,7 +247,7 @@ LIST(args...) ;;list of installed packages
         write !?3,tRS.Name,?32,tRS.Version,?42,tRS.Description
         if verbose {
             #dim o As CPM.Registry.Package = ##class(CPM.Registry.Package).%OpenId(tRS.ID)
-            #dim items As list of %String = o.Items
+            #dim items As list of %String = o.items
             #dim i As %Integer
             for i=1:1:items.Count() {
                 write !,?10,items.GetAt(i)

@@ -175,49 +175,5 @@ Is used to get the value of an unknown property.</Description>
     SELECT id FROM package where FOR SOME %ELEMENT(maintainers) (%VALUE %INLIST(:Value))
 ) GROUP BY id</SqlQuery>
 </Query>
-
-<Storage name="Default">
-<Type>%Library.CacheStorage</Type>
-<DataLocation>^CPM.Registry.PackageD</DataLocation>
-<DefaultData>PackageDefaultData</DefaultData>
-<IdLocation>^CPM.Registry.PackageD</IdLocation>
-<IndexLocation>^CPM.Registry.PackageI</IndexLocation>
-<StreamLocation>^CPM.Registry.PackageS</StreamLocation>
-<Data name="PackageDefaultData">
-<Value name="1">
-<Value>%%CLASSNAME</Value>
-</Value>
-<Value name="2">
-<Value>Modified</Value>
-</Value>
-<Value name="3">
-<Value>path</Value>
-</Value>
-<Value name="4">
-<Value>version</Value>
-</Value>
-<Value name="5">
-<Value>license</Value>
-</Value>
-<Value name="6">
-<Value>keywords</Value>
-</Value>
-<Value name="7">
-<Value>description</Value>
-</Value>
-<Value name="8">
-<Value>dependencies</Value>
-</Value>
-<Value name="9">
-<Value>items</Value>
-</Value>
-<Value name="10">
-<Value>maintainers</Value>
-</Value>
-<Value name="11">
-<Value>author</Value>
-</Value>
-</Data>
-</Storage>
 </Class>
 </Export>
