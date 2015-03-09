@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.IPackage">
+<Description>
+basic class for all package related classes
+public properties are in low case to properly generate package.json format</Description>
 <Super>%RegisteredObject</Super>
 <TimeCreated>63577,81977.364523</TimeCreated>
 
@@ -11,6 +14,15 @@ package short-name</Description>
 <Parameter name="MAXLEN" value="300"/>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>
+
+<Method name="NormalizeName">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec>name:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[$zcvt(name, "l")
+]]></Implementation>
+</Method>
 
 <Property name="author">
 <Type>%String</Type>
@@ -74,5 +86,43 @@ items defined by this package</Description>
 <Collection>list</Collection>
 <Parameter name="MAXLEN" value="300"/>
 </Property>
+
+<Property name="DirectoryPath">
+<Description>
+package base directory path - intentionally private, to avoid their save to package.json</Description>
+<Type>%String</Type>
+<Private>1</Private>
+<Parameter name="MAXLEN" value="300"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Method name="DirectoryPathSet">
+<Description>
+setter for directory path - intentionally public</Description>
+<FormalSpec>Value:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set i%DirectoryPath = Value
+    quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DirectoryPathGet">
+<Description>
+getter for directory path - intentionally public</Description>
+<CodeMode>expression</CodeMode>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[i%DirectoryPath
+]]></Implementation>
+</Method>
+
+<Method name="GetFullPath">
+<Description>
+given saved directory path and partial filename to calculate full path</Description>
+<CodeMode>expression</CodeMode>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[##class(%Library.File).NormalizeFilename(..path,i%DirectoryPath)
+]]></Implementation>
+</Method>
 </Class>
 </Export>

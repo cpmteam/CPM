@@ -120,8 +120,9 @@ override IsPacked property to be always returning 1</Description>
     merge ..PackageContent.Data = xmltree kill xmltree
     
     #dim p As CPM.IPackage = ##class(CPM.IPackage).%New()
-    set p.name      = pkg("Name")
-    set p.path      = ..iFullPackagePath($get(pkg("Path")))
+    do p.DirectoryPathSet(..DirectoryPath)
+    set p.name      = ##class(CPM.IPackage).NormalizeName(pkg("Name"))
+    set p.path      = $get(pkg("Path"))
     set p.version   = $get(pkg("Version"))
     set p.license   = $get(pkg("License"))
     
@@ -214,9 +215,10 @@ create repo-based path using given package symbolic name</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     #dim status As %Status = $$$OK
-    if ##class(%Library.File).Exists(package.path) {
+    #dim fullPath As %String = package.GetFullPath()
+    if ##class(%Library.File).Exists(fullPath) {
         // 1. load list of items in the container
-        do $system.OBJ.Load(package.path,"-d",,.list,1)
+        do $system.OBJ.Load(fullPath,"-d",,.list,1)
         write !,"About to load these items from the package ", package.name,!
         #dim itemName As %String = ""
         for  {
@@ -226,7 +228,7 @@ create repo-based path using given package symbolic name</Description>
         }
         // TODO: 2. Ask interactively to install
         // TODO: 3. Actual installation
-        do $system.OBJ.Load(package.path,"ck",.errorlog,.list)
+        do $system.OBJ.Load(fullPath,"ck",.errorlog,.list)
         set itemName = "" for {
             set itemName = $order(list(itemName))
             quit:itemName=""

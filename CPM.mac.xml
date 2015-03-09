@@ -136,9 +136,10 @@ BATCH(command="help", args...)
 
 ALIASES(aliases)
  ;QUIT;Q
- ;INSTALL;I
+ ;INSTALL;INS;I
  ;HELP;?
- ;LIST;L
+ ;LIST;LIS;LS;L
+ ;EXPORT;EXP;EX;E
 #; aliases for commands
     new (aliases)
     for i=1:1 {
@@ -253,7 +254,9 @@ SEARCH(terms...) ;;search packages
 LIST(args...) ;;list of installed packages
     new (args)
     #dim verbose As %Boolean = 0
-    do GetOptions(.args, "/v|/verbose", .verbose)
+    #dim local As %Boolean = 1
+    #dim remote As %Boolean = 0
+    do GetOptions(.args, "/v|/verbose", .verbose, "/local", .local, "/remote", .remote)
 
     #dim sql As %SQL.Statement = ##class(%SQL.Statement).%New()
     #dim tSC As %Status = sql.%Prepare("SELECT %ID, Name, Version, Description FROM CPM_Registry.Package")
@@ -288,13 +291,13 @@ CONFIG(args...) ;; get/set configuration parameters
         set nameParam  = $$PopArrValue(.args)
         write !,nameParam, ?14, " = ", $property( $$$CpmConfig, nameParam)
     }
-    elseif setOp {
+    if setOp {
         set nameParam  = $$PopArrValue(.args)
         set valueParam = $$PopArrValue(.args)
         set $property($$$CpmConfig, nameParam) = valueParam
         write !,nameParam, ?14, " = ", $property( $$$CpmConfig, nameParam)
     }
-    else {
+    if 'getOp && 'setOp {
         // TODO - show whole configuration
     } 
     if debug { zw }

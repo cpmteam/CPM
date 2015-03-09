@@ -38,6 +38,7 @@
         set ..keywords = initvalue.keywords
         set ..maintainers = initvalue.maintainers
         set ..items = initvalue.items
+        set ..DirectoryPath = initvalue.DirectoryPathGet()
     }
     quit $$$OK
 ]]></Implementation>
@@ -217,6 +218,9 @@ Is used to get the value of an unknown property.</Description>
 </Value>
 <Value name="11">
 <Value>author</Value>
+</Value>
+<Value name="12">
+<Value>DirectoryPath</Value>
 </Value>
 </Data>
 </Storage>
