@@ -59,6 +59,7 @@ for /f "tokens=1-8 delims=^" %%A in ('type "%TMPFILE%"') DO (
     
     set /A n+=1
     set INSTANCES[!n!]=!INSTANCE!
+    set DIRECTORIES[!n!]=!DIRECTORY!
 
     :: only first instance yet
     break
@@ -73,6 +74,7 @@ if !n! equ 0 (
 del "%TMPFILE%"
 
 set INSTANCE=!INSTANCES[1]!
+set CACHEBIN=!DIRECTORIES[1]!\bin\
 
 set ARGUMENTS=
 set ARGSCOUNT=0
