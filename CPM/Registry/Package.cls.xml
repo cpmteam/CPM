@@ -115,10 +115,15 @@ appropriate container</Description>
     #dim DirectoryName As %String = $$$CpmConfig.tempdir
     #dim fileName As %String = ##class(%Library.File).NormalizeFilename("package.json",DirectoryName)
     // 1. export/generate metainfo
+    #dim containerName As %String = ..path
+    if containerName="" {
+        set containerName = ..name_".xml"
+    }
+    set ..path = containerName
     do ..ExportJSON(fileName, $this) // FIXME - attribute case
     // 2. export container
     // FIXME - at the moment exporting only using XML
-    set fileName = ##class(%Library.File).NormalizeFilename("sample.xml",DirectoryName)
+    set fileName = ##class(%Library.File).NormalizeFilename(containerName, DirectoryName)
     #dim listItems = $lts(..items.Serialize(),",")
     do $system.OBJ.Export(listItems,fileName)
 ]]></Implementation>
