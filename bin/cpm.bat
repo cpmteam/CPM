@@ -48,11 +48,9 @@ if not DEFINED CACHEBIN (
 set TMPFILE=%TMP%\cpm-%RANDOM%.tmp
 if exist "%TMPFILE%" GOTO :GETTEMPNAME 
 
-"%CACHEBIN%ccontrol.exe" qlist nodisplay > "%TMPFILE%"
+"%CACHEBIN%ccontrol.exe" qlist nodisplay | findstr running, > "%TMPFILE%"
 set n=0
 for /f "tokens=1-8 delims=^" %%A in ('type "%TMPFILE%"') DO (
-  for /f "delims=, " %%s in ("%%D") do set STATE=%%s
-  if !STATE! equ running (
     set INSTANCE=%%A
     set DIRECTORY=%%B
     set VERSION=%%C
@@ -63,7 +61,6 @@ for /f "tokens=1-8 delims=^" %%A in ('type "%TMPFILE%"') DO (
 
     :: only first instance yet
     break
-  )
 )
 
 if !n! equ 0 (
