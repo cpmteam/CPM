@@ -248,18 +248,64 @@ PACKAGE(args...) ;;package creation commands
     set status = p.%Save()
 
     quit status
+    
+NormalizeVersion(version) {
+    quit:'$data(version) "0.0.0"
+
+    #dim list = $lfs(version, ".")
+    
+    // make sure we have >= 3 numbers in the version string
+    if $ll(list) < 3 {
+        if $ll(list) < 2 {
+            set $li(list,2) = 0
+        }
+        set $li(list,3) = 0
+    }
+
+    quit $lts(list, ".")
+}
+IncreaseMinorVersion(version) {
+    #dim list = $lfs(version, ".")
+    set $li(list, *) = $li(list, *) + 1
+    quit $lts(list, ".")
+}
+
+IncreaseMajorVersion(version) {
+    #dim list = $lfs(version, ".")
+    set $li(list, *-1) = $li(list, *-1) + 1
+    quit $lts(list, ".")
+}
 
 EXPORT(args...) ;; prepare to publish - export package(s)
     new (args)
     #dim verbose As %Boolean = 0
-    do GetOptions(.args, "/v|/verbose", .verbose)
+    #dim minor As %Boolean = 0
+    #dim major As %Boolean = 0
+    do GetOptions(.args, "/v|/verbose", .verbose, 
+                  "/minor", .minor, "/major", .major)
     for i=1:1:$get(args) {
         #dim packageName As %String = $get(args(i))
         continue:packageName=""
         
         #dim p As CPM.Registry.Package = ##class(CPM.Registry.Package).%OpenId(packageName)
         if $isobject(p) {
+            // if we were ordered to increase version...
+            if minor || major {
+                #dim version As %String = p.version
+                set version = $$NormalizeVersion(version)
+                if minor {
+                    set version = $$IncreaseMinorVersion(version)
+                }
+                elseif major {
+                    set version = $$IncreaseMajorVersion(version)
+                }
+                set p.version = version
+                write !,packageName, " version set to:  ", version,!
+            }
             do p.Export(verbose)
+            if p.%IsModified() {
+                do p.%Save()
+            }
         }
     }
     quit
