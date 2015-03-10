@@ -162,30 +162,7 @@ RegisterAllSourceTypes() {
 }
 INSTALL(packages...) ;;install package
     do RegisterAllSourceTypes()
-#if 1
     do $$$CpmInstance.Install(packages...)
-    quit
-#else
-    new (packages)
-    if '$data(packages) {
-        write !,"Nothing to install"
-        quit
-    }
-    write !,"Installing packages: "
-    for i=1:1:packages {
-        #dim package As %String = packages(i)
-        #dim packageFile As CPM.Source.IBase = ##class(CPM.Source.IBase).%OpenContainer(package)
-        if '$isobject(packageFile) {
-            continue
-        }
-        if packageFile.IsPacked {
-            do packageFile.Unpack()
-        }
-        #dim packageData As CPM.IPackage = packageFile.Parse()
-        write !?3, packageData.name, ?25, packageData.version, ?45, packageData.description,!,packageData.path,!
-        do packageFile.Install(packageData)
-    }
-#endif
     quit
 
 PACKAGE(args...) ;;package creation commands
