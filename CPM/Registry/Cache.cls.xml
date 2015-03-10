@@ -30,17 +30,22 @@
 </Method>
 
 <Method name="Update">
+<Description>
+FIXME - implement proper caching [all/since]</Description>
+<FormalSpec>force:%Boolean=1</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     set Url=..Config.registry
     $$$UrlParser(Url,url)
-    if .."_updated"'="" {
+
+    if 'force && (.."_updated"'="") {
         quit:..GetTime()-.."_updated"<60000 $$$OK
-        set url("query")="stale=update_after&startkey="_.."_updated"
-        set url("path")=$$$GetParam(url, "path", "/-/all/since")
+        
+        set url("query") = "stale=update_after&startkey="_.."_updated"
+        set url("path")  = $$$GetParam(url, "path", "/-/all/since")
         write "Updating index",!
     } else {
-        set url("path")=$$$GetParam(url, "path", "/-/all/")
+        set url("path")  = $$$GetParam(url, "path", "/-/all/")
         write "Building the local index for the first time",!
     }
     #dim exception As %Exception.AbstractException
@@ -56,7 +61,13 @@
     quit:$data(exception) $$$OK
     
     #dim data As %ZEN.proxyObject
+#if 0
     set tSC=##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(response.Data,..%ClassName(1),.data,1)
+#else
+    zw response
+    do response.Data.OutputToDevice()
+    set tSC=##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(response.Data,,.data)
+#endif
     $$$ThrowOnError(tSC)
     
     quit $$$OK

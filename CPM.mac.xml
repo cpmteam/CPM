@@ -108,7 +108,8 @@ PopArrValue(&args)
 {
     #dim value 
     #dim key As %String = $order(args(""),1,value)
-    if $d(args(key)) {
+    quit:key=""
+    if $data(args(key)) {
         kill args(key)
         return value
     }
@@ -135,9 +136,10 @@ BATCH(command="help", args...)
 
 ALIASES(aliases)
  ;QUIT;Q
- ;INSTALL;I
+ ;INSTALL;INS;I
  ;HELP;?
- ;LIST;L
+ ;LIST;LIS;LS;L
+ ;EXPORT;EXP;EX;E
 #; aliases for commands
     new (aliases)
     for i=1:1 {
@@ -160,29 +162,7 @@ RegisterAllSourceTypes() {
 }
 INSTALL(packages...) ;;install package
     do RegisterAllSourceTypes()
-    set cpm=##class(CPM.Main).%New()
-    do cpm.Install(packages...)
-    quit
-    new (packages)
-    if '$data(packages) {
-        write !,"Nothing to install"
-        quit
-    }
-    do RegisterAllSourceTypes()
-    write !,"Installing packages: "
-    for i=1:1:packages {
-        #dim package As %String = packages(i)
-        #dim packageFile As CPM.Source.IBase = ##class(CPM.Source.IBase).%OpenContainer(package)
-        if '$isobject(packageFile) {
-            continue
-        }
-        if packageFile.IsPacked {
-            do packageFile.Unpack()
-        }
-        #dim packageData As CPM.IPackage = packageFile.Parse()
-        write !?3, packageData.Name, ?25, packageData.Version, ?45, packageData.Description,!,packageData.Path,!
-        do packageFile.Install(packageData)
-    }
+    do $$$CpmInstance.Install(packages...)
     quit
 
 PACKAGE(args...) ;;package creation commands
@@ -215,37 +195,119 @@ PACKAGE(args...) ;;package creation commands
     
 #define SetIf(%val,%init) if %init'="" { set %val = %init }
 
-    $$$SetIf(p.Author,pkgAuthor)
-    $$$SetIf(p.Description,pkgDescription)
-    $$$SetIf(p.License,pkgLicense)
-    $$$SetIf(p.Version,pkgVersion)
+    $$$SetIf(p.name,pkgName)
+    $$$SetIf(p.author,pkgAuthor)
+    $$$SetIf(p.description,pkgDescription)
+    $$$SetIf(p.license,pkgLicense)
+    $$$SetIf(p.version,pkgVersion)
     
     // link package to the project content
     if prjName '= "" {
-        #dim prj As %Studio.Project = ##class(%Studio.Project).%OpenId(prjName)
+        #dim prjExt As %String = $piece(prjName,".",*)
+        if prjExt="prj" || (prjExt="PRJ") {
+            #dim prjBareName As %String = $piece(prjName,".",1,*-1)
+            #dim prj As %Studio.Project = ##class(%Studio.Project).%OpenId(prjBareName)
+            if $isobject(prj) {
+                // remember all project items 
+                for i=1:1:prj.Items.Count() {
+                    #dim item As %Studio.ProjectItem = prj.Items.GetAt(i)
+                    #dim itemName As %String = item.Name
+                    #dim itemType As %String = item.Type
+                    do ##class(%Studio.Project).NormalizeName(.itemName, .itemType)
+                    do p.items.Insert(itemName_"."_itemType)
+                }
+                // then remember project itself
+                do p.items.Insert(prjName)
+            }
+        }
     }
     if debug { zw p }
-    do p.%Save()
+    set status = p.%Save()
 
+    quit status
+    
+NormalizeVersion(version) {
+    quit:'$data(version) "0.0.0"
+
+    #dim list = $lfs(version, ".")
+    
+    // make sure we have >= 3 numbers in the version string
+    if $ll(list) < 3 {
+        if $ll(list) < 2 {
+            set $li(list,2) = 0
+        }
+        set $li(list,3) = 0
+    }
+
+    quit $lts(list, ".")
+}
+IncreaseMinorVersion(version) {
+    #dim list = $lfs(version, ".")
+    set $li(list, *) = $li(list, *) + 1
+    quit $lts(list, ".")
+}
+
+IncreaseMajorVersion(version) {
+    #dim list = $lfs(version, ".")
+    set $li(list, *-1) = $li(list, *-1) + 1
+    quit $lts(list, ".")
+}
+
+EXPORT(args...) ;; prepare to publish - export package(s)
+    new (args)
+    #dim verbose As %Boolean = 0
+    #dim minor As %Boolean = 0
+    #dim major As %Boolean = 0
+    do GetOptions(.args, "/v|/verbose", .verbose, 
+                  "/minor", .minor, "/major", .major)
+    for i=1:1:$get(args) {
+        #dim packageName As %String = $get(args(i))
+        continue:packageName=""
+        
+        #dim p As CPM.Registry.Package = ##class(CPM.Registry.Package).%OpenId(packageName)
+        if $isobject(p) {
+            // if we were ordered to increase version...
+            if minor || major {
+                #dim version As %String = p.version
+                set version = $$NormalizeVersion(version)
+                if minor {
+                    set version = $$IncreaseMinorVersion(version)
+                }
+                elseif major {
+                    set version = $$IncreaseMajorVersion(version)
+                }
+                set p.version = version
+                write !,packageName, " version set to:  ", version,!
+            }
+            do p.Export(verbose)
+            if p.%IsModified() {
+                do p.%Save()
+            }
+        }
+    }
     quit
 
 SEARCH(terms...) ;;search packages
     do $$$CpmInstance.Search(terms...)
     quit
+
 LIST(args...) ;;list of installed packages
     new (args)
     #dim verbose As %Boolean = 0
-    do GetOptions(.args, "/v|/verbose", .verbose)
+    #dim local As %Boolean = 1
+    #dim remote As %Boolean = 0
+    do GetOptions(.args, "/v|/verbose", .verbose, "/local", .local, "/remote", .remote)
 
-    set sql=##class(%SQL.Statement).%New()
-    set tSC=sql.%Prepare("SELECT %ID, Name, Version, Description FROM CPM_Registry.Package")
+    #dim sql As %SQL.Statement = ##class(%SQL.Statement).%New()
+    #dim tSC As %Status = sql.%Prepare("SELECT %ID, Name, Version, Description FROM CPM_Registry.Package")
     quit:'$$$ISOK(tSC)
-    set tRS=sql.%Execute()
+
+    #dim tRS As %SQL.StatementResult = sql.%Execute()
     while tRS.%Next() {
-        write !?3,tRS.Name,?32,tRS.Version,?42,tRS.Description
+        write !?3,tRS.Name, ?32,tRS.Version, ?42,tRS.Description
         if verbose {
             #dim o As CPM.Registry.Package = ##class(CPM.Registry.Package).%OpenId(tRS.ID)
-            #dim items As list of %String = o.Items
+            #dim items As list of %String = o.items
             #dim i As %Integer
             for i=1:1:items.Count() {
                 write !,?10,items.GetAt(i)
@@ -269,13 +331,13 @@ CONFIG(args...) ;; get/set configuration parameters
         set nameParam  = $$PopArrValue(.args)
         write !,nameParam, ?14, " = ", $property( $$$CpmConfig, nameParam)
     }
-    elseif setOp {
+    if setOp {
         set nameParam  = $$PopArrValue(.args)
         set valueParam = $$PopArrValue(.args)
         set $property($$$CpmConfig, nameParam) = valueParam
         write !,nameParam, ?14, " = ", $property( $$$CpmConfig, nameParam)
     }
-    else {
+    if 'getOp && 'setOp {
         // TODO - show whole configuration
     } 
     if debug { zw }

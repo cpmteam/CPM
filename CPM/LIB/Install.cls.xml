@@ -33,44 +33,16 @@ DESCRIPTION
     for i=1:1:Packages {
         set packageName=$get(Packages(i))
         continue:packageName=""
-        if ##class(%File).Exists(packageName) {
-            set package=##class(CPM.SourceType.IBase).%OpenContainer(packageName)
-            continue:'$isobject(package)
-        } elseif $match(packageName,"https?\:\/\/.*") {
-            
-        } else {
-            set tag=$piece(packageName,"@",2)
-            set:tag="" tag="latest"
-            set packageName=$piece(packageName,"@")
-            set package=##class(CPM.Registry.Package).%OpenId(packageName)
-            continue:'$isobject(package)
-            set url=..Config.registry_"/"_packageName_"/"_tag
-            $$$UrlParser(url,url)
-            
-            #dim response As %Net.HttpResponse = ..Registry.Get(.url)
-            
-            #dim data As %ZEN.proxyObject
-            set tSC=##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(response.Data,,.data,1)
-            $$$ThrowOnError(tSC)
-            
-            set destUrl=data.dist.tarball
-            set destSha=data.dist.shasum
-            
-            set response=..Registry.Get(destUrl)
-            set package=##class(%Stream.FileBinary).%New()
-            set fileName="test.tgz"
-            set package.Filename=##class(%File).NormalizeFilename(fileName, tempDir)
-            do package.CopyFromAndSave(response.Data)
-            kill response
-            quit
-#;            set package=##class(CPM.SourceType.IBase).%OpenContainer(package.Filename)
-        }
-        
+
+        set package=##class(CPM.Source.IBase).%OpenContainer(packageName)
+        continue:'$isobject(package)
+
         if package.IsPacked {
             do package.Unpack()
         }
         #dim packageData As CPM.IPackage = package.Parse()
-        write !?3, packageData.Name, ?25, packageData.Version, ?45, packageData.Description
+        write !?3, packageData.name, ?25, packageData.version, ?45, packageData.description
+        do package.Install(packageData)
     }
     quit $$$OK
 ]]></Implementation>

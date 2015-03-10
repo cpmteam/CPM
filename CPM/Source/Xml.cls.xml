@@ -120,12 +120,13 @@ override IsPacked property to be always returning 1</Description>
     merge ..PackageContent.Data = xmltree kill xmltree
     
     #dim p As CPM.IPackage = ##class(CPM.IPackage).%New()
-    set p.Name      = pkg("Name")
-    set p.Path      = ..iFullPackagePath($get(pkg("Path")))
-    set p.Version   = $get(pkg("Version"))
-    set p.License   = $get(pkg("License"))
+    do p.DirectoryPathSet(..DirectoryPath)
+    set p.name      = ##class(CPM.IPackage).NormalizeName(pkg("Name"))
+    set p.path      = $get(pkg("Path"))
+    set p.version   = $get(pkg("Version"))
+    set p.license   = $get(pkg("License"))
     
-    if ..DebugMode { write p.Name,":", p.Path,":", p.Version,! }
+    if ..DebugMode { write p.name,":", p.path,":", p.version,! }
 
     #dim deps As %ArrayOfDataTypes
     
@@ -144,17 +145,12 @@ override IsPacked property to be always returning 1</Description>
         }
         set i = $order(localdeps(i))
     }
-#if 0 
-    // %ArrayOfDataTypes provides us convenient multi-dimensional property .Data
-    // unfortunately we can't redefine MAXLEN for %ArrayOfDataTypes
-    merge p.Dependencies.Data = deps
-#else
     set i="" for  {
         #dim value As %String
         set i=$order(deps(i),1,value) quit:i=""
-        do p.Dependencies.SetAt(value,i)
+        do p.dependencies.Insert(value)
     }
-#endif
+
     quit p
 ]]></Implementation>
 </Method>
@@ -195,13 +191,13 @@ create repo-based path using given package symbolic name</Description>
         do parser.Open(FileName)
         #dim package As CPM.IPackage = parser.Parse()
         if Debug {
-            write ?4, package.Name, ?32, package.Dependencies.Count(), !
+            write ?4, package.name, ?32, package.dependencies.Count(), !
         }
         if Recursive {
-            set known(package.Name) = 1 ; mark itself as visited
+            set known(package.name) = 1 ; mark itself as visited
             #dim name As %String = ""
             for {
-                #dim listItems = package.Dependencies.GetNext(.name)
+                #dim listItems = package.dependencies.GetNext(.name)
                 quit:name=""
                 if '$data(known(name)) {
                     $$$Enqueue(queue,name)
@@ -219,10 +215,11 @@ create repo-based path using given package symbolic name</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     #dim status As %Status = $$$OK
-    if ##class(%Library.File).Exists(package.Path) {
+    #dim fullPath As %String = package.GetFullPath()
+    if ##class(%Library.File).Exists(fullPath) {
         // 1. load list of items in the container
-        do $system.OBJ.Load(package.Path,"-d",,.list,1)
-        write !,"About to load these items from the package ", package.Name,!
+        do $system.OBJ.Load(fullPath,"-d",,.list,1)
+        write !,"About to load these items from the package ", package.name,!
         #dim itemName As %String = ""
         for  {
             set itemName = $order(list(itemName))
@@ -231,16 +228,27 @@ create repo-based path using given package symbolic name</Description>
         }
         // TODO: 2. Ask interactively to install
         // TODO: 3. Actual installation
-        do $system.OBJ.Load(package.Path,"ck",.errorlog,.list,1)
+        do $system.OBJ.Load(fullPath,"ck",.errorlog,.list)
         set itemName = "" for {
             set itemName = $order(list(itemName))
             quit:itemName=""
-            do package.Items.Insert(itemName)
+            do package.items.Insert(itemName)
         }
         // TODO - check errorlog
+        
+        // 4.0. check whether there is same name duplicate
+        #dim storedPackage As CPM.Registry.Package
+        if ##class(CPM.Registry.Package).%ExistsId(package.name) {
+            // TODO - later we need to be more vocal, at the moment - just overwrite
+            //        it sliently
+            set storedPackage = ##class(CPM.Registry.Package).%OpenId(package.name)
+            do storedPackage.%OnNew(package)
+        } else {
+            set storedPackage = ##class(CPM.Registry.Package).%New(package)
+        }
         // 4. save package instance to the registry
-        #dim storedPackage As CPM.Registry.Package = ##class(CPM.Registry.Package).%New(package)
         set status = storedPackage.%Save()
+
         quit status
    }
 ]]></Implementation>

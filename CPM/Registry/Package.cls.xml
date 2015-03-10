@@ -7,7 +7,7 @@
 
 <Index name="byName">
 <IdKey>1</IdKey>
-<Properties>Name</Properties>
+<Properties>name</Properties>
 </Index>
 
 <Property name="Modified">
@@ -15,11 +15,11 @@
 </Property>
 
 <Index name="byKeywords">
-<Properties>Keywords(ELEMENTS)</Properties>
+<Properties>keywords(ELEMENTS)</Properties>
 </Index>
 
 <Index name="byMaintainers">
-<Properties>Maintainers(ELEMENTS)</Properties>
+<Properties>maintainers(ELEMENTS)</Properties>
 </Index>
 
 <Method name="%OnNew">
@@ -27,29 +27,19 @@
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     if $data(initvalue) && $isobject(initvalue) {
-        set ..Author = initvalue.Author
-        set ..Name = initvalue.Name
-        set ..Path  = initvalue.Path
-        set ..Version  = initvalue.Version
-        set ..License  = initvalue.License
-        set ..Description  = initvalue.Description
+        set ..author = initvalue.author
+        set ..name = initvalue.name
+        set ..path  = initvalue.path
+        set ..version  = initvalue.version
+        set ..license  = initvalue.license
+        set ..description  = initvalue.description
 
-        set ..Dependencies = initvalue.Dependencies
-        set ..Keywords = initvalue.Keywords
-        set ..Maintainers = initvalue.Maintainers
-        set ..Items = initvalue.Items
+        set ..dependencies = initvalue.dependencies
+        set ..keywords = initvalue.keywords
+        set ..maintainers = initvalue.maintainers
+        set ..items = initvalue.items
+        set ..DirectoryPath = initvalue.DirectoryPathGet()
     }
-    quit $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="%OnBeforeSave">
-<FormalSpec>insert:%Boolean</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-    // FIXME: bad, bad me - we should not modify state of the object upon saving!
-    set ..Modified = $ZDT($ZTS,3,,3)
-
     quit $$$OK
 ]]></Implementation>
 </Method>
@@ -87,28 +77,28 @@
 <Implementation><![CDATA[
     #dim package As CPM.Registry.Package = ..%OpenId(Package)
     set:'$isobject(package) package=..%New()
-    set package.Name        = Package
-    set package.Description = Value.description
+    set package.name        = Package
+    set package.description = Value.description
     
-    do package.Keywords.Clear()
+    do package.keywords.Clear()
     for i=1:1:Value.keywords.Size {
-        do package.Keywords.Insert(Value.keywords.GetAt(i))
+        do package.keywords.Insert(Value.keywords.GetAt(i))
     }
-    do package.Maintainers.Clear()
+    do package.maintainers.Clear()
     if Value.maintainers.%IsA("%ListOfObjects") {
         for i=1:1:Value.maintainers.Size {
-            do package.Maintainers.Insert(Value.maintainers.GetAt(i).name)
+            do package.maintainers.Insert(Value.maintainers.GetAt(i).name)
         }
     }
-    set package.Author   = $select($isobject(Value.author):Value.author.name, 1:"")
-    set package.Modified = $tr(Value.time.modified,"TZ"," ")
+    set package.author   = $select($isobject(Value.author):Value.author.name, 1:"")
+    set package.modified = $tr(Value.time.modified,"TZ"," ")
     do Value.versions.%CopyToArray(.versions)
     set tVersion=""
     for {
         set tVersion = $order(versions(tVersion),1,latest)
         quit:tVersion=""
         continue:latest'="latest"
-        set package.Version = tVersion
+        set package.version = tVersion
     }
     quit package.%Save()
 ]]></Implementation>
@@ -119,6 +109,7 @@
 common method for exporting package to the staging area
 regardless of a format it should generate package.json pointing to the 
 appropriate container</Description>
+<FormalSpec>verbose:%Boolean</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     #dim DirectoryName As %String = $$$CpmConfig.tempdir
@@ -128,7 +119,7 @@ appropriate container</Description>
     // 2. export container
     // FIXME - at the moment exporting only using XML
     set fileName = ##class(%Library.File).NormalizeFilename("sample.xml",DirectoryName)
-    #dim listItems = $lts(..Items.Serialize(),",")
+    #dim listItems = $lts(..items.Serialize(),",")
     do $system.OBJ.Export(listItems,fileName)
 ]]></Implementation>
 </Method>
@@ -194,44 +185,42 @@ Is used to get the value of an unknown property.</Description>
 <IdLocation>^CPM.Registry.PackageD</IdLocation>
 <IndexLocation>^CPM.Registry.PackageI</IndexLocation>
 <StreamLocation>^CPM.Registry.PackageS</StreamLocation>
-<Data name="Maintainers">
-<Attribute>Maintainers</Attribute>
-<Structure>subnode</Structure>
-<Subscript>"Maintainers"</Subscript>
-</Data>
 <Data name="PackageDefaultData">
 <Value name="1">
 <Value>%%CLASSNAME</Value>
 </Value>
 <Value name="2">
-<Value>Author</Value>
-</Value>
-<Value name="3">
-<Value>Path</Value>
-</Value>
-<Value name="4">
-<Value>Version</Value>
-</Value>
-<Value name="5">
-<Value>License</Value>
-</Value>
-<Value name="6">
-<Value>Keywords</Value>
-</Value>
-<Value name="7">
-<Value>Description</Value>
-</Value>
-<Value name="8">
-<Value>Dependencies</Value>
-</Value>
-<Value name="9">
-<Value>Items</Value>
-</Value>
-<Value name="10">
 <Value>Modified</Value>
 </Value>
+<Value name="3">
+<Value>path</Value>
+</Value>
+<Value name="4">
+<Value>version</Value>
+</Value>
+<Value name="5">
+<Value>license</Value>
+</Value>
+<Value name="6">
+<Value>keywords</Value>
+</Value>
+<Value name="7">
+<Value>description</Value>
+</Value>
+<Value name="8">
+<Value>dependencies</Value>
+</Value>
 <Value name="9">
-<Value>Maintainers</Value>
+<Value>items</Value>
+</Value>
+<Value name="10">
+<Value>maintainers</Value>
+</Value>
+<Value name="11">
+<Value>author</Value>
+</Value>
+<Value name="12">
+<Value>DirectoryPath</Value>
 </Value>
 </Data>
 </Storage>

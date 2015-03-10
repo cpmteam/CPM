@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.IPackage">
+<Description>
+basic class for all package related classes
+public properties are in low case to properly generate package.json format</Description>
 <Super>%RegisteredObject</Super>
 <TimeCreated>63577,81977.364523</TimeCreated>
 
-<Property name="Name">
+<Property name="name">
 <Description>
 package short-name</Description>
 <Type>%String</Type>
@@ -12,13 +15,22 @@ package short-name</Description>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>
 
-<Property name="Author">
+<Method name="NormalizeName">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec>name:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[$zcvt(name, "l")
+]]></Implementation>
+</Method>
+
+<Property name="author">
 <Type>%String</Type>
 <Parameter name="MAXLEN" value="300"/>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>
 
-<Property name="Path">
+<Property name="path">
 <Description>
 container name/path</Description>
 <Type>%String</Type>
@@ -26,26 +38,27 @@ container name/path</Description>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>
 
-<Property name="Version">
+<Property name="version">
 <Description>
 actual version used</Description>
 <Type>%String</Type>
+<InitialExpression>"0.0.1"</InitialExpression>
 <Parameter name="MAXLEN" value="128"/>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>
 
-<Property name="License">
+<Property name="license">
 <Description>
 license of a package (MIT, BSD, etc)</Description>
 <Type>%String</Type>
 </Property>
 
-<Property name="Keywords">
+<Property name="keywords">
 <Type>%String</Type>
 <Collection>list</Collection>
 </Property>
 
-<Property name="Description">
+<Property name="description">
 <Description>
 description of a package</Description>
 <Type>%Text</Type>
@@ -53,7 +66,7 @@ description of a package</Description>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>
 
-<Property name="Dependencies">
+<Property name="dependencies">
 <Description>
 external dependencies</Description>
 <Type>%String</Type>
@@ -61,7 +74,7 @@ external dependencies</Description>
 <Parameter name="MAXLEN" value="300"/>
 </Property>
 
-<Property name="Items">
+<Property name="items">
 <Description>
 items defined by this package</Description>
 <Type>%String</Type>
@@ -69,10 +82,48 @@ items defined by this package</Description>
 <Parameter name="MAXLEN" value="100"/>
 </Property>
 
-<Property name="Maintainers">
+<Property name="maintainers">
 <Type>%String</Type>
 <Collection>list</Collection>
 <Parameter name="MAXLEN" value="300"/>
 </Property>
+
+<Property name="DirectoryPath">
+<Description>
+package base directory path - intentionally private, to avoid their save to package.json</Description>
+<Type>%String</Type>
+<Private>1</Private>
+<Parameter name="MAXLEN" value="300"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Method name="DirectoryPathSet">
+<Description>
+setter for directory path - intentionally public</Description>
+<FormalSpec>Value:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set i%DirectoryPath = Value
+    quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DirectoryPathGet">
+<Description>
+getter for directory path - intentionally public</Description>
+<CodeMode>expression</CodeMode>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[i%DirectoryPath
+]]></Implementation>
+</Method>
+
+<Method name="GetFullPath">
+<Description>
+given saved directory path and partial filename to calculate full path</Description>
+<CodeMode>expression</CodeMode>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[##class(%Library.File).NormalizeFilename(..path,i%DirectoryPath)
+]]></Implementation>
+</Method>
 </Class>
 </Export>

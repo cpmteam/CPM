@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.Source.IBase">
-<IncludeCode>%occConstant,CPM.SourceTypes</IncludeCode>
+<IncludeCode>%occConstant,CPM.SourceTypes,CPM.LIB</IncludeCode>
 <Super>%Library.RegisteredObject</Super>
 <TimeCreated>63577,81983.079145</TimeCreated>
 
@@ -72,20 +72,50 @@ given different handler class will be called)</Description>
 <Implementation><![CDATA[
     #dim ext As %String = $zcvt($piece(fileName,".",*), "U")
     #dim o As CPM.SourceType.IBase = $$$NULLOREF
+    #dim packageName As %String = fileName
     
-    if $d($$$PpvExtensions(ext)) {
-        set o = $classmethod($$$PpvExtensions(ext), "%New")
-        if $isobject(o) {
-            do o.Open(fileName)
+    if ##class(%File).Exists(fileName) {
+        if $d($$$PpvExtensions(ext)) {
+            set o = $classmethod($$$PpvExtensions(ext), "%New")
+            if $isobject(o) {
+                do o.Open(fileName)
+            }
         }
+    } elseif $match(packageName,"https?\:\/\/.*") {
+        
+    } else {
+        #dim tag As %String = $piece(packageName, "@", 2)
+        set:tag="" tag="latest"
+        set packageName = $piece(packageName,"@")
+        set package     = ##class(CPM.Registry.Package).%OpenId(packageName)
+        quit:'$isobject(package)
+
+        set url = $$$CpmConfig.registry_"/"_packageName_"/"_tag
+        $$$UrlParser(url,url)
+
+        #dim response As %Net.HttpResponse = $$$CpmRegistry.Get(.url)
+
+        #dim data As %ZEN.proxyObject
+        set tSC=##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(response.Data,,.data,1)
+        $$$ThrowOnError(tSC)
+        
+        set destUrl = data.dist.tarball
+        set destSha = data.dist.shasum
+        
+        set response = $$$CpmRegistry.Get(destUrl)
+        set package  = ##class(%Stream.FileBinary).%New()
+        set fileName = "test.tgz"
+        set package.Filename = ##class(%File).NormalizeFilename(fileName, tempDir)
+        do package.CopyFromAndSave(response.Data)
+        kill response
     }
+
     quit o
 ]]></Implementation>
 </Method>
 
 <Method name="Open">
 <FormalSpec>fileName:%String</FormalSpec>
-<Implementation><![CDATA[]]></Implementation>
 </Method>
 
 <Method name="Unpack">

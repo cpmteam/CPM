@@ -18,9 +18,7 @@
 <Description>
 override IsPacked property to be always returning 1</Description>
 <ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
-    quit 1
-
+<Implementation><![CDATA[    quit 1
 ]]></Implementation>
 </Method>
 
@@ -30,7 +28,6 @@ override IsPacked property to be always returning 1</Description>
 <Implementation><![CDATA[
     #; simply ignore
     quit $$$OK
-
 ]]></Implementation>
 </Method>
 
@@ -41,7 +38,6 @@ override IsPacked property to be always returning 1</Description>
     #; not try to actually open file
     set ..FileName = fileName
     quit ##class(%File).Exists(..FileName)
-
 ]]></Implementation>
 </Method>
 
@@ -55,7 +51,6 @@ override IsPacked property to be always returning 1</Description>
     kill tFileStream
 
     quit $isobject(i%PackageContent)
-
 ]]></Implementation>
 </Method>
 
@@ -79,13 +74,11 @@ override IsPacked property to be always returning 1</Description>
     {
         quit $$$NULLOREF
     }
-    #dim name As %String        = metaInfo.name
+    #dim name As %String        = metaInfo.name ; ##class(CPM.IPackage).NormalizeName(metaInfo.name)
     #dim description As %String = $zconvert(metaInfo.description,"I","UTF8")
     #dim version As %String     = metaInfo.version
 
     quit ##class(CPM.IPackage).Create(name, description, version)
-
-
 ]]></Implementation>
 </Method>
 </Class>
