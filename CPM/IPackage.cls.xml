@@ -42,6 +42,7 @@ container name/path</Description>
 <Description>
 actual version used</Description>
 <Type>%String</Type>
+<InitialExpression>"0.0.1"</InitialExpression>
 <Parameter name="MAXLEN" value="128"/>
 <Parameter name="TRUNCATE" value="0"/>
 </Property>

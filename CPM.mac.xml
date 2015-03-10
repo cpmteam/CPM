@@ -218,6 +218,7 @@ PACKAGE(args...) ;;package creation commands
     
 #define SetIf(%val,%init) if %init'="" { set %val = %init }
 
+    $$$SetIf(p.name,pkgName)
     $$$SetIf(p.author,pkgAuthor)
     $$$SetIf(p.description,pkgDescription)
     $$$SetIf(p.license,pkgLicense)
@@ -225,12 +226,28 @@ PACKAGE(args...) ;;package creation commands
     
     // link package to the project content
     if prjName '= "" {
-        #dim prj As %Studio.Project = ##class(%Studio.Project).%OpenId(prjName)
+        #dim prjExt As %String = $piece(prjName,".",*)
+        if prjExt="prj" || (prjExt="PRJ") {
+            #dim prjBareName As %String = $piece(prjName,".",1,*-1)
+            #dim prj As %Studio.Project = ##class(%Studio.Project).%OpenId(prjBareName)
+            if $isobject(prj) {
+                // remember all project items 
+                for i=1:1:prj.Items.Count() {
+                    #dim item As %Studio.ProjectItem = prj.Items.GetAt(i)
+                    #dim itemName As %String = item.Name
+                    #dim itemType As %String = item.Type
+                    do ##class(%Studio.Project).NormalizeName(.itemName, .itemType)
+                    do p.items.Insert(itemName_"."_itemType)
+                }
+                // then remember project itself
+                do p.items.Insert(prjName)
+            }
+        }
     }
     if debug { zw p }
-    do p.%Save()
+    set status = p.%Save()
 
-    quit
+    quit status
 
 EXPORT(args...) ;; prepare to publish - export package(s)
     new (args)
