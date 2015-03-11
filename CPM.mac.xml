@@ -219,6 +219,7 @@ PACKAGE(args...) ;;package creation commands
         }
         // loading from barebone XML export file ("webterminal" mode)
         elseif prjExt="xml" || (prjExt="XML") {
+            do p.AddXmlItems(prjName) ; FIXME - beware of no autoload here!
         }
     }
     if debug { zw p }

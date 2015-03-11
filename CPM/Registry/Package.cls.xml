@@ -150,6 +150,31 @@ appropriate container</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="AddXmlItems">
+<FormalSpec>xmlFile:%String,autoLoad:%Boolean=0</FormalSpec>
+<Implementation><![CDATA[
+    // FIXME - refactor to common function
+    // FIXME - beware of copy-paste from CPM.Source.XML
+    if ##class(%Library.File).Exists(xmlFile) {
+        #dim list
+        do $system.OBJ.Load(xmlFile,"-d",,.list,1)
+        write !,"Adding these items to the package: ",..name, !
+
+        #dim itemName As %String = ""
+        for  {
+            set itemName = $order(list(itemName))
+            quit:itemName=""
+            write ?8,itemName,!
+            do ..items.Insert(itemName)
+        }
+
+        if autoLoad {
+            do $system.OBJ.Load(fullPath,"ck",.errorlog)
+        }
+    }
+]]></Implementation>
+</Method>
+
 <Method name="ExportJSON">
 <Description>
 FIXME - at the moment we output attributes at the same case as properties written
