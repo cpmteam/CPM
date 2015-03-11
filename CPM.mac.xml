@@ -169,6 +169,7 @@ PACKAGE(args...) ;;package creation commands
     new (args)
     #dim debug As %Boolean = 0
     #dim create As %Boolean = 0
+    #dim delete As %Boolean = 0
     #dim prjName As %String = ""
     #dim pkgAuthor As %String = ""
     #dim pkgDescription As %String = ""
@@ -177,17 +178,25 @@ PACKAGE(args...) ;;package creation commands
     
     do GetOptions(.args, 
                   "/debug", .debug,
-                  "/c|/create", .create, "/prj:|/from:", .prjName,
+                  "/c|/create", .create, "/delete", .delete, "/prj:|/from:", .prjName,
                   "/author:", .pkgAuthor, "/description:", .pkgDescription,
                   "/license:", .pkgLicense, "/version:", .pkgVersion)
 
     #dim pkgName As %String = ""
     #dim status As %Status = $$$OK
-    
+
     if create {
         set pkgName = $$PopArrValue(.args)
         set $$$CpmLastPkgName = pkgName
-    } else {
+    }
+    elseif delete {
+        set pkgName = $$PopArrValue(.args)
+        write !, "Deleting package definition: ", pkgName,!
+        set status = ##class(CPM.Registry.Package).%DeleteId(pkgName)
+
+        return status
+    }
+    else {
         set pkgName = $$$CpmLastPkgName
     }
     #dim p As CPM.Registry.Package = ##class(CPM.Registry.Package).CreateOrOpenId(pkgName)
