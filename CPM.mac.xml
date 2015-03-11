@@ -171,6 +171,7 @@ PACKAGE(args...) ;;package creation commands
     #dim create As %Boolean = 0
     #dim delete As %Boolean = 0
     #dim prjName As %String = ""
+    #dim autoload As %Boolean = 0
     #dim pkgAuthor As %String = ""
     #dim pkgDescription As %String = ""
     #dim pkgLicense As %String = ""
@@ -178,7 +179,8 @@ PACKAGE(args...) ;;package creation commands
     
     do GetOptions(.args, 
                   "/debug", .debug,
-                  "/c|/create", .create, "/delete", .delete, "/prj:|/from:", .prjName,
+                  "/c|/create", .create, "/delete", .delete,
+                  "/prj:|/from:", .prjName, "/autoload", .autoload,
                   "/author:", .pkgAuthor, "/description:", .pkgDescription,
                   "/license:", .pkgLicense, "/version:", .pkgVersion)
 
@@ -219,7 +221,7 @@ PACKAGE(args...) ;;package creation commands
         }
         // loading from barebone XML export file ("webterminal" mode)
         elseif prjExt="xml" || (prjExt="XML") {
-            do p.AddXmlItems(prjName) ; FIXME - beware of no autoload here!
+            do p.AddXmlItems(prjName, autoload)
         }
     }
     if debug { zw p }

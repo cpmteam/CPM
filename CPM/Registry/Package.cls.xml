@@ -169,7 +169,7 @@ appropriate container</Description>
         }
 
         if autoLoad {
-            do $system.OBJ.Load(fullPath,"ck",.errorlog)
+            do $system.OBJ.Load(xmlFile,"ck",.errorlog)
         }
     }
 ]]></Implementation>
