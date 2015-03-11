@@ -169,6 +169,7 @@ PACKAGE(args...) ;;package creation commands
     new (args)
     #dim debug As %Boolean = 0
     #dim create As %Boolean = 0
+    #dim delete As %Boolean = 0
     #dim prjName As %String = ""
     #dim pkgAuthor As %String = ""
     #dim pkgDescription As %String = ""
@@ -177,17 +178,25 @@ PACKAGE(args...) ;;package creation commands
     
     do GetOptions(.args, 
                   "/debug", .debug,
-                  "/c|/create", .create, "/prj:|/from:", .prjName,
+                  "/c|/create", .create, "/delete", .delete, "/prj:|/from:", .prjName,
                   "/author:", .pkgAuthor, "/description:", .pkgDescription,
                   "/license:", .pkgLicense, "/version:", .pkgVersion)
 
     #dim pkgName As %String = ""
     #dim status As %Status = $$$OK
-    
+
     if create {
         set pkgName = $$PopArrValue(.args)
         set $$$CpmLastPkgName = pkgName
-    } else {
+    }
+    elseif delete {
+        set pkgName = $$PopArrValue(.args)
+        write !, "Deleting package definition: ", pkgName,!
+        set status = ##class(CPM.Registry.Package).%DeleteId(pkgName)
+
+        return status
+    }
+    else {
         set pkgName = $$$CpmLastPkgName
     }
     #dim p As CPM.Registry.Package = ##class(CPM.Registry.Package).CreateOrOpenId(pkgName)
@@ -204,21 +213,13 @@ PACKAGE(args...) ;;package creation commands
     // link package to the project content
     if prjName '= "" {
         #dim prjExt As %String = $piece(prjName,".",*)
+        // loading from preexisting Studio Project .PRJ
         if prjExt="prj" || (prjExt="PRJ") {
-            #dim prjBareName As %String = $piece(prjName,".",1,*-1)
-            #dim prj As %Studio.Project = ##class(%Studio.Project).%OpenId(prjBareName)
-            if $isobject(prj) {
-                // remember all project items 
-                for i=1:1:prj.Items.Count() {
-                    #dim item As %Studio.ProjectItem = prj.Items.GetAt(i)
-                    #dim itemName As %String = item.Name
-                    #dim itemType As %String = item.Type
-                    do ##class(%Studio.Project).NormalizeName(.itemName, .itemType)
-                    do p.items.Insert(itemName_"."_itemType)
-                }
-                // then remember project itself
-                do p.items.Insert(prjName)
-            }
+            do p.AddProjectItems(prjName)
+        }
+        // loading from barebone XML export file ("webterminal" mode)
+        elseif prjExt="xml" || (prjExt="XML") {
+            do p.AddXmlItems(prjName) ; FIXME - beware of no autoload here!
         }
     }
     if debug { zw p }

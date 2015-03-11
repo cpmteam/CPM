@@ -34,7 +34,7 @@ DESCRIPTION
         set packageName=$get(Packages(i))
         continue:packageName=""
 
-        set package=##class(CPM.Source.IBase).%OpenContainer(packageName)
+        #dim package As CPM.Source.IBase = ##class(CPM.Source.IBase).%OpenContainer(packageName)
         continue:'$isobject(package)
 
         if package.IsPacked {
