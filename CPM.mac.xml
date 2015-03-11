@@ -204,7 +204,9 @@ PACKAGE(args...) ;;package creation commands
     // link package to the project content
     if prjName '= "" {
         #dim prjExt As %String = $piece(prjName,".",*)
+        // loading from preexisting Studio Project .PRJ
         if prjExt="prj" || (prjExt="PRJ") {
+#if 0
             #dim prjBareName As %String = $piece(prjName,".",1,*-1)
             #dim prj As %Studio.Project = ##class(%Studio.Project).%OpenId(prjBareName)
             if $isobject(prj) {
@@ -219,6 +221,12 @@ PACKAGE(args...) ;;package creation commands
                 // then remember project itself
                 do p.items.Insert(prjName)
             }
+#else
+            do p.AddProjectItems(prjName)
+#endif
+        }
+        // loading from barebone XML export file ("webterminal" mode)
+        elseif prjExt="xml" || (prjExt="XML") {
         }
     }
     if debug { zw p }

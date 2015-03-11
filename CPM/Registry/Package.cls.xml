@@ -129,6 +129,27 @@ appropriate container</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="AddProjectItems">
+<FormalSpec>prjName:%String</FormalSpec>
+<Implementation><![CDATA[
+    #dim prjBareName As %String = $piece(prjName,".",1,*-1)
+    #dim prj As %Studio.Project = ##class(%Studio.Project).%OpenId(prjBareName)
+
+    if $isobject(prj) {
+        // remember all project items 
+        for i=1:1:prj.Items.Count() {
+            #dim item As %Studio.ProjectItem = prj.Items.GetAt(i)
+            #dim itemName As %String = item.Name
+            #dim itemType As %String = item.Type
+            do ##class(%Studio.Project).NormalizeName(.itemName, .itemType)
+            do ..items.Insert(itemName_"."_itemType)
+        }
+        // then remember project itself
+        do ..items.Insert(prjName)
+    }
+]]></Implementation>
+</Method>
+
 <Method name="ExportJSON">
 <Description>
 FIXME - at the moment we output attributes at the same case as properties written
