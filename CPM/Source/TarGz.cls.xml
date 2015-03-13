@@ -74,11 +74,67 @@ override IsPacked property to be always returning 1</Description>
     {
         quit $$$NULLOREF
     }
-    #dim name As %String        = metaInfo.name ; ##class(CPM.IPackage).NormalizeName(metaInfo.name)
-    #dim description As %String = $zconvert(metaInfo.description,"I","UTF8")
-    #dim version As %String     = metaInfo.version
+    #dim p As CPM.IPackage = ##class(CPM.IPackage).%New()
+    set p.name          = metaInfo.name ; ##class(CPM.IPackage).NormalizeName(metaInfo.name)
+    set p.description   = $zconvert(metaInfo.description,"I","UTF8")
+    set p.version       = metaInfo.version
+    set p.author        = metaInfo.author
+    set p.path          = metaInfo.path
+    set p.license       = metaInfo.license
 
-    quit ##class(CPM.IPackage).Create(name, description, version)
+    set p.dependencies  = metaInfo.dependencies
+    set p.keywords      = metaInfo.keywords
+    set p.maintainers   = metaInfo.maintainers
+    set p.items         = metaInfo.items
+
+    quit p
+]]></Implementation>
+</Method>
+
+<Method name="Install">
+<FormalSpec>package:CPM.IPackage</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim status As %Status = $$$OK
+    #dim fileStream AS %Stream.FileBinary = ..PackageContent.GetAt(package.path).fileData
+
+    if $isobject(fileStream) {
+        // FIXME - beware of extreme copy-paste from CPM.Source.Xml!
+
+        // 1. load list of items in the container
+        do $system.OBJ.LoadStream(fileStream,"-d",,.list,1)
+        write !,"About to load these items from the package ", package.name,!
+        #dim itemName As %String = ""
+        for  {
+            set itemName = $order(list(itemName))
+            quit:itemName=""
+            write ?8,itemName,!
+        }
+        do $system.OBJ.LoadStream(fileStream,"ck",.errorlog,.list)
+        set itemName = "" for {
+            set itemName = $order(list(itemName))
+            quit:itemName=""
+            do package.items.Insert(itemName)
+        }
+        // TODO - check errorlog
+        
+        // 4.0. check whether there is same name duplicate
+        #dim storedPackage As CPM.Registry.Package
+        if ##class(CPM.Registry.Package).%ExistsId(package.name) {
+            // TODO - later we need to be more vocal, at the moment - just overwrite
+            //        it sliently
+            set storedPackage = ##class(CPM.Registry.Package).%OpenId(package.name)
+            do storedPackage.%OnNew(package)
+        } else {
+            set storedPackage = ##class(CPM.Registry.Package).%New(package)
+        }
+
+        // 4. save package instance to the registry
+        set status = storedPackage.%Save()
+    } else {
+        set status = '$$$OK
+    }
+    quit status
 ]]></Implementation>
 </Method>
 </Class>

@@ -105,7 +105,7 @@ given different handler class will be called)</Description>
         set response = $$$CpmRegistry.Get(destUrl)
         set package  = ##class(%Stream.FileBinary).%New()
         set fileName = "test.tgz"
-        set package.Filename = ##class(%File).NormalizeFilename(fileName, $$$CpmConfig.tempDir)
+        set package.Filename = ##class(%File).NormalizeFilename(fileName, $$$CpmConfig.tempdir)
         do package.CopyFromAndSave(response.Data)
         kill response
         set o = $classmethod($$$PpvExtensions("TGZ"), "%New")
