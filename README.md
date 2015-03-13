@@ -5,16 +5,20 @@ _This is still work-in-progress, and we appreciate any help in implementation of
 
 ## TODO list (the nearest and long-term)
 
-- [ ] %CPM shell
+- [X] CPM shell
   - [X] list
   - [X] search
   - [X] install
   - [X] help
+  - [X] config /get | /set
   - [ ] uninstall
   - [ ] reinstall
-  - [ ] package create
-    - [ ] package ...
-  - [ ] package publish
+  - [x] package 
+  - [x]   /create
+  - [x]   /delete
+  - [x]   /from prj | /from xml
+  - [X] export /major | /minor
+  - [ ] package /publish
   - [ ] shell extensions API via extending basic class (_desired for 1.0, but not required_)
 
 - [X] Multiple container types
