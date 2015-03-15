@@ -223,6 +223,9 @@ PACKAGE(args...) ;;package creation commands
         elseif prjExt="xml" || (prjExt="XML") {
             do p.AddXmlItems(prjName, autoload)
         }
+        elseif ##class(%Library.File).DirectoryExists(prjName) {
+            do p.AddDirectoryItems(prjName, autoload)
+        }
     }
     if debug { zw p }
     set status = p.%Save()

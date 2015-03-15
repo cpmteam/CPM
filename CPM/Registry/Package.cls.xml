@@ -135,6 +135,25 @@ appropriate container</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="AddDirectoryItems">
+<FormalSpec>directoryName:%String,autoLoad:%Boolean=0</FormalSpec>
+<Implementation><![CDATA[
+    if ##class(%Library.File).Exists(directoryName) {
+        #dim list
+        do $system.OBJ.ImportDir(directoryName,,"ck",,1,.list)
+        write !,"Adding these items to the package: ",..name, !
+
+        #dim itemName As %String = ""
+        for  {
+            set itemName = $order(list(itemName))
+            quit:itemName=""
+            write ?8,itemName,!
+            do ..items.Insert(itemName)
+        }
+    }
+]]></Implementation>
+</Method>
+
 <Method name="AddProjectItems">
 <FormalSpec>prjName:%String</FormalSpec>
 <Implementation><![CDATA[
