@@ -16,6 +16,8 @@
 #define CpmInstall  $$$CpmInstance.install
 #define CpmSearch   $$$CpmInstance.search
 
+#define UtilMakePath(%dir,%name) ##class(%Library.File).NormalizeFilename(%name,%dir)
+
 #define CpmLastPkgName ^||CPM.LastPkgName
 
 

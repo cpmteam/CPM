@@ -112,8 +112,14 @@ appropriate container</Description>
 <FormalSpec>verbose:%Boolean</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    #dim DirectoryName As %String = $$$CpmConfig.tempdir
-    #dim fileName As %String = ##class(%Library.File).NormalizeFilename("package.json",DirectoryName)
+    #dim status As %Status = $$$OK
+    #dim DirectoryName As %String = $$$UtilMakePath($$$CpmConfig.tempdir,..name)
+    do ##class(%Library.File).CreateDirectoryChain(DirectoryName)
+    write !, "Exporting package files to: ", DirectoryName, !
+    do ##class(%Library.File).ComplexDelete(DirectoryName_"/*.*")
+    write "Deleted all files in the directory:",!
+    
+    #dim fileName As %String = $$$UtilMakePath(DirectoryName,"package.json")
     // 1. export/generate metainfo
     #dim containerName As %String = ..path
     if containerName="" {
@@ -123,7 +129,7 @@ appropriate container</Description>
     do ..ExportJSON(fileName, $this) // FIXME - attribute case
     // 2. export container
     // FIXME - at the moment exporting only using XML
-    set fileName = ##class(%Library.File).NormalizeFilename(containerName, DirectoryName)
+    set fileName = $$$UtilMakePath(DirectoryName,containerName)
     #dim listItems = $lts(..items.Serialize(),",")
     do $system.OBJ.Export(listItems,fileName)
 ]]></Implementation>
