@@ -42,7 +42,7 @@ _This is still work-in-progress, and we appreciate any help in implementation of
 
 - [ ] site
   - [ ] login frontend 
-  - [X] database backend - http://cpmiscregistry.couchappy.com/-/all/
+  - [X] database backend - https://cpmisc.smileupps.com/-/all/
 
 - [ ] initial examples converted
   - [ ]  iknowSocial - *good*;
