@@ -10,7 +10,7 @@
 
 <Property name="registry">
 <Type>%String</Type>
-<InitialExpression>"http://cpmiscregistry.couchappy.com"</InitialExpression>
+<InitialExpression>"https://cpmisc.smileupps.com"</InitialExpression>
 </Property>
 
 <Property name="tempdir">
