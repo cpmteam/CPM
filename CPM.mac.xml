@@ -32,13 +32,13 @@ SHELL
         if $data(aliases(command),command)
         
         quit:command="QUIT"
-        
+
         do BATCH(command, args...)
     }
     quit
 
 ExtractArgs(&line,&command,&args) {
-    #dim pattern As %String = ##class(%Regex.Matcher).%New("[^ ]+|\""([^\""]+)\""")
+    #dim pattern As %String = ##class(%Regex.Matcher).%New("\""([^\""]+)\""|[^ ]+")
 
     set line    = $zstrip(line,"<>WC")
     set command = $piece(line," ")
