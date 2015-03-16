@@ -32,13 +32,13 @@ SHELL
         if $data(aliases(command),command)
         
         quit:command="QUIT"
-        
+
         do BATCH(command, args...)
     }
     quit
 
 ExtractArgs(&line,&command,&args) {
-    #dim pattern As %String = ##class(%Regex.Matcher).%New("[^ ]+|\""([^\""]+)\""")
+    #dim pattern As %String = ##class(%Regex.Matcher).%New("\""([^\""]+)\""|[^ ]+")
 
     set line    = $zstrip(line,"<>WC")
     set command = $piece(line," ")
@@ -222,6 +222,9 @@ PACKAGE(args...) ;;package creation commands
         // loading from barebone XML export file ("webterminal" mode)
         elseif prjExt="xml" || (prjExt="XML") {
             do p.AddXmlItems(prjName, autoload)
+        }
+        elseif ##class(%Library.File).DirectoryExists(prjName) {
+            do p.AddDirectoryItems(prjName, autoload)
         }
     }
     if debug { zw p }
