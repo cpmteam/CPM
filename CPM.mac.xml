@@ -10,6 +10,7 @@ SHELL
     new
     #; here goes interactive entry
     #; aliases for commands
+    do init
     do ALIASES(.aliases)
     for i=1:1 {
         set line=$text(ALIASES+i)
@@ -35,7 +36,25 @@ SHELL
 
         do BATCH(command, args...)
     }
+    do fini
     quit
+
+#; shell initialization code
+init() {
+    do RegisterAllSourceTypes()
+    do $$$CpmInstance.Registry.Cache.Update()
+}
+
+#; shell finalization code
+fini() {
+    do ##class(CPM.Source.IBase).UnregisterExts()
+}
+
+#; register all known metainfo extensions
+RegisterAllSourceTypes() {
+    do ##class(CPM.Source.IBase).UnregisterExts()
+    do ##class(CPM.Source.IBase).ForEachSuccessor("RegisterExts")
+}
 
 ExtractArgs(&line,&command,&args) {
     #dim pattern As %String = ##class(%Regex.Matcher).%New("\""([^\""]+)\""|[^ ]+")
@@ -154,14 +173,10 @@ ALIASES(aliases)
         }
     }
     quit
+
 COMMANDS
 
-RegisterAllSourceTypes() {
-    do ##class(CPM.Source.IBase).UnregisterExts()
-    do ##class(CPM.Source.IBase).ForEachSuccessor("RegisterExts")
-}
 INSTALL(packages...) ;;install package
-    do RegisterAllSourceTypes()
     do $$$CpmInstance.Install(packages...)
     quit
 
