@@ -110,7 +110,7 @@ given different handler class will be called)</Description>
         kill response
         set o = $classmethod($$$PpvExtensions("TGZ"), "%New")
         if $isobject(o) {
-            do o.Open(fileName)
+            do o.Open(package.Filename)
         }
     }
 
