@@ -10,6 +10,7 @@ SHELL
     new
     #; here goes interactive entry
     #; aliases for commands
+    do init
     do ALIASES(.aliases)
     for i=1:1 {
         set line=$text(ALIASES+i)
@@ -35,7 +36,25 @@ SHELL
 
         do BATCH(command, args...)
     }
+    do fini
     quit
+
+#; shell initialization code
+init() {
+    do RegisterAllSourceTypes()
+    do $$$CpmInstance.Registry.Cache.Update()
+}
+
+#; shell finalization code
+fini() {
+    do ##class(CPM.Source.IBase).UnregisterExts()
+}
+
+#; register all known metainfo extensions
+RegisterAllSourceTypes() {
+    do ##class(CPM.Source.IBase).UnregisterExts()
+    do ##class(CPM.Source.IBase).ForEachSuccessor("RegisterExts")
+}
 
 ExtractArgs(&line,&command,&args) {
     #dim pattern As %String = ##class(%Regex.Matcher).%New("\""([^\""]+)\""|[^ ]+")
@@ -154,14 +173,10 @@ ALIASES(aliases)
         }
     }
     quit
+
 COMMANDS
 
-RegisterAllSourceTypes() {
-    do ##class(CPM.Source.IBase).UnregisterExts()
-    do ##class(CPM.Source.IBase).ForEachSuccessor("RegisterExts")
-}
 INSTALL(packages...) ;;install package
-    do RegisterAllSourceTypes()
     do $$$CpmInstance.Install(packages...)
     quit
 
@@ -259,7 +274,7 @@ IncreaseMajorVersion(version) {
     quit $lts(list, ".")
 }
 
-EXPORT(args...) ;; prepare to publish - export package(s)
+EXPORT(args...) ;;prepare to publish - export package(s)
     new (args)
     #dim verbose As %Boolean = 0
     #dim minor As %Boolean = 0
@@ -297,7 +312,7 @@ SEARCH(terms...) ;;search packages
     do $$$CpmInstance.Search(terms...)
     quit
 
-LIST(args...) ;;list of installed packages
+LIST(args...) ;;list of installed and available packages
     new (args)
     #dim verbose As %Boolean = 0
     #dim local As %Boolean = 1
@@ -323,7 +338,7 @@ LIST(args...) ;;list of installed packages
     }
     quit
 
-CONFIG(args...) ;; get/set configuration parameters
+CONFIG(args...) ;;get/set configuration parameters
     new (args)
     #dim debug As %Boolean = 0
     #dim getOp As %Boolean = 0
