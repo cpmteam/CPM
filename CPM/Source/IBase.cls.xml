@@ -81,18 +81,31 @@ given different handler class will be called)</Description>
                 do o.Open(fileName)
             }
         }
-    } elseif $match(packageName,"https?\:\/\/.*") {
-        
     } else {
-        #dim tag As %String = $piece(packageName, "@", 2)
-        set:tag="" tag="latest"
-        set packageName = $piece(packageName,"@")
-        set package     = ##class(CPM.Registry.Package).%OpenId(packageName)
-        quit:'$isobject(package)
+        #dim package As %CPM.Registry.Package
+        #dim url As %String = ""
+        
+        if $match(packageName,"https?\:\/\/.*") {
+            // installing directly from GitHub repo
+            // FIXME - check github assumptions
+            set url = packageName _ "/tarball/master/"
+        } else {
+            #dim tag As %String = $piece(packageName, "@", 2)
+            set:tag="" tag="latest"
+            set packageName = $piece(packageName,"@")
+#if 0
+            set package     = ##class(CPM.Registry.Package).%OpenId(packageName)
+            #; FIXME - check version mismatch
+            quit:'$isobject(package)
+#else
+            if '##class(CPM.Registry.Package).%ExistsId(packageName) {
+                quit $$$NULLOREF
+            }
+#endif
 
-        set url = $$$CpmConfig.registry_"/"_packageName_"/"_tag
+            set url = $$$CpmConfig.registry_"/"_packageName_"/"_tag
+        }
         $$$UrlParser(url,url)
-
         #dim response As %Net.HttpResponse = $$$CpmRegistry.Get(.url)
 
         #dim data As %ZEN.proxyObject
@@ -105,7 +118,7 @@ given different handler class will be called)</Description>
         set response = $$$CpmRegistry.Get(destUrl)
         set package  = ##class(%Stream.FileBinary).%New()
         set fileName = "test.tgz"
-        set package.Filename = ##class(%File).NormalizeFilename(fileName, $$$CpmConfig.tempdir)
+        set package.Filename = $$$UtilMakePath($$$CpmConfig.tempdir, fileName)
         do package.CopyFromAndSave(response.Data)
         kill response
         set o = $classmethod($$$PpvExtensions("TGZ"), "%New")

@@ -41,6 +41,7 @@ Get SSL Configuration by Server as a name for configuration</Description>
 
 <Method name="Request">
 <Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[Url:%String,&Params]]></FormalSpec>
 <Implementation><![CDATA[
     set method=$$$GetParam(Params,"method","GET")
@@ -80,6 +81,7 @@ Get SSL Configuration by Server as a name for configuration</Description>
 </Method>
 
 <Method name="Get">
+<ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[Url:%String="",&Params]]></FormalSpec>
 <Implementation><![CDATA[
     $$$UrlParser(Url,url)
