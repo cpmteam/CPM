@@ -243,16 +243,27 @@ Is used to get the value of an unknown property.</Description>
 <Type>%SQLQuery</Type>
 <FormalSpec>Value:%String</FormalSpec>
 <SqlProc>1</SqlProc>
-<SqlQuery>SELECT id from (
-    SELECT id FROM package where UPPER(name) %INLIST UPPER(:Value)
+<SqlQuery>    SELECT %id FROM CPM_Registry.Package where name %STARTSWITH :Value</SqlQuery>
+</Query>
+
+<UDLText name="T">
+<Content><![CDATA[
+/* 
+Query Search(Value As %String) As %SQLQuery [ SqlProc ]
+{
+SELECT id from (
+    SELECT id FROM package where UPPER(name) %STARTSWITH UPPER(:Value)
     union all
     SELECT id FROM package where FOR SOME %ELEMENT(keywords) (%VALUE %INLIST(:Value))
     union all
     SELECT id FROM package where description %CONTAINSTERM(:Value)
     union all
     SELECT id FROM package where FOR SOME %ELEMENT(maintainers) (%VALUE %INLIST(:Value))
-) GROUP BY id</SqlQuery>
-</Query>
+) GROUP BY id
+}
+*/
+]]></Content>
+</UDLText>
 
 <Storage name="Default">
 <Type>%Library.CacheStorage</Type>
