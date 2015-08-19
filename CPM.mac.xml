@@ -39,8 +39,8 @@ SHELL
     }
     }
     catch e {
-        do fini
     }
+    do fini
     quit
 
 #; shell initialization code
