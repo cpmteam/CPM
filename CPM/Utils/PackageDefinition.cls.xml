@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.Utils.PackageDefinition">
+<Abstract>1</Abstract>
 <IncludeCode>CPM.Utils.Compile</IncludeCode>
 <Super>%RegisteredObject</Super>
 <TimeCreated>63782,68064.705177</TimeCreated>
+
+<Parameter name="AUTOREGISTER">
+<Description>
+automatically register compiled package definition in the CPM 
+.. override all local changes</Description>
+<Type>%Boolean</Type>
+<Default>1</Default>
+</Parameter>
 
 <Projection name="PackageProjection">
 <Type>CPM.Utils.PackageProjection</Type>
@@ -28,14 +37,26 @@
     if '$IsObject(xdata) || '$IsObject(data) {
         return %objlasterror 
     }
-    #dim tSC As %Status = $$$OK
-    while 'data.AtEnd {
-        #dim tLength As %Integer = 32000
-        #dim tLine As %String = data.ReadLine(.tLength, .tSC)
-        quit:$$$ISERR(tSC)
-        $$$CPMCOMPILELOG(tLine)
-        quit:$$$ISERR(tSC)
+    #dim metaInfo ; multi-dimentional array
+
+    #dim jsonText As %String = data.Read(data.Size)
+    $$$CPMCOMPILELOG(jsonText)
+    do data.Rewind() ; is log above is not an noop, then we need to rewind
+
+    if '##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(jsonText,,.metaInfo) {
+        return 0
     }
+    $$$CPMCOMPILELOG(metaInfo.name)
+    $$$CPMCOMPILELOG(metaInfo.description)
+    $$$CPMCOMPILELOG(metaInfo.version)
+    $$$CPMCOMPILELOG(metaInfo.author)
+    $$$CPMCOMPILELOG(metaInfo.path)
+    $$$CPMCOMPILELOG(metaInfo.license)
+
+    // we are called here in the middle of a moment when ton of classes being compiled/imported
+    // remember pakage.json information for later moment when we will save package object to the 
+    // internal storage (i.e. instance of CPM.Registry.Package)
+    do ##class(CPM.Registry.Package).RegisterPackageDefinition(jsonText) ; save this json package for final package definition moment
     return $$$OK
 ]]></Implementation>
 </Method>

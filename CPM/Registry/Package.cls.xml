@@ -136,6 +136,9 @@ appropriate container</Description>
 </Method>
 
 <Method name="AddDirectoryItems">
+<Description>
+xml load from files in subdirectories, automatically register all as 
+package item</Description>
 <FormalSpec>directoryName:%String,autoLoad:%Boolean=0</FormalSpec>
 <Implementation><![CDATA[
     if ##class(%Library.File).Exists(directoryName) {
@@ -154,7 +157,17 @@ appropriate container</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="RegisterPackageDefinition">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>jsonText:%String</FormalSpec>
+<Implementation><![CDATA[    #; FIXME
+]]></Implementation>
+</Method>
+
 <Method name="AddProjectItems">
+<Description>
+load items from gibven project, automatically register all as 
+package item</Description>
 <FormalSpec>prjName:%String</FormalSpec>
 <Implementation><![CDATA[
     #dim prjBareName As %String = $piece(prjName,".",1,*-1)
