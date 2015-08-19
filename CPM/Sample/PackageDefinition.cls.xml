@@ -8,8 +8,8 @@
 <MimeType>application/json</MimeType>
 <Data><![CDATA[
 {
-        "name": "cpm-installer-sample",
-        "description": "CPM package sample",
+        "name": "cpm-embedded-package-sample",
+        "description": "CPM package sample with the embedded paсkage definition",
         "author": "tsafin",
         "version": "0.5.0",
         "license": "MIT",

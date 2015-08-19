@@ -41,7 +41,8 @@ automatically register compiled package definition in the CPM
 
     #dim jsonText As %String = data.Read(data.Size)
     $$$CPMCOMPILELOG(jsonText)
-    do data.Rewind() ; is log above is not an noop, then we need to rewind
+    $$$CPMCOMPILELOG($J)
+    $$$CPMCOMPILELOG($zparent)
 
     if '##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(jsonText,,.metaInfo) {
         return 0

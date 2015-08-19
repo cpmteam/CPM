@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.Utils.Session">
+<IncludeCode>CPM.LIB</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>63784,520.137352</TimeCreated>
+
+<Property name="LastPackageName">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<Transient>1</Transient>
+</Property>
+
+<Property name="LastPackageJSON">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<Transient>1</Transient>
+</Property>
+
+<Method name="Lock">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[    lock +@$$$CpmSessionGlobal:0 quit $test
+]]></Implementation>
+</Method>
+
+<Method name="Unlock">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[    lock -@$$$CpmSessionGlobal quit $test
+]]></Implementation>
+</Method>
+
+<Method name="IsLocked">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+    lock +@$$$CpmSessionGlobal:0
+    #dim value As %Boolean = $Test
+    if value {
+        lock -@$$$CpmSessionGlobal
+    }
+]]></Implementation>
+</Method>
+
+<Method name="LastPackageNameGet">
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[    quit $$$CpmLastPkgName
+]]></Implementation>
+</Method>
+
+<Method name="LastPackageNameSet">
+<FormalSpec>Value:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set $$$CpmLastPkgName = Value
+    
+    quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="LastPackageJSONGet">
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[    quit $$$CpmLastPkgJson
+]]></Implementation>
+</Method>
+
+<Method name="LastPackageJSONSet">
+<FormalSpec>Value:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set $$$CpmLastPkgJson = Value
+    
+    quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

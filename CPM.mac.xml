@@ -10,6 +10,7 @@ SHELL
     new
     #; here goes interactive entry
     #; aliases for commands
+    try {
     do init
     do ALIASES(.aliases)
     for i=1:1 {
@@ -36,17 +37,24 @@ SHELL
 
         do BATCH(command, args...)
     }
-    do fini
+    }
+    catch e {
+        do fini
+    }
     quit
 
 #; shell initialization code
 init() {
     do RegisterAllSourceTypes()
     do $$$CpmInstance.Registry.Cache.Update()
+    if '##class(CPM.Utils.Session).Lock() {
+        ztrap "Can't lock CPM session global: "_$$$CpmSessionGlobal
+    }
 }
 
 #; shell finalization code
 fini() {
+    do ##class(CPM.Utils.Session).Unlock()
     do ##class(CPM.Source.IBase).UnregisterExts()
 }
 
@@ -135,6 +143,8 @@ PopArrValue(&args)
     return ""
 }
 
+#; FIXME - we supposed to accept _whole line_ here
+#; and then split into command and options
 BATCH(command="help", args...)
     ; here goes batch entry
     do ALIASES(.aliases)
@@ -243,6 +253,9 @@ PACKAGE(args...) ;;package creation commands
         }
     }
     if debug { zw p }
+
+    do p.UsePackageJsonProps()
+
     set status = p.%Save()
 
     quit status
@@ -338,6 +351,11 @@ LIST(args...) ;;list of installed and available packages
     }
     quit
 
+PURGE(args...) ;; purge all installed packages
+    ;FIXME - do uninstall
+    do ##class(CPM.Registry.Package).%DeleteExtent()
+    quit
+    
 CONFIG(args...) ;;get/set configuration parameters
     new (args)
     #dim debug As %Boolean = 0
