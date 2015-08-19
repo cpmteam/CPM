@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.Utils.PackageDefinition">
-<Abstract>1</Abstract>
+<IncludeCode>CPM.Utils.Compile</IncludeCode>
 <Super>%RegisteredObject</Super>
 <TimeCreated>63782,68064.705177</TimeCreated>
 
@@ -14,41 +14,29 @@
 <MimeType>application/json</MimeType>
 <Data><![CDATA[
 {
-        "name": "webterminal",
-        "title": "Cache WEB Terminal",
-        "description": "Web-based terminal emulator for Caché administering.",
-        "author": "ZitRo",
-        "version": "2.0.0-beta.2",
-        "releaseNumber": "4",
-        "repository": {
-            "type": "git",
-            "url": "https://github.com/intersystems-ru/webterminal.git"
-        },
-        "homepage": "https://github.com/intersystems-ru/webterminal",
-        "bugs":{
-            "url": "https://github.com/intersystems-ru/webterminal/issues"
-        },
-        "keywords": [
-            "terminal"
-        ],
-        "devDependencies": {
-            "grunt": ">=0.4.5",
-            "grunt-contrib-clean": ">=0.6.0",
-            "grunt-contrib-concat": ">=0.5.0",
-            "grunt-contrib-copy": ">=0.5.0",
-            "grunt-contrib-uglify": ">=0.6.0",
-            "grunt-preprocess": ">=4.0.0"
-        }
     }
 ]]></Data>
 </XData>
 
 <Method name="%OnPkgDefCompile">
-<Internal>1</Internal>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <ForceGenerate>1</ForceGenerate>
-<Implementation><![CDATA[    return $$$OK
+<Implementation><![CDATA[
+    #dim xdata As %Dictionary.CompiledXData = ##class(%Dictionary.CompiledXData).%OpenId(..%ClassName(1)_"||Package")
+    #dim data As %Stream.TmpCharacter = xdata.Data
+    if '$IsObject(xdata) || '$IsObject(data) {
+        return %objlasterror 
+    }
+    #dim tSC As %Status = $$$OK
+    while 'data.AtEnd {
+        #dim tLength As %Integer = 32000
+        #dim tLine As %String = data.ReadLine(.tLength, .tSC)
+        quit:$$$ISERR(tSC)
+        $$$CPMCOMPILELOG(tLine)
+        quit:$$$ISERR(tSC)
+    }
+    return $$$OK
 ]]></Implementation>
 </Method>
 </Class>

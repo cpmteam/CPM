@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.Utils.PackageProjection">
+<IncludeCode>CPM.Utils.Compile</IncludeCode>
 <Super>%Projection.AbstractProjection</Super>
 <TimeCreated>63782,67979.691944</TimeCreated>
 
@@ -9,12 +10,12 @@
 <FormalSpec><![CDATA[className:%String,&parameters:%String,modified:%String,qStruct]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    set ^cpm.log($increment(^cpm.log))=$lb(className, parameters, modified, qStruct)
+    $$$CPMCOMPILELOG($lb(className, parameters, modified, qStruct))
     quit:(className="CPM.Utils.PackageDefinition") $$$OK
-    set tClass = ##class(%Dictionary.CompiledClass).%OpenId(className)
+    #dim tClass As %Dictionary.CompiledClass = ##class(%Dictionary.CompiledClass).%OpenId(className)
     quit:tClass.Abstract $$$OK
     
-    return $classmethod(classname, "%OnPkgDefCompile")
+    return $classmethod(className, "%OnPkgDefCompile")
 ]]></Implementation>
 </Method>
 

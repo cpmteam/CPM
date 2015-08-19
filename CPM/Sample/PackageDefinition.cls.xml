@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.Sample.PackageDefinition">
+<Super>CPM.Utils.PackageDefinition</Super>
+<TimeCreated>63783,49209.753877</TimeCreated>
+
+<XData name="Package">
+<MimeType>application/json</MimeType>
+<Data><![CDATA[
+{
+        "name": "webterminal",
+        "title": "Cache WEB Terminal",
+        "description": "Web-based terminal emulator for Caché administering.",
+        "author": "ZitRo",
+        "version": "2.0.0-beta.2",
+        "releaseNumber": "4",
+        "repository": {
+            "type": "git",
+            "url": "https://github.com/intersystems-ru/webterminal.git"
+        },
+        "homepage": "https://github.com/intersystems-ru/webterminal",
+        "bugs":{
+            "url": "https://github.com/intersystems-ru/webterminal/issues"
+        },
+        "keywords": [
+            "terminal"
+        ],
+        "devDependencies": {
+            "grunt": ">=0.4.5",
+            "grunt-contrib-clean": ">=0.6.0",
+            "grunt-contrib-concat": ">=0.5.0",
+            "grunt-contrib-copy": ">=0.5.0",
+            "grunt-contrib-uglify": ">=0.6.0",
+            "grunt-preprocess": ">=4.0.0"
+        }
+    }
+]]></Data>
+</XData>
+</Class>
+</Export>
