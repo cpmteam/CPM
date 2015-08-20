@@ -24,17 +24,29 @@ search for packages
     }
     try {
         do ..Registry.Cache.Update()
-    } catch {
+    }
+    catch {
     }
     
-    set tST=##class(%SQL.Statement).%New()
-    set tSC=tST.%PrepareClassQuery("CPM.Registry.Package","Search")
+    set tST = ##class(%SQL.Statement).%New()
+#if 0
+    // FIXME - disabled for a while, till we found a way to find by package name prefix
+    set tSC = tST.%PrepareClassQuery("CPM.Registry.Package","Search")
     $$$ThrowOnError(tSC)
-    #dim tRes As %Library.ProcedureContext = tST.%Execute(terms)
+    #dim tRes As %SQL.StatementResult = tST.%Execute(terms)
+#else
+    // FIXME - at the moment it works only with the single prefix name
+    #dim tSC As %Status = tST.%Prepare("SELECT %id FROM CPM_Registry.Package where name %STARTSWITH ?")
+    $$$ThrowOnError(tSC)
+
+    #dim Value As %String = $get(Terms(1))
+    #dim tRes As %SQL.StatementResult = tST.%Execute(Value)
+#endif
+
     while tRes.%Next() {
-        set id=tRes.%Get("ID")
-        set package=##class(CPM.Registry.Package).%OpenId(id)
-        set authors=""
+        set id = tRes.ID
+        set package = ##class(CPM.Registry.Package).%OpenId(id)
+        set authors = ""
         for i=1:1:package.maintainers.Size {
             set maintainer="="_package.maintainers.GetAt(i)
             if $length(maintainer)+$l(authors) > 20 {

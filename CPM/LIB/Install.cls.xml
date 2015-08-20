@@ -28,10 +28,10 @@ DESCRIPTION
         quit $$$OK
     }
     do ..Registry.Cache.Update()
-    set tempDir=##class(%File).NormalizeDirectory($zh, ..Config.tempdir)
+    #dim tempDir As %String = $$$UtilMakePath(..Config.tempdir, $zh)
     
     for i=1:1:Packages {
-        set packageName=$get(Packages(i))
+        #dim packageName As %String = $get(Packages(i))
         continue:packageName=""
 
         #dim package As CPM.Source.IBase = ##class(CPM.Source.IBase).%OpenContainer(packageName)

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.Sample.PackageDefinition">
+<Super>CPM.Utils.PackageDefinition</Super>
+<TimeCreated>63783,49209.753877</TimeCreated>
+
+<XData name="Package">
+<MimeType>application/json</MimeType>
+<Data><![CDATA[
+{
+        "name": "cpm-embedded-package-sample",
+        "description": "CPM package sample with the embedded paсkage definition",
+        "author": "tsafin",
+        "version": "0.5.0",
+        "license": "MIT",
+        "dependencies": {
+            "async": ">= 0.2.10",
+            "fsplus": ">= 0.1.0",
+            "language-cos": "https://github.com/UGroup/atom-language-cos.git"
+        }
+    }
+]]></Data>
+</XData>
+</Class>
+</Export>

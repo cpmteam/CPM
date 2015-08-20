@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.Registry.Package">
-<IncludeCode>CPM.LIB</IncludeCode>
+<IncludeCode>CPM.LIB,CPM.Utils.Compile</IncludeCode>
 <Super>%Persistent,CPM.IPackage</Super>
 <TimeCreated>63577,86035.524325</TimeCreated>
 
@@ -51,7 +51,50 @@
     // FIXME: bad, bad me - we should not modify state of the object upon saving!
     set ..Modified = $ZDT($ZTS,3,,3)
 
+
     quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="UsePackageJsonProps">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim status As %Status = '$$$OK
+    #dim metaInfo ; multi-dimentional array
+
+    #dim jsonText As %String = $get($$$CpmLastPkgJson)
+    $$$CPMCOMPILELOG(jsonText)
+
+    if jsonText'="" {
+        if '##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(jsonText,,.metaInfo) {
+            quit status
+        }
+        set status = $$$OK
+#if 0 
+    #define SetProp(%prop,%from)   ##continue
+        if 'm%%prop {            ##continue
+            set ..%prop = %from.%prop       ##continue
+        }
+        $$$SetProp(name,metaInfo)
+        $$$SetProp(description,metaInfo)
+        $$$SetProp(version,metaInfo)
+        $$$SetProp(author,metaInfo)
+        $$$SetProp(path,metaInfo)
+        $$$SetProp(license,metaInfo)
+#else
+    #define SetProp(%prop,%from)  set ..%prop = %from.%prop
+        write !,"Changing package properties to package.json values: ",!
+        write ?8,..name, " => ", metaInfo.name, !
+        write ?8,..version, " => ", metaInfo.version, !
+        $$$SetProp(name,metaInfo) ; FIXME! Uh-oh, forcefully change name of a package. Which is primary idkey...
+        $$$SetProp(description,metaInfo)
+        $$$SetProp(version,metaInfo)
+        $$$SetProp(author,metaInfo)
+        $$$SetProp(path,metaInfo)
+        $$$SetProp(license,metaInfo)
+#endif
+    }
+    quit status
 ]]></Implementation>
 </Method>
 
@@ -66,6 +109,9 @@
         set o = ..%New()
         set o.Name = id
     }
+    // clean temporary package.json store, if any
+    kill $$$CpmLastPkgJson
+
     quit o
 ]]></Implementation>
 </Method>
@@ -136,6 +182,9 @@ appropriate container</Description>
 </Method>
 
 <Method name="AddDirectoryItems">
+<Description>
+xml load from files in subdirectories, automatically register all as 
+package item</Description>
 <FormalSpec>directoryName:%String,autoLoad:%Boolean=0</FormalSpec>
 <Implementation><![CDATA[
     if ##class(%Library.File).Exists(directoryName) {
@@ -154,7 +203,17 @@ appropriate container</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="RegisterPackageDefinition">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>jsonText:%String</FormalSpec>
+<Implementation><![CDATA[    set $$$CpmLastPkgJson = jsonText
+]]></Implementation>
+</Method>
+
 <Method name="AddProjectItems">
+<Description>
+load items from gibven project, automatically register all as 
+package item</Description>
 <FormalSpec>prjName:%String</FormalSpec>
 <Implementation><![CDATA[
     #dim prjBareName As %String = $piece(prjName,".",1,*-1)

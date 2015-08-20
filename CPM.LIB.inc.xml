@@ -18,7 +18,10 @@
 
 #define UtilMakePath(%dir,%name) ##class(%Library.File).NormalizeFilename(%name,%dir)
 
-#define CpmLastPkgName ^||CPM.LastPkgName
+#; session global suppose to be not mapped to the central CPM database
+#define CpmSessionGlobal $name(^CPMx.Session)
+#define CpmLastPkgName @$$$CpmSessionGlobal@("LastPackage")
+#define CpmLastPkgJson @$$$CpmSessionGlobal@("Package.json")
 
 
 ]]></Routine>
