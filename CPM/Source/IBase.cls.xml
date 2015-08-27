@@ -93,16 +93,9 @@ given different handler class will be called)</Description>
             #dim tag As %String = $piece(packageName, "@", 2)
             set:tag="" tag="latest"
             set packageName = $piece(packageName,"@")
-#if 0
-            set package     = ##class(CPM.Registry.Package).%OpenId(packageName)
-            #; FIXME - check version mismatch
-            quit:'$isobject(package)
-#else
             if '##class(CPM.Registry.Package).%ExistsId(packageName) {
                 quit $$$NULLOREF
             }
-#endif
-
             set url = $$$CpmConfig.registry_"/"_packageName_"/"_tag
         }
         $$$UrlParser(url,url)

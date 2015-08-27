@@ -338,7 +338,7 @@ LIST(args...) ;;list of installed and available packages
 
     #dim tRS As %SQL.StatementResult = sql.%Execute()
     while tRS.%Next() {
-        write !?3,tRS.Name, ?32,tRS.Version, ?42,tRS.Description
+        write !?3,tRS.Name, ?32,tRS.Version, " ", ?41,tRS.Description
         if verbose {
             #dim o As CPM.Registry.Package = ##class(CPM.Registry.Package).%OpenId(tRS.ID)
             #dim items As list of %String = o.items
