@@ -89,6 +89,12 @@ given different handler class will be called)</Description>
             // installing directly from GitHub repo
             // FIXME - check github assumptions
             set url = packageName _ "/tarball/master/"
+            $$$UrlParser(url,url)
+            #dim response As %Net.HttpResponse = $$$CpmRegistry.Get(.url)
+
+            set package  = ##class(%Stream.FileBinary).%New()
+            set fileName = "temp.tgz" ; ##class(%Library.File).GetFilename(url)
+            set package.Filename = $$$UtilMakePath($$$CpmConfig.tempdir, fileName)
         } else {
             #dim tag As %String = $piece(packageName, "@", 2)
             set:tag="" tag="latest"
@@ -97,21 +103,22 @@ given different handler class will be called)</Description>
                 quit $$$NULLOREF
             }
             set url = $$$CpmConfig.registry_"/"_packageName_"/"_tag
-        }
-        $$$UrlParser(url,url)
-        #dim response As %Net.HttpResponse = $$$CpmRegistry.Get(.url)
 
-        #dim data As %ZEN.proxyObject
-        set tSC=##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(response.Data,,.data,1)
-        $$$ThrowOnError(tSC)
-        
-        set destUrl = data.dist.tarball
-        set destSha = data.dist.shasum
-        
-        set response = $$$CpmRegistry.Get(destUrl)
-        set package  = ##class(%Stream.FileBinary).%New()
-        set fileName = "test.tgz"
-        set package.Filename = $$$UtilMakePath($$$CpmConfig.tempdir, fileName)
+            $$$UrlParser(url,url)
+            #dim response As %Net.HttpResponse = $$$CpmRegistry.Get(.url)
+
+            #dim data As %ZEN.proxyObject
+            set tSC=##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(response.Data,,.data,1)
+            $$$ThrowOnError(tSC)
+            
+            set destUrl = data.dist.tarball
+            set destSha = data.dist.shasum
+            
+            set response = $$$CpmRegistry.Get(destUrl)
+            set package  = ##class(%Stream.FileBinary).%New()
+            set fileName = ##class(%Library.File).GetFilename(destUrl) ; "test.tgz"
+            set package.Filename = $$$UtilMakePath($$$CpmConfig.tempdir, fileName)
+        }
         do package.CopyFromAndSave(response.Data)
         kill response
         set o = $classmethod($$$PpvExtensions("TGZ"), "%New")
