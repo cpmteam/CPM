@@ -11,20 +11,20 @@ SHELL
     #; here goes interactive entry
     #; aliases for commands
     try {
-    do init
-    for {
-        write !,"CPM:"_$Namespace_">> "
-        read line
-        do ExtractArgs(.line, .command, .args)
-        
-        continue:command=""
-        set command=$zconvert(command,"U")
-        if $data(aliases(command),command)
-        
-        quit:command="QUIT"
+        do init
+        for {
+            write !,"CPM:"_$Namespace_">> "
+            read line
+            do ExtractArgs(.line, .command, .args)
 
-        do BATCH(command, args...)
-    }
+            continue:command=""
+            set command=$zconvert(command,"U")
+            if $data(aliases(command),command)
+
+            quit:command="QUIT"
+
+            do BATCH(command, args...)
+        }
     }
     catch e {
     }
@@ -263,7 +263,7 @@ LIST(args...) ;;list of installed and available packages
     }
     quit
 
-PURGE(args...) ;; purge all installed packages
+PURGE(args...) ;;purge all installed packages
     ;FIXME - do uninstall
     do ##class(CPM.Registry.Package).%DeleteExtent()
     quit
