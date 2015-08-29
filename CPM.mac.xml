@@ -23,7 +23,7 @@ SHELL
 
             quit:command="QUIT"
 
-            do BATCH(command, args...)
+            do batch1(command, args...)
         }
     }
     catch e {
@@ -55,9 +55,15 @@ RegisterAllSourceTypes() {
 
 #include CPM.GetOptions
 
-#; FIXME - we supposed to accept _whole line_ here
-#; and then split into command and options
-BATCH(command="help", args...)
+#; BEWARE - this entry point consume whole command-line
+#;          and then tries to split it into command and arguments
+BATCH(line)
+    new (line)
+    do ExtractArgs(.line, .command, .args)
+    do batch1(command, args...)
+    quit
+    
+batch1(command="help", args...)
     ; here goes batch entry
     do ALIASES(.aliases)
     set command=$zconvert(command,"U")

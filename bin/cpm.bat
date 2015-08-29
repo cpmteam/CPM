@@ -73,17 +73,9 @@ del "%TMPFILE%"
 set INSTANCE=!INSTANCES[1]!
 set CACHEBIN=!DIRECTORIES[1]!\bin\
 
-set ARGUMENTS=
-set ARGSCOUNT=0
-for %%x in (%*) do (
-  set /A ARGSCOUNT+=1
-  if !ARGSCOUNT! gtr 1 ( set ARGUMENTS=!ARGUMENTS!,)
-  set ARGUMENTS=!ARGUMENTS!""%%~x""
-)
-
 :: run command in cache
 cd "%CACHEBIN%"
-cache.exe -s..\mgr\ "BATCH^CPM(%ARGUMENTS%)"
+cache.exe -s..\mgr\ "BATCH^CPM(""%*"")"
 cd "%cd%"
 
 :eof
