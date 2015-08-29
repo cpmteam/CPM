@@ -63,16 +63,21 @@ BATCH(line)
     do batch1(command, args...)
     quit
     
+#; actual batch entry-point with command and arguments given
 batch1(command="help", args...)
-    ; here goes batch entry
+    ; load aliases
     do ALIASES(.aliases)
+    ; convert to lower case
     set command=$zconvert(command,"U")
+    ; translate from alias to command (if it was alias)
     if $data(aliases(command),command)
     
+    ; check we have appropriate tag entry COMMAND^CPM
     if $text(@command)="" {
         write !,"Unrecognized command: ",command,!
         quit
     }
+    ; call this COMMAND^CPM routine with arguments args...
     try {
         set command=command_"(args...)"
         do @command
