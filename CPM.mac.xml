@@ -12,18 +12,6 @@ SHELL
     #; aliases for commands
     try {
     do init
-    do ALIASES(.aliases)
-    for i=1:1 {
-        set line=$text(ALIASES+i)
-        quit:$extract(line)'=" "
-        set command=$zstrip($piece(line,";",2),"<>WCP")
-        for j=3:1:$length(line,";") {
-            set alias=$zconvert($piece(line,";",j),"U")
-            continue:alias=""
-            continue:$data(aliases(alias))
-            set aliases(alias)=command
-        }
-    }
     for {
         write !,"CPM:"_$Namespace_">> "
         read line
@@ -46,6 +34,7 @@ SHELL
 #; shell initialization code
 init() {
     do RegisterAllSourceTypes()
+    do ALIASES(.aliases)
     do $$$CpmInstance.Registry.Cache.Update()
     if '##class(CPM.Utils.Session).Lock() {
         ztrap "Can't lock CPM session global: "_$$$CpmSessionGlobal
