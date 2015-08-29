@@ -98,8 +98,20 @@ ALIASES(aliases)
 
 COMMANDS
 
-INSTALL(packages...) ;;install package
-    do $$$CpmInstance.Install(packages...)
+INSTALL(args...) ;;install package
+    new (args)
+    #dim opts 
+    #dim dryrun As %Boolean = 0
+    #dim silent As %Boolean = 0
+    #dim verbose As %Boolean = 0
+    do GetOptions(.args, 
+                  "/dryrun|/d", .dryrun,
+                  "/s|/silent", .silent, "/verbose|/v", .verbose)
+    #; FIXME - create special GetOptions version which will set opts{} directly
+    set opts("dryrun") = $get(dryrun)
+    set opts("silent") = $get(silent)
+    set opts("verbose") = $get(verbose)
+    do $$$CpmInstance.Install(.opts,args...)
     quit
 
 PACKAGE(args...) ;;package creation commands

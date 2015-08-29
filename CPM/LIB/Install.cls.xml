@@ -20,7 +20,7 @@ DESCRIPTION
 </Parameter>
 
 <Method name="Install">
-<FormalSpec>Packages...:%String</FormalSpec>
+<FormalSpec><![CDATA[&Options,Packages...:%String]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     if '$data(Packages) {
@@ -28,7 +28,6 @@ DESCRIPTION
         quit $$$OK
     }
     do ..Registry.Cache.Update()
-    #dim tempDir As %String = $$$UtilMakePath(..Config.tempdir, $zh)
     
     for i=1:1:Packages {
         #dim packageName As %String = $get(Packages(i))
