@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25">
-<Routine name="CPM.Utils.Compile" type="INC"><![CDATA[
-#define CPMCOMPILELOG(%s) set ^cpm.compile.log($increment(^cpm.compile.log)) = %s
-]]></Routine>
-</Export>
