@@ -211,7 +211,7 @@ create repo-based path using given package symbolic name</Description>
 </Method>
 
 <Method name="Install">
-<FormalSpec>package:CPM.IPackage</FormalSpec>
+<FormalSpec>dryrun:%Boolean=0,package:CPM.IPackage</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     #dim status As %Status = $$$OK
@@ -228,26 +228,28 @@ create repo-based path using given package symbolic name</Description>
         }
         // TODO: 2. Ask interactively to install
         // TODO: 3. Actual installation
-        do $system.OBJ.Load(fullPath,"ck",.errorlog,.list)
-        set itemName = "" for {
-            set itemName = $order(list(itemName))
-            quit:itemName=""
-            do package.items.Insert(itemName)
+        if 'dryrun {
+            do $system.OBJ.Load(fullPath,"ck",.errorlog,.list)
+            set itemName = "" for {
+                set itemName = $order(list(itemName))
+                quit:itemName=""
+                do package.items.Insert(itemName)
+            }
+            // TODO - check errorlog
+            
+            // 4.0. check whether there is same name duplicate
+            #dim storedPackage As CPM.Registry.Package
+            if ##class(CPM.Registry.Package).%ExistsId(package.name) {
+                // TODO - later we need to be more vocal, at the moment - just overwrite
+                //        it sliently
+                set storedPackage = ##class(CPM.Registry.Package).%OpenId(package.name)
+                do storedPackage.%OnNew(package)
+            } else {
+                set storedPackage = ##class(CPM.Registry.Package).%New(package)
+            }
+            // 4. save package instance to the registry
+            set status = storedPackage.%Save()
         }
-        // TODO - check errorlog
-        
-        // 4.0. check whether there is same name duplicate
-        #dim storedPackage As CPM.Registry.Package
-        if ##class(CPM.Registry.Package).%ExistsId(package.name) {
-            // TODO - later we need to be more vocal, at the moment - just overwrite
-            //        it sliently
-            set storedPackage = ##class(CPM.Registry.Package).%OpenId(package.name)
-            do storedPackage.%OnNew(package)
-        } else {
-            set storedPackage = ##class(CPM.Registry.Package).%New(package)
-        }
-        // 4. save package instance to the registry
-        set status = storedPackage.%Save()
 
         quit status
    }

@@ -23,6 +23,9 @@ DESCRIPTION
 <FormalSpec><![CDATA[&Options,Packages...:%String]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+    #dim dryrun As %Boolean = $get(Options("dryrun"),0)
+    #dim silent As %Boolean = $get(Options("silent"),0)
+    #dim verbose As %Boolean = $get(Options("verbose"),0)
     if '$data(Packages) {
         do ..Usage()
         quit $$$OK
@@ -41,7 +44,7 @@ DESCRIPTION
         }
         #dim packageData As CPM.IPackage = package.Parse()
         write !?3, packageData.name, ?25, packageData.version, ?45, packageData.description
-        do package.Install(packageData)
+        do package.Install(dryrun, packageData)
     }
     quit $$$OK
 ]]></Implementation>

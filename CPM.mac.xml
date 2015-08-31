@@ -5,6 +5,7 @@
 #include %occInclude
 #include CPM.LIB
 #include CPM.DataTypes
+#include CPM.SourceTypes
 
 SHELL
     new
@@ -16,11 +17,10 @@ SHELL
             write !,"CPM:"_$Namespace_">> "
             read line
             do ExtractArgs(.line, .command, .args)
-
             continue:command=""
+
             set command=$zconvert(command,"U")
             if $data(aliases(command),command)
-
             quit:command="QUIT"
 
             do batch1(command, args...)
@@ -49,8 +49,7 @@ fini() {
 
 #; register all known metainfo extensions
 RegisterAllSourceTypes() {
-    do ##class(CPM.Source.IBase).UnregisterExts()
-    do ##class(CPM.Source.IBase).ForEachSuccessor("RegisterExts")
+    $$$RegisterAllExtensions
 }
 
 #include CPM.GetOptions

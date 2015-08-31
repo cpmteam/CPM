@@ -31,6 +31,15 @@ will be overriden in the successor</Description>
 <Type>%ArrayOfDataTypes</Type>
 </Property>
 
+<Method name="AutoRegisterExts">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+    if '$data($$$PpvExtensions) {
+        $$$RegisterAllExtensions
+    }
+]]></Implementation>
+</Method>
+
 <Method name="UnregisterExts">
 <Description>
  cleanup process private variables used for .ext and manifest registration</Description>
@@ -73,7 +82,9 @@ given different handler class will be called)</Description>
     #dim ext As %String = $zcvt($piece(fileName,".",*), "U")
     #dim o As CPM.SourceType.IBase = $$$NULLOREF
     #dim packageName As %String = fileName
-    
+
+    do ..AutoRegisterExts()
+
     if ##class(%File).Exists(fileName) {
         if $d($$$PpvExtensions(ext)) {
             set o = $classmethod($$$PpvExtensions(ext), "%New")
@@ -148,7 +159,7 @@ given different handler class will be called)</Description>
 </Method>
 
 <Method name="Install">
-<FormalSpec>package:CPM.IPackage</FormalSpec>
+<FormalSpec>dryrun:%Boolean,package:CPM.IPackage</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[    quit '$$$OK
 ]]></Implementation>
