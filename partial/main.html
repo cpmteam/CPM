@@ -1,4 +1,7 @@
 <div>
+	<md-input-container md-no-float class="md-primary" style="width: 60%; margin: 0 auto;">
+		<input placeholder="Search" ng-model="term" ng-keyup="$event.keyCode==13 && enter(term)" ng-change="enter(term)">
+	</md-input-container>
 	<md-card ng-repeat="item in data" layout="row" layout-padding flex>
 	<md-card-content>
 		<div layout="column">

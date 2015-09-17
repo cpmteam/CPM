@@ -1,18 +1,28 @@
 app.controller('MainCtrl', ['$scope', '$http', 'DataSrvc', function($scope, $http, DataSrvc){
 	console.log('main init')
     $scope.data = [];
+    $scope.sourceData = [];
 
     DataSrvc.getData(function(data){
     	for (item in data) {
-    		console.log(item)
     		if (item != '_updated'){
-    			console.log(data[item].author)
     			data[item].latest = data[item]['dist-tags'].latest
-				//data[item].latest = 
-    			console.log(data[item])
-    			$scope.data.push(data[item]);
+    			$scope.sourceData.push(data[item]);
     		}
     	}
+    	$scope.data= $scope.sourceData
     })
 
+    $scope.enter = function(term){
+		if (!term){
+			$scope.data = $scope.sourceData
+			return;
+		}
+
+		$scope.data = [];
+		$scope.sourceData.forEach(function(item){
+			if(item.name.indexOf(term) >= 0)
+				$scope.data.push(item);
+		})
+	};
 }]);
