@@ -66,7 +66,7 @@ BATCH(line)
 batch1(command="help", args...)
     ; load aliases
     do ALIASES(.aliases)
-    ; convert to lower case
+    ; convert to upper case
     set command=$zconvert(command,"U")
     ; translate from alias to command (if it was alias)
     if $data(aliases(command),command)
