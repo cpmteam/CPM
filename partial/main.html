@@ -1,0 +1,11 @@
+<div>
+	<md-card ng-repeat="item in data" layout="row" layout-padding flex>
+	<md-card-content>
+		<div layout="column">
+			<h2 class="md-title">{{item.name}}</h2>
+			<p ng-if="item.author">{{item.author.name}}</p>
+			<p>version {{item.latest}} (latest)</p>
+		</div>
+	</md-card-content>
+</md-card>
+</div>
