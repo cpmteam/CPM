@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.Utils.PackageProjection">
-<IncludeCode>CPM.Utils.Compile</IncludeCode>
+<IncludeCode>CPM.LIB</IncludeCode>
 <Super>%Projection.AbstractProjection</Super>
 <TimeCreated>63782,67979.691944</TimeCreated>
 

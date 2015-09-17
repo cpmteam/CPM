@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.Registry.Package">
-<IncludeCode>CPM.LIB,CPM.Utils.Compile</IncludeCode>
+<IncludeCode>CPM.LIB</IncludeCode>
 <Super>%Persistent,CPM.IPackage</Super>
 <TimeCreated>63577,86035.524325</TimeCreated>
 

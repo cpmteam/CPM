@@ -5,38 +5,26 @@
 #include %occInclude
 #include CPM.LIB
 #include CPM.DataTypes
+#include CPM.SourceTypes
 
 SHELL
     new
     #; here goes interactive entry
     #; aliases for commands
     try {
-    do init
-    do ALIASES(.aliases)
-    for i=1:1 {
-        set line=$text(ALIASES+i)
-        quit:$extract(line)'=" "
-        set command=$zstrip($piece(line,";",2),"<>WCP")
-        for j=3:1:$length(line,";") {
-            set alias=$zconvert($piece(line,";",j),"U")
-            continue:alias=""
-            continue:$data(aliases(alias))
-            set aliases(alias)=command
-        }
-    }
-    for {
-        write !,"CPM:"_$Namespace_">> "
-        read line
-        do ExtractArgs(.line, .command, .args)
-        
-        continue:command=""
-        set command=$zconvert(command,"U")
-        if $data(aliases(command),command)
-        
-        quit:command="QUIT"
+        do init
+        for {
+            write !,"CPM:"_$Namespace_">> "
+            read line
+            do ExtractArgs(.line, .command, .args)
+            continue:command=""
 
-        do BATCH(command, args...)
-    }
+            set command=$zconvert(command,"U")
+            if $data(aliases(command),command)
+            quit:command="QUIT"
+
+            do batch1(command, args...)
+        }
     }
     catch e {
     }
@@ -46,6 +34,7 @@ SHELL
 #; shell initialization code
 init() {
     do RegisterAllSourceTypes()
+    do ALIASES(.aliases)
     do $$$CpmInstance.Registry.Cache.Update()
     if '##class(CPM.Utils.Session).Lock() {
         ztrap "Can't lock CPM session global: "_$$$CpmSessionGlobal
@@ -60,101 +49,34 @@ fini() {
 
 #; register all known metainfo extensions
 RegisterAllSourceTypes() {
-    do ##class(CPM.Source.IBase).UnregisterExts()
-    do ##class(CPM.Source.IBase).ForEachSuccessor("RegisterExts")
+    $$$RegisterAllExtensions
 }
 
-ExtractArgs(&line,&command,&args) {
-    #dim pattern As %String = ##class(%Regex.Matcher).%New("\""([^\""]+)\""|[^ ]+")
+#include CPM.GetOptions
 
-    set line    = $zstrip(line,"<>WC")
-    set command = $piece(line," ")
-    set line    = $piece(line," ",2,*)
-
-    kill args
-    set args = 0
-    set pattern.Text = line
-    while pattern.Locate() {
-        set argument = pattern.Group
-        set args($increment(args)) = $zstrip(argument, "<>", """")
-    }
-}
-
-#define OptionBoolean 1
-#define OptionString 2
-
-/// GetOptions(.args,"-o",.option,"/verbose|/v",.verbose,"/include:",.include)
-GetOptions(&args,&fmtDest...) public {
-    #dim known ; known options
-
-    // 1. scan options
-    for i=1:2:$get(fmtDest) {
-        #dim opts As %String = $get(fmtDest(i))
-        continue:opts=""
-        for j=1:1:$length(opts,"|") {
-            #dim opt As %String = $zstrip($piece(opts,"|",j), "<>", "-/")
-            #dim lastC As %String = $e(opt,*)
-            #dim optType As %Integer = $case(lastC, ":":$$$OptionString, :$$$OptionBoolean)
-            set opt = $zstrip(opt,"<>",":")
-            
-            set known(opt) = $lb(optType, i + 1) ; remember option type and destination argument pointer
-        }
-    }
+#; BEWARE - this entry point consume whole command-line
+#;          and then tries to split it into command and arguments
+BATCH(line)
+    new (line)
+    do ExtractArgs(.line, .command, .args)
+    do batch1(command, args...)
+    quit
     
-    #dim argsN = "" ; new args without processed known options
-    // 2. process passed args while creating new modified args (without known /options)
-    for i=1:1:$get(args) {
-        #dim arg As %String = $get(args(i))
-        #dim isOption As %Boolean = $case($extract(arg,1),"/":1, "-":1, :0)
-
-        if isOption {
-            #dim optInfo = $get(known($zstrip(arg, "<>", "-/:")))
-
-            if $length(optInfo)>0 {
-                #dim type As %Integer = $li(optInfo,1)
-                #dim index As %Integer = $li(optInfo,2)
-                if type=$$$OptionBoolean {
-                    set fmtDest(index) = 1
-                } else {
-                    set fmtDest(index) = $get(args($i(i)))
-                }
-            } else {
-                return i ; unknown /option - bails out
-            }
-        } else {
-            set argsN($i(argsN)) = arg
-        }
-    }
-    // 3. save not consumed arguments back to args array
-    if $get(argsN)<$get(args) {
-        kill args merge args = argsN
-    }
-    quit 0
-}
-PopArrValue(&args)
-{
-    #dim value 
-    #dim key As %String = $order(args(""),1,value)
-    quit:key=""
-    if $data(args(key)) {
-        kill args(key)
-        return value
-    }
-    return ""
-}
-
-#; FIXME - we supposed to accept _whole line_ here
-#; and then split into command and options
-BATCH(command="help", args...)
-    ; here goes batch entry
+#; actual batch entry-point with command and arguments given
+batch1(command="help", args...)
+    ; load aliases
     do ALIASES(.aliases)
+    ; convert to upper case
     set command=$zconvert(command,"U")
+    ; translate from alias to command (if it was alias)
     if $data(aliases(command),command)
     
+    ; check we have appropriate tag entry COMMAND^CPM
     if $text(@command)="" {
         write !,"Unrecognized command: ",command,!
         quit
     }
+    ; call this COMMAND^CPM routine with arguments args...
     try {
         set command=command_"(args...)"
         do @command
@@ -186,8 +108,20 @@ ALIASES(aliases)
 
 COMMANDS
 
-INSTALL(packages...) ;;install package
-    do $$$CpmInstance.Install(packages...)
+INSTALL(args...) ;;install package
+    new (args)
+    #dim opts 
+    #dim dryrun As %Boolean = 0
+    #dim silent As %Boolean = 0
+    #dim verbose As %Boolean = 0
+    do GetOptions(.args, 
+                  "/dryrun|/d", .dryrun,
+                  "/s|/silent", .silent, "/verbose|/v", .verbose)
+    #; FIXME - create special GetOptions version which will set opts{} directly
+    set opts("dryrun") = $get(dryrun)
+    set opts("silent") = $get(silent)
+    set opts("verbose") = $get(verbose)
+    do $$$CpmInstance.Install(.opts,args...)
     quit
 
 PACKAGE(args...) ;;package creation commands
@@ -338,7 +272,7 @@ LIST(args...) ;;list of installed and available packages
 
     #dim tRS As %SQL.StatementResult = sql.%Execute()
     while tRS.%Next() {
-        write !?3,tRS.Name, ?32,tRS.Version, ?42,tRS.Description
+        write !?3,tRS.Name, ?32,tRS.Version, " ", ?41,tRS.Description
         if verbose {
             #dim o As CPM.Registry.Package = ##class(CPM.Registry.Package).%OpenId(tRS.ID)
             #dim items As list of %String = o.items
@@ -351,7 +285,7 @@ LIST(args...) ;;list of installed and available packages
     }
     quit
 
-PURGE(args...) ;; purge all installed packages
+PURGE(args...) ;;purge all installed packages
     ;FIXME - do uninstall
     do ##class(CPM.Registry.Package).%DeleteExtent()
     quit
@@ -389,7 +323,7 @@ HELP(command="",args...) ;;this help
         do cpm.Help(command,args...)
         quit 
     }
-    write !,"Cache Package Manager"
+    write !,"Caché Package Manager"
     write !!,"Available commands:"
     for i=1:1 {
         set line=$text(COMMANDS+i)

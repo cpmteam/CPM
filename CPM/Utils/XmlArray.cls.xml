@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.Utils.XmlArray">
-<IncludeCode>CPM.License,CPM.DataTypes</IncludeCode>
+<IncludeCode>CPM.License,CPM.DataTypes,%occSAX</IncludeCode>
 <Super>%SerialObject</Super>
 <TimeCreated>63585,47373.132452</TimeCreated>
 
@@ -84,7 +84,7 @@
 <FormalSpec>TargetArrayName:%String</FormalSpec>
 <Implementation><![CDATA[
     #dim xreader As %XML.TextReader
-    do ##class(%XML.TextReader).ParseFile(..fileName,.xreader)
+    do ##class(%XML.TextReader).ParseFile(..fileName,.xreader,,$$$SAXVALIDATION)
     set ..xmlReader = xreader
     quit:'$isobject(..xmlReader)
 

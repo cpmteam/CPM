@@ -92,10 +92,13 @@ override IsPacked property to be always returning 1</Description>
 </Method>
 
 <Method name="Install">
-<FormalSpec>package:CPM.IPackage</FormalSpec>
+<FormalSpec>dryrun:%Boolean,package:CPM.IPackage</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     #dim status As %Status = $$$OK
+    // TODO - FIXME - WHATTHEHECK - how to deal with tar.gz which has no package.json, or 
+    // where `path = ` argument is not defined in manifest?
+    // we should extract whole archive
     #dim fileStream AS %Stream.FileBinary = ..PackageContent.GetAt(package.path).fileData
 
     if $isobject(fileStream) {
@@ -110,27 +113,29 @@ override IsPacked property to be always returning 1</Description>
             quit:itemName=""
             write ?8,itemName,!
         }
-        do $system.OBJ.LoadStream(fileStream,"ck",.errorlog,.list)
-        set itemName = "" for {
-            set itemName = $order(list(itemName))
-            quit:itemName=""
-            do package.items.Insert(itemName)
-        }
-        // TODO - check errorlog
-        
-        // 4.0. check whether there is same name duplicate
-        #dim storedPackage As CPM.Registry.Package
-        if ##class(CPM.Registry.Package).%ExistsId(package.name) {
-            // TODO - later we need to be more vocal, at the moment - just overwrite
-            //        it sliently
-            set storedPackage = ##class(CPM.Registry.Package).%OpenId(package.name)
-            do storedPackage.%OnNew(package)
-        } else {
-            set storedPackage = ##class(CPM.Registry.Package).%New(package)
-        }
+        if 'dryrun {
+            do $system.OBJ.LoadStream(fileStream,"ck",.errorlog,.list)
+            set itemName = "" for {
+                set itemName = $order(list(itemName))
+                quit:itemName=""
+                do package.items.Insert(itemName)
+            }
+            // TODO - check errorlog
+            
+            // 4.0. check whether there is same name duplicate
+            #dim storedPackage As CPM.Registry.Package
+            if ##class(CPM.Registry.Package).%ExistsId(package.name) {
+                // TODO - later we need to be more vocal, at the moment - just overwrite
+                //        it sliently
+                set storedPackage = ##class(CPM.Registry.Package).%OpenId(package.name)
+                do storedPackage.%OnNew(package)
+            } else {
+                set storedPackage = ##class(CPM.Registry.Package).%New(package)
+            }
 
-        // 4. save package instance to the registry
-        set status = storedPackage.%Save()
+            // 4. save package instance to the registry
+            set status = storedPackage.%Save()
+        }
     } else {
         set status = '$$$OK
     }

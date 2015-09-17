@@ -2,7 +2,7 @@
 <Export generator="Cache" version="25">
 <Class name="CPM.Utils.PackageDefinition">
 <Abstract>1</Abstract>
-<IncludeCode>CPM.Utils.Compile</IncludeCode>
+<IncludeCode>CPM.LIB</IncludeCode>
 <Super>%RegisteredObject</Super>
 <TimeCreated>63782,68064.705177</TimeCreated>
 

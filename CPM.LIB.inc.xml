@@ -23,6 +23,6 @@
 #define CpmLastPkgName @$$$CpmSessionGlobal@("LastPackage")
 #define CpmLastPkgJson @$$$CpmSessionGlobal@("Package.json")
 
-
+#define CPMCOMPILELOG(%s) set ^cpm.compile.log($increment(^cpm.compile.log)) = ##quote(%s)_"="_%s
 ]]></Routine>
 </Export>
