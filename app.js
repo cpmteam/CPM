@@ -9,5 +9,10 @@ app.config(['$routeProvider', function($routeProvider) {
 			templateUrl: 'partial/main.html', 
 			controller: 'MainCtrl',
 		})
+		.when('/repo/:name', 
+		{
+			templateUrl: 'partial/repo.html', 
+			controller: 'RepoCtrl',
+		})
 		.otherwise({redirectTo: '/'});
 }]);
