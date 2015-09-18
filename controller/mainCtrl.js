@@ -1,5 +1,4 @@
 app.controller('MainCtrl', ['$scope', '$http', 'DataSrvc', '$location', function($scope, $http, DataSrvc, $location){
-	console.log('main init')
 	$scope.data = [];
 	$scope.sourceData = [];
 
@@ -14,7 +13,6 @@ app.controller('MainCtrl', ['$scope', '$http', 'DataSrvc', '$location', function
 	})
 
 	$scope.locate = function(path){
-		console.log($location)
 		$location.path(path)
 	};
 

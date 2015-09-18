@@ -4,7 +4,7 @@
 	</md-input-container>
 
 	<div layout="row" layout-wrap style="width:80%; margin-left: auto; margin-right: auto;">
-		<md-card ng-repeat="item in data" ng-click="locate('repo/'+item.name)" flex="30">
+		<md-card ng-repeat="item in data" ng-click="locate('repo/'+item.name)" flex="30" style="cursor: pointer;">
 			<md-card-content>
 					<h1 class="md-title" style="font-size:30px; margin-top:5px">{{item.name}}</h1>
 					<p ng-if="item.author">{{item.author.name}}</p>
