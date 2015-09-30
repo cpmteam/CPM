@@ -6,7 +6,7 @@
 	<div layout="row" layout-wrap style="width:80%; margin-left: auto; margin-right: auto;">
 		<md-card ng-repeat="item in data" ng-click="locate('repo/'+item.name)" flex="30" style="cursor: pointer;">
 			<md-card-content>
-					<h1 class="md-title" style="font-size:30px; margin-top:5px">{{item.name}}</h1>
+					<h2 class="md-title">{{item.name}}</h2>
 					<p ng-if="item.author">{{item.author.name}}</p>
 					<p style="margin-bottom:5px">version {{item.latest}} (latest)</p>
 			</md-card-content>

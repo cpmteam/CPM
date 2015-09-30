@@ -1,22 +1,23 @@
 <div layout="row" layout-wrap style="min-height:85%; width:80%; margin-left: auto; margin-right: auto;">
 	<md-card flex>
 		<md-card-content layout="row">
-			<div layout="column" flex="75">
-				<h1 class="md-title" style="font-size:34px; margin-top:5px">{{data.name}}</h1>
+			<div layout="column" flex="66">
+				<h1 class="md-title">{{data.name}}</h1>
 				
-				<h1 class="md-title">description</h1>
+				<h2 class="md-title">description</h2>
 				{{data.description?data.description:'-'}}
-				<h1 class="md-title">getting started</h1>
+				<h2 class="md-title">getting started</h2>
 				-
-				<h1 class="md-title">example</h1>
+				<h2 class="md-title">example</h2>
 				-
-				<h1 class="md-title">install</h1>
+				<h2 class="md-title">install</h2>
 				-
-				<h1 class="md-title">usage</h1>
+				<h2 class="md-title">usage</h2>
 				-
 			</div>
 			<div layout="column" flex="25">
-				<p>
+				<h1>&nbsp;</h1>
+				<p>                                   	
 					version: {{data['dist-tags'].latest}}
 					<br>
 					author: {{data.author?data.author.name:'-'}}
