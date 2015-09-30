@@ -21,6 +21,9 @@
 				font-size: 44px !important;
 				letter-spacing: -1.5px;
 			}
+			h2 {
+				font-size: 34px !important;
+			}
 
 			body { 
 				height: 100%; 
@@ -32,12 +35,47 @@
 				hyphens: none; 
 				-webkit-hyphens: none; 
 			}
+            .ribbon {
+                background-color: #a00;
+                overflow: hidden;
+                white-space: nowrap;
+                /* top left corner */
+                position: absolute;
+                right: -50px;
+                top: 40px;
+                /* 45 deg cw rotation */
+                -webkit-transform: rotate(45deg);
+                 -moz-transform: rotate(45deg);
+                  -ms-transform: rotate(45deg);
+                   -o-transform: rotate(45deg);
+                      transform: rotate(45deg);
+                /* shadow */
+                -webkit-box-shadow: 0 0 10px #888;
+                 -moz-box-shadow: 0 0 10px #888;
+                      box-shadow: 0 0 10px #888;
+            }
+            .ribbon a {
+              border: 1px solid #faa;
+              color: #fff;
+              display: block;
+              font: bold 81.25% 'Source Sans Pro', Helvetica, Arial, sans-serif;
+              margin: 1px 0;
+              padding: 10px 50px;
+              text-align: center;
+              text-decoration: none;
+              /* shadow */
+              text-shadow: 0 0 6px #444;
+            }
+
 		</style>
 	</head>
 	<body layout="column">
 		<md-toolbar layout="row">
+            <div class="ribbon"><a href="https://github.com/intersystems-ru/CPM/fork">Fork me on GitHub</a></div>
+<!--            <iframe src="http://ghbtns.com/github-btn.html?user=intersystems-ru&repo=CPM&type=fork&count=true&size=large" height="30" width="170" frameborder="0" scrolling="0" style="width:170px; height: 30px;" allowTransparency="true"></iframe> -->
+
 			<div class="md-toolbar-tools">
-				<a href="#/"><h1>Cach&eacute; Package Manager</h1></a>
+				<a href="#/"><h1 style="align:center">Cach&eacute; Package Manager</h1></a>
 			</div>
 			</md-toolbar>
 
@@ -62,7 +100,8 @@
 
 		<script language="javascript" src="service/dataSrvc.js"></script>
 		<!--Angular Material Javascript now available via Google CDN; version 0.10 used here -->
-		<script src="https://ajax.googleapis.com/ajax/libs/angular_material/0.10.0/angular-material.min.js"></script>
+		<script language="javascript" src="https://ajax.googleapis.com/ajax/libs/angular_material/0.10.0/angular-material.min.js"></script>
+		<!-- <script language="javascript" src="https://buttons.github.io/buttons.js"></script> -->
 	</body>
 </html>
 
