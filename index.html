@@ -35,6 +35,14 @@
 				hyphens: none; 
 				-webkit-hyphens: none; 
 			}
+            .ribbon-container {
+                position: fixed;
+                right: 0px;
+                top: 0px;
+                width: 190px;
+                height: 190px;
+                overflow: hidden;
+            }
             .ribbon {
                 background-color: #a00;
                 overflow: hidden;
@@ -71,8 +79,10 @@
 	</head>
 	<body layout="column">
 		<md-toolbar layout="row">
-            <div class="ribbon">
-                <a href="https://github.com/intersystems-ru/CPM/fork">Fork me on GitHub</a>
+            <div class="ribbon-container">
+                <div class="ribbon">
+                    <a href="https://github.com/intersystems-ru/CPM/fork">Fork me on GitHub</a>
+                </div>
             </div>
 			<div class="md-toolbar-tools md-whiteframe-z3">
 				<a href="#/"><h1 style="align:center">Cach&eacute; Package Manager</h1></a>
