@@ -10,10 +10,10 @@
                 md-gutter="12px" md-gutter-gt-sm="8px">
     <md-grid-tile ng-repeat="item in data | limitTo:numLimit " ng-click="locate('repo/'+item.name)" flex="30"
                    class="md-whiteframe-z3" style="cursor: pointer;">
-        <md-grid-tile-header><h3>{{item.name}}</h3></md-grid-tile-header>
+        <md-grid-tile-header><h3>{{item.name}}@{{item.latest}}</h3></md-grid-tile-header>
         <i class="material-icons md-48">face</i>
         <div ng-if="item.author">author: {{item.author.name}}</div>
-        <div>version: {{item.latest}} (latest)</div>
+        <div>version: {{item.latest}}</div>
     </md-grid-tile>
 
   </md-grid-list>
