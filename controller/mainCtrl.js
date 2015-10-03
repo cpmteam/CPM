@@ -1,6 +1,7 @@
 app.controller('MainCtrl', ['$scope', '$http', 'DataSrvc', '$location', function($scope, $http, DataSrvc, $location){
 	$scope.data = [];
 	$scope.sourceData = [];
+	$scope.numLimit = 3;
 
 	DataSrvc.getData(function(data){
 		for (item in data) {
