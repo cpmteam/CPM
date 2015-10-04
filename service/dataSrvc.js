@@ -23,7 +23,7 @@ app.factory('DataSrvc', function($http, $q, $location) {
 		getData: function(cb){
             var url = 'http://crossorigin.me/https://cpmisc.smileupps.com/-/all';
             if ($location.hasUrlArgument('local')) {
-                url = '/test/repo.json';
+                url = '../test/repo.json';
                 console.log('local JSON');
             } else {
                 console.log('remote JSON');
