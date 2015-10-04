@@ -25,7 +25,8 @@
     <!--<img ng-src="{{item.face}}?{{$index}}" class="md-avatar" alt="{{item.who}}">-->
     <i class="material-icons md-36">face</i>
 
-    <div class="md-list-item-text" layout="column">
+    <div class="md-list-item-text" layout="column"
+         style="cursor: pointer;" ng-click="locate('repo/'+item.name)">
       <h3>{{ item.name }}</h3>
       <h4>{{ item.author.name }}</h4>
       <p>{{ item.latest }}</p>
