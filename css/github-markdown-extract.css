@@ -1,3 +1,35 @@
+.featherweight-heading, .package-description, #notification-banner hgroup h3 {
+    font-weight: 300;
+    line-height: 1.2;
+    font-size: 24px;
+    margin: 0 0 10px 0;
+    padding: 0;
+}
+
+.autoselect-wrapper > input[type=text] {
+    font-family: Consolas, "Liberation Mono", Menlo, Monaco, Courier, monospace;
+    /*margin: 0;*/
+    /*padding: 0 0 0 30px;*/
+    line-height: 18px;
+    vertical-align: top;
+    display: inline-block;
+    /*width: 100%;*/
+    white-space: nowrap;
+    /*overflow: visible;*/
+    /*overflow-x: auto;*/
+    color: rgba(0,0,0,0.6);
+    height: 20px;
+    cursor: text;
+    font-size: 15px;
+}
+.unstyled-text-input, .autoselect-wrapper > input[type=text] {
+    border: none;
+    outline: none;
+    background: none;
+    margin: 0;
+    padding: 0;
+}
+
 .markdown-body {
     /*font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif;*/
     /*font-size: 16px;*/
