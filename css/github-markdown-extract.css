@@ -15,8 +15,8 @@
     display: inline-block;
     /*width: 100%;*/
     white-space: nowrap;
-    /*overflow: visible;*/
-    /*overflow-x: auto;*/
+    overflow: visible;
+    overflow-x: auto;
     color: rgba(0,0,0,0.6);
     height: 20px;
     cursor: text;
