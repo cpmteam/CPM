@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('sampleApp', ['ngRoute', 'ngMaterial']);
+var app = angular.module('sampleApp', ['ngRoute', 'ngMaterial', 'ui.bootstrap']);
 
 app.config(function($mdThemingProvider) {
   $mdThemingProvider.theme('default')
