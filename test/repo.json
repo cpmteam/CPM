@@ -134,12 +134,13 @@
       "url": "https://github.com/intersystems-ru/webterminal.git"
     },
     "author": {
-      "name": "ZitRo"
+      "name": "ZitRos"
     },
     "bugs": {
       "url": "https://github.com/intersystems-ru/webterminal/issues"
     },
     "readmeFilename": "readme.md",
+    "readmeText": "# Caché Web Terminal\nWeb-based terminal application for InterSystems Caché database. Access your database from everywhere!\n\nVisit [project page](http://intersystems-ru.github.io/webterminal) for more details.\n\n### Installation\nDownload latest version from <a href=\"http://intersystems-ru.github.io/webterminal/#downloads\">project page</a> and import XML file into %SYS namespace. Make sure that you have enabled write access to CACHELIB database during installation process. Later you can update application by typing \"/update\" command.\n\n### Usage\nAfter installation, you will be able to access application at http://[host]:[port]/csp/sys/WebTerminal/index.csp. Type \"/help\" there to get more information. Enable authorization manually over index.csp page.\n\n### Features\n<table>\n\t<tr>\n\t\t<td class=\"info\">Native browser application</td>\n\t\t<td>This allows to access terminal both from desktop or mobile devices. No Telnet, only HTTP and WebSocket.</td>\n\t</tr>\n\t<tr>\n\t\t<td class=\"info\">Autocompletion</td>\n\t\t<td>Enables you to complete your input faster. Except keywords, autocomplete also available for classes, properties and globals.</td>\n\t</tr>\n\t<tr>\n\t\t<td class=\"info\">Tracing</td>\n\t\t<td>Monitor any changes in globals or files.</td>\n\t</tr>\n\t<tr>\n\t\t<td class=\"info\">SQL mode</td>\n\t\t<td>Execute SQL queries simply by switching to SQL mode.</td>\n\t</tr>\n\t<tr>\n\t\t<td class=\"info\">Syntax highlighting</td>\n\t\t<td>Visually attractive highlighted input.</td>\n\t</tr>\n\t<tr>\n\t\t<td class=\"info\">Appearance</td>\n\t\t<td>Change the appearance of web-terminal or even code you own.</td>\n\t</tr>\n\t<tr>\n\t\t<td class=\"info\">Favorites</td>\n\t\t<td>Remember your best commands for later execution.</td>\n\t</tr>\n\t<tr>\n\t\t<td class=\"info\">Definitions</td>\n\t\t<td>Define any piece of code as short expression and make your administering experience faster.</td>\n\t</tr>\n\t<tr>\n\t\t<td class=\"info\">Security</td>\n\t\t<td>Access to WebSocket is granted only if client will pass a session key given by csp page.</td>\n\t</tr>\n\t<tr>\n\t\t<td class=\"info\">Self-update</td>\n\t\t<td>Second version of terminal can be automatically updated by one command.</td>\n\t</tr>\n\t<tr>\n\t\t<td class=\"info\">Explore!</td>\n\t\t<td>Hope you will find this useful.</td>\n\t</tr>\n</table>\n",
     "keywords": [
       "terminal"
     ],
