@@ -2,16 +2,18 @@
 	<md-card flex>
 		<md-card-content layout="row">
 			<div layout="column" flex="60">
-				<h1 class="md-display-2" class="md-title">{{data.name}}</h1>
+				<h1 class="md-display-2 md-title">{{data.name}}</h1>
 				<p class="package-description">{{data.description}}</p>
+				<h2>How to install?</h2>
+				<div class="autoselect-wrapper">
+					<i class="material-icons">input</i><input type="text" value="cpm install {{data.name}}" readonly="">
+				</div>
+				
 				<div marked="readmeText" class="markdown-body">
 				</div>
 			</div>
 			<div layout="column" flex="40">
 				<h1>&nbsp;</h1>
-				<div class="autoselect-wrapper">
-					<i class="material-icons">input</i><input type="text" value="cpm install {{data.name}}" readonly="">
-				</div>
 				<div>                                   	
 					<b>version:</b> {{data['dist-tags'].latest}}
 				</div>
