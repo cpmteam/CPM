@@ -40,8 +40,8 @@ _This is still work-in-progress, and we appreciate any help in implementation of
   - [ ] Mac OS-X
   - [X] Windows
 
-- [ ] site
-  - [ ] login frontend 
+- [x] site
+  - [x] login frontend - work in progress http://intersystems-ru.github.io/CPM/
   - [X] database backend - https://cpmisc.smileupps.com/-/all/
 
 - [ ] initial examples converted
