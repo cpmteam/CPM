@@ -27,9 +27,9 @@
 
     <div class="md-list-item-text" layout="column"
          style="cursor: pointer;" ng-click="locate('repo/'+item.name)">
-      <h3>{{ item.name }}</h3>
+      <h3>{{ item.name }}@{{ item.latest }}</h3>
       <h4>{{ item.author.name }}</h4>
-      <p>{{ item.latest }}</p>
+      <p>{{ item.description }}</p>
     </div>
   <md-divider></md-divider>
   </md-list-item>

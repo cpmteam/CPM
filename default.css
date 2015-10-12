@@ -1,20 +1,26 @@
 h1, h2, h3, h4, h5 {
     /* font-family: 'Open Sans', sans-serif; font-weight: 700;  */
     font-family: 'Source Sans Pro', 'Lucida Grande', sans-serif;
-    font-weight: 700;
     line-height: 1.4em;
 }
 h1 {
     margin: 0;
     padding: 20px 0 0 0;
-    font-size: 44px !important;
-    letter-spacing: -1.5px;
+    font-size: 280% !important;
+    letter-spacing: -0.05em !important;
+    font-weight: 300 !important;
+}
+
+h1.md-display-3 {
+    letter-spacing: -0.08em !important;
 }
 h2 {
     font-size: 34px !important;
+    font-weight: 500 !important;
 }
 h3 {
     font-size: 24px !important;
+    font-weight: 600 !important;
 }
 
 body {
