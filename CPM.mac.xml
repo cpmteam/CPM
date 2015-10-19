@@ -27,6 +27,7 @@ SHELL
         }
     }
     catch e {
+        do BACK^%ETN
     }
     do fini
     quit
