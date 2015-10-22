@@ -120,3 +120,8 @@ body {
 .nav, .pagination, .carousel, .panel-title a { 
     cursor: pointer; 
 }
+
+md-toolbar a:hover  {
+    text-decoration: none;
+    color: inherit;
+}

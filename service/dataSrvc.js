@@ -28,7 +28,7 @@ app.factory('DataSrvc', function($http, $q, $location) {
             } else {
                 console.log('remote JSON');
             }
-			$http.get(url)
+			$http.get(url, {cache: true})
 			  .success(function(data) {
 			     console.log('SUCCESS')
 			     cb(data);
