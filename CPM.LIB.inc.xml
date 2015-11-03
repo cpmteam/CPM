@@ -25,7 +25,8 @@
 
 #define CPMCOMPILELOG(%s) set ^cpm.compile.log($increment(^cpm.compile.log)) = ##quote(%s)_"="_%s
 
-#if $$$comClassDefined("%Library.Array")
+#; FIXME - doesn't work yet - return after %ParseJSON  made to work with user types
+#if 0 ;$$$comClassDefined("%Library.Array")
 #define JsonObject %Object
 #define JsonProvider %ZEN.Auxiliary.altJSONProvider
 #else
