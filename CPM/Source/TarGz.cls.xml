@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.Source.TarGz">
+<IncludeCode>CPM.LIB</IncludeCode>
 <Super>%RegisteredObject,CPM.Source.IBase</Super>
 <TimeCreated>63578,9135.530254</TimeCreated>
 
@@ -69,8 +70,8 @@ override IsPacked property to be always returning 1</Description>
     }
     
     #dim metaInfoData As %Stream.FileBinary = metaInfo.fileData
-    if '##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(metaInfoData.Read(metaInfoData.Size),,
-                                                                  .metaInfo) 
+    if '##class($$$JsonProvider).%ConvertJSONToObject(metaInfoData.Read(metaInfoData.Size),,
+                                                     .metaInfo) 
     {
         quit $$$NULLOREF
     }

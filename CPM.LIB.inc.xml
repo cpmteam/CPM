@@ -24,5 +24,13 @@
 #define CpmLastPkgJson @$$$CpmSessionGlobal@("Package.json")
 
 #define CPMCOMPILELOG(%s) set ^cpm.compile.log($increment(^cpm.compile.log)) = ##quote(%s)_"="_%s
+
+#if $$$comClassDefined("%Library.Array")
+#define JsonObject %Object
+#define JsonProvider %ZEN.Auxiliary.altJSONProvider
+#else
+#define JsonObject %ZEN.proxyObject
+#define JsonProvider %ZEN.Auxiliary.jsonProvider
+#endif
 ]]></Routine>
 </Export>

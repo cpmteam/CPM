@@ -44,7 +44,7 @@ automatically register compiled package definition in the CPM
     $$$CPMCOMPILELOG($J)
     $$$CPMCOMPILELOG($zparent)
 
-    if '##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(jsonText,,.metaInfo) {
+    if '##class($$$JsonProvider).%ConvertJSONToObject(jsonText,,.metaInfo) {
         return 0
     }
     $$$CPMCOMPILELOG(metaInfo.name)

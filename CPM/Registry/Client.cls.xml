@@ -71,9 +71,9 @@ Get SSL Configuration by Server as a name for configuration</Description>
     
     quit request.HttpResponse
     
-    set data=request.HttpResponse.Data
-    set data=data.Read(data.Size)
-    set tSC=##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(data,,.parsed)
+    set data = request.HttpResponse.Data
+    set data = data.Read(data.Size)
+    set tSC  = ##class($$$JsonProvider).%ConvertJSONToObject(data,,.parsed)
     $$$ThrowOnError(tSC)
     
     quit parsed

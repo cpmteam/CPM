@@ -118,8 +118,8 @@ given different handler class will be called)</Description>
             $$$UrlParser(url,url)
             #dim response As %Net.HttpResponse = $$$CpmRegistry.Get(.url)
 
-            #dim data As %ZEN.proxyObject
-            set tSC=##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(response.Data,,.data,1)
+            #dim data As $$$JsonObject
+            set tSC = ##class($$$JsonProvider).%ConvertJSONToObject(response.Data,,.data,1)
             $$$ThrowOnError(tSC)
             
             set destUrl = data.dist.tarball

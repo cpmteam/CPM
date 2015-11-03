@@ -60,8 +60,8 @@ FIXME - implement proper caching [all/since]</Description>
     }
     quit:$data(exception) $$$OK
     
-    #dim data As %ZEN.proxyObject
-    set tSC=##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(response.Data,..%ClassName(1),.data,1)
+    #dim data As $$$JsonObject
+    set tSC = ##class($$$JsonProvider).%ConvertJSONToObject(response.Data, ..%ClassName(1), .data,1)
     $$$ThrowOnError(tSC)
     
     quit $$$OK
