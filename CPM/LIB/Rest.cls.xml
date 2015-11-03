@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.LIB.Rest">
+<Super>%CSP.REST,CPM.Utils.FormatUtils</Super>
+<TimeCreated>63859,67736.712285</TimeCreated>
+
+<Parameter name="REGISTRYTABLENAME">
+<Type>%String</Type>
+<Default>CPM_Registry.Package</Default>
+</Parameter>
+
+<XData name="UrlMap">
+<Data><![CDATA[
+<Routes>
+<Route Url="/all" Method="GET" Call="GetAll"/>
+</Routes>
+]]></Data>
+</XData>
+
+<Method name="GetAll">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim status As %Status = $$$OK
+
+    try {
+        #; TODO
+        #dim sql As %String = ..FormatStr("select name from $1", ..#REGISTRYTABLENAME)
+        #dim stmt As %SQL.Statement = ##class(%SQL.Statement).%New()
+        set status = stmt.%Prepare(sql)
+        #dim result As %SQL.StatementResult = stmt.%Execute()
+        #dim o As %Object = {}
+        while result.%Next(.sc) { 
+            do result.%Print()
+            #dim oName As %String = result.%Get("name")
+            #dim p As CPM.Registry.Package = ##class(CPM.Registry.Package).%OpenId(oName)
+            do o.$set(oName, p)
+        }
+        write o.$toJSON(),!
+    }
+    catch (e) {
+        Set status = e.AsStatus()
+        //do ..ErrorHandler(status)
+    }
+    quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
