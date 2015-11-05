@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <Class name="CPM.LIB.Rest">
-<IncludeCode>CPM.LIB</IncludeCode>
+<IncludeCode>CPM.LIB,%syConfig</IncludeCode>
 <Super>%CSP.REST,CPM.Utils.FormatUtils</Super>
 <TimeCreated>63859,67736.712285</TimeCreated>
 
@@ -50,6 +50,21 @@
         //do ..ErrorHandler(status)
     }
     quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DebugEnable">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+    set $$$CpmConfig."Debug.Rest" = 1
+    #dim servername As %String
+    #dim serverport As %String
+    do 
+    . new $namespace zn "%sys"
+    . set servername = $$$CONFGLO("Startup","WebServerName") 
+    . set:servername="" servername="127.0.0.1"
+    . set serverport = $$$CONFGLO("Startup","WebServerPort")
+    set $$$CpmConfig."Debug.RestAddress" = ..FormatStr("http://$1:$2",servername,serverport) ;"http://localhost:57776"
 ]]></Implementation>
 </Method>
 </Class>

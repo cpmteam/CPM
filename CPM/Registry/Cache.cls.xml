@@ -35,7 +35,13 @@ FIXME - implement proper caching [all/since]</Description>
 <FormalSpec>force:%Boolean=1</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    set Url=..Config.registry
+    // if we enabled local REST service debug - there is no need to update from repo
+    // everything is local
+    if ($$$CpmConfig."Debug.Rest") {
+        write "Bypassing registry update due to REST debugging mode",!
+        quit $$$OK
+    }
+    set Url = ..Config.registry
     $$$UrlParser(Url,url)
 
     if 'force && (.."_updated"'="") {

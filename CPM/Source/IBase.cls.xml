@@ -113,6 +113,7 @@ given different handler class will be called)</Description>
             if '##class(CPM.Registry.Package).%ExistsId(packageName) {
                 quit $$$NULLOREF
             }
+            // FIXME - local REST debug mode
             set url = $$$CpmConfig.registry_"/"_packageName_"/"_tag
 
             $$$UrlParser(url,url)
