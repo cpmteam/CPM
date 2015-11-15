@@ -94,7 +94,7 @@ ShowOptionsHelp(&fmtDest) {
             write opt, ?8,!
         }
         #else
-        write opts,!
+        write !,opts
         #endif
     }
 }
