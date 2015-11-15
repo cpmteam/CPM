@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Routine name="CPM.CHUI" type="MAC" languagemode="0"><![CDATA[
+#include CPM.License
+#include %occInclude
+#include %syPrompt
+
+LOOP(&array,&selIndex) public {
+    #dim i As %Integer
+    for i=1:1 {
+        if $data(array(i))=0 quit
+        #dim text As %String = $get(array(i,"Text"))
+        #dim handler As %String = $get(array(i,"Handler"))
+        write ?2,i,".",?6,text,!
+    }
+}
+
+TEXT2ARRAY(TAG,&MenuArray,&HandlerArray) public {
+    #dim line As %String
+    #dim index As %Integer = 1
+    do {
+        set addr = TAG _ "+" _ index
+        set line = $Text(@addr)
+        #dim text As %String = $piece(line,";",2)
+        #dim handler As %String = $piece(line,";;",2)
+        if (text="") {
+            quit
+        }
+        set MenuArray(index) = text
+        set HandlerArray(index) = handler
+        set index = index + 1
+    } while $piece(line,";;",2)'=""
+}
+
+MENULOOP(&Menu,&Handler) public {
+    set $ztrap="ERROR"
+    for  {
+        #dim response As %String = ""
+        #dim mask As %Integer = $$$TrapCtrlCMask + $$$InitialDisplayMask + $$$EnableQuitCharMask
+        write #
+        #dim status As %Status = ##Class(%Library.Prompt).GetMenu("Option?", .response, .Menu,, mask)
+        if (+status=$$$CtrlCResponse) || (status=$$$BackupResponse) || (status=$$$QuitResponse) || (response="") quit
+        do @Handler(response) continue
+    }
+    quit status
+ERROR   ; handle errors
+    set $ztrap=""
+    if $zerror["<INTERRUPT>" quit $$$CtrlCResponse
+    ztrap $zerror
+}
+
+Debug()  public {
+    #; 1. using $TEXT menu
+    do TEXT2ARRAY("DEBUGMENU", .%MenuArray, .%HandlerArray)
+    do MENULOOP(.%MenuArray, .%HandlerArray)
+    quit
+    #; 2. generating local array for menu
+    #dim sql As %String = "select name from CPM_Registry.Package"
+    #dim sql As %SQL.Statement = ##class(%SQL.Statement).%New()
+    #dim status As %Status = sql.%Prepare("SELECT %ID FROM CPM_Registry.Package")
+    quit:'$$$ISOK(status)
+
+    kill %MenuArray
+    set index = 1
+    #dim resultSet As %SQL.StatementResult = sql.%Execute()
+    while resultSet.%Next() {
+        set %MenuArray(index,"Text") = resultSet.ID
+        set index = index + 1
+    }
+    do LOOP(.%MenuArray,.%selected)
+
+    quit
+}
+DEBUGHANDLER0   write "Debughandler0",! quit 0
+DEBUGHANDLER1   write "Debughandler1",! quit 1
+DEBUGHANDLER2   write "Debughandler2",! quit 2
+
+DEBUGMENU
+    ;MENU - 1;;DEBUGHANDLER0
+    ;MENU - 2;;DEBUGHANDLER1
+    ;MENU - 3;;DEBUGHANDLER2
+    
+]]></Routine>
+</Export>

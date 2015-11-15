@@ -5,6 +5,11 @@
 <Super>%CSP.REST,CPM.Utils.FormatUtils</Super>
 <TimeCreated>63859,67736.712285</TimeCreated>
 
+<Parameter name="HandleCorsRequest">
+<Type>%Boolean</Type>
+<Default>1</Default>
+</Parameter>
+
 <Parameter name="REGISTRYTABLENAME">
 <Type>%String</Type>
 <Default>CPM_Registry.Package</Default>
@@ -43,13 +48,13 @@
             Set %response.CharSet     = ##class(%SYS.NLS.Table).GetCSPTable()
             Set %response.ContentType = "application/json"
         }
-        do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(o,,1)
+        do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(o,,1,"aeloqtwu")
     }
     catch (e) {
         Set status = e.AsStatus()
         //do ..ErrorHandler(status)
     }
-    quit $$$OK
+    quit status
 ]]></Implementation>
 </Method>
 

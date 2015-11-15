@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.IPackage.DistTags">
+<Super>%SerialObject</Super>
+<TimeCreated>63862,10032.610984</TimeCreated>
+
+<Property name="latest">
+<Type>%String</Type>
+<InitialExpression>"0.0.1"</InitialExpression>
+</Property>
+</Class>
+</Export>
