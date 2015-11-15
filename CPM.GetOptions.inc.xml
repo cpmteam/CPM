@@ -49,8 +49,14 @@ GetOptions(&args,&fmtDest...) public {
         #dim isOption As %Boolean = $case($extract(arg,1),"/":1, "-":1, :0)
 
         if isOption {
-            #dim optInfo = $get(known($zstrip(arg, "<>", "-/:")))
+            #dim option As %String = $zstrip(arg, "<>", "-/:")
+            #dim optInfo = $get(known(option))
 
+            if option = "help" {
+                // special case - processed separately
+                do ShowOptionsHelp(.fmtDest)
+                return 0
+            }
             if $length(optInfo)>0 {
                 #dim type As %Integer = $li(optInfo,1)
                 #dim index As %Integer = $li(optInfo,2)
@@ -70,7 +76,27 @@ GetOptions(&args,&fmtDest...) public {
     if $get(argsN)<$get(args) {
         kill args merge args = argsN
     }
-    quit 0
+    quit $$$OK
+}
+
+ShowOptionsHelp(&fmtDest) {
+    for i=1:2:$get(fmtDest) {
+        #dim opts As %String = $get(fmtDest(i))
+        continue:opts=""
+        #if 0
+        for j=1:1:$length(opts,"|") {
+            #dim opt As %String = $zstrip($piece(opts,"|",j), "<>", "-/")
+            #dim lastC As %String = $e(opt,*)
+            #dim optType As %Integer = $case(lastC, ":":$$$OptionString, :$$$OptionBoolean)
+            set opt = $zstrip(opt,"<>",":")
+            
+            //set known(opt) = $lb(optType, i + 1) ; remember option type and destination argument pointer
+            write opt, ?8,!
+        }
+        #else
+        write opts,!
+        #endif
+    }
 }
 PopArrValue(&args)
 {

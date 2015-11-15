@@ -137,15 +137,18 @@ PACKAGE(args...) ;;package creation commands
     #dim pkgLicense As %String = ""
     #dim pkgVersion As %String = ""
     
-    do GetOptions(.args, 
-                  "/debug", .debug,
-                  "/c|/create", .create, "/delete", .delete,
-                  "/prj:|/from:", .prjName, "/autoload", .autoload,
-                  "/author:", .pkgAuthor, "/description:", .pkgDescription,
-                  "/license:", .pkgLicense, "/version:", .pkgVersion)
+    #dim status As %Status = $$$OK
+    set status = $$GetOptions(.args, 
+                              "/debug", .debug,
+                              "/c|/create", .create, "/delete", .delete,
+                              "/prj:|/from:", .prjName, "/autoload", .autoload,
+                              "/author:", .pkgAuthor, "/description:", .pkgDescription,
+                              "/license:", .pkgLicense, "/version:", .pkgVersion)
+    if $$$ISERR(status) { 
+        quit status 
+    }
 
     #dim pkgName As %String = ""
-    #dim status As %Status = $$$OK
 
     if create {
         set pkgName = $$PopArrValue(.args)
