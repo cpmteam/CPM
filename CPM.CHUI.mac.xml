@@ -49,25 +49,47 @@ ERROR   ; handle errors
     ztrap $zerror
 }
 
-Debug()  public {
-    #; 1. using $TEXT menu
-    do TEXT2ARRAY("DEBUGMENU", .%MenuArray, .%HandlerArray)
-    do MENULOOP(.%MenuArray, .%HandlerArray)
-    quit
-    #; 2. generating local array for menu
+MENUSELECT(&Menu,&Selected) public {
+    set $ztrap="ERROR"
+    #dim response As %String = ""
+    #dim mask As %Integer = $$$TrapCtrlCMask + $$$InitialDisplayMask + $$$EnableQuitCharMask
+    write #
+    #dim status As %Status = ##Class(%Library.Prompt).GetMenu("Option?", .response, .Menu,, mask)
+    if (+status=$$$CtrlCResponse) || (status=$$$BackupResponse) || (status=$$$QuitResponse) || (response="") quit
+    set Selected = response
+    return status
+ERROR   ; handle errors
+    set $ztrap=""
+    if $zerror["<INTERRUPT>" quit $$$CtrlCResponse
+    ztrap $zerror
+}
+
+RetrievePackageArray(&PackageArray) {
+    kill PackageArray
     #dim sql As %String = "select name from CPM_Registry.Package"
     #dim sql As %SQL.Statement = ##class(%SQL.Statement).%New()
     #dim status As %Status = sql.%Prepare("SELECT %ID FROM CPM_Registry.Package")
     quit:'$$$ISOK(status)
 
-    kill %MenuArray
-    set index = 1
+    #dim index As %Integer = 1
     #dim resultSet As %SQL.StatementResult = sql.%Execute()
     while resultSet.%Next() {
-        set %MenuArray(index,"Text") = resultSet.ID
+        set PackageArray(index) = resultSet.ID
         set index = index + 1
     }
-    do LOOP(.%MenuArray,.%selected)
+}
+Debug()  public {
+    #; 1. using $TEXT menu
+#if 0
+    do TEXT2ARRAY("DEBUGMENU", .%MenuArray, .%HandlerArray)
+    do MENULOOP(.%MenuArray, .%HandlerArray)
+    quit
+#endif
+    #; 2. generating local array for menu
+    #dim MenuArray
+    #dim selected As %Integer = 0
+    do RetrievePackageArray(.MenuArray)
+    do MENUSELECT(.MenuArray,.selected)
 
     quit
 }
