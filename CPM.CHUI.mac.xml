@@ -78,6 +78,19 @@ RetrievePackageArray(&PackageArray) {
         set index = index + 1
     }
 }
+
+RetrievePackageProps(&PropsArray,ClassName="CPM.IPackage") public {
+    kill PropsArray
+    #dim cclass As %Dictionary.CompiledClass = ##class(%Dictionary.CompiledClass).%OpenId(ClassName)
+    quit:'$isobject(cclass)
+    #dim cprops As %Library.RelationshipObject = cclass.Properties
+    // FIXME - asume it's not failing
+    #dim index As %Integer
+    #dim count As %Integer = cprops.Count()
+    for i=1:1:count {
+        set PropsArray(i) = cprops.GetAt(i).Name
+    }
+}
 Debug()  public {
     #; 1. using $TEXT menu
 #if 0
