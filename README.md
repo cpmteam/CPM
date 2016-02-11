@@ -41,7 +41,7 @@ _This is still work-in-progress, and we appreciate any help in implementation of
   - [X] Windows
 
 - [x] site
-  - [x] login frontend - work in progress http://intersystems-ru.github.io/CPM/
+  - [x] login frontend - work in progress http://cpmteam.github.io/CPM/#/repo/webterminal?local=1
   - [X] database backend - https://cpmisc.smileupps.com/-/all/
 
 - [ ] initial examples converted
