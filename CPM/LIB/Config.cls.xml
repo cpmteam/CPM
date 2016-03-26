@@ -79,5 +79,10 @@ is used to set the value of an unknown property.</Description>
     quit $$$OK
 ]]></Implementation>
 </Method>
+
+<Method name="DumpAll">
+<Implementation><![CDATA[    zw @..#STORAGE
+]]></Implementation>
+</Method>
 </Class>
 </Export>

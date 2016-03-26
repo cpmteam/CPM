@@ -334,7 +334,9 @@ CONFIG(args...) ;;get/set configuration parameters
     if 'getOp && 'setOp {
         // TODO - show whole configuration
     } 
-    if debug { zw }
+    if debug { 
+        do $$$CpmConfig.DumpAll()
+    }
     quit
 
 HELP(command="",args...) ;;this help
