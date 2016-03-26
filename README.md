@@ -1,4 +1,4 @@
-#CPM - Caché Package Manager
+#CPM - Caché Package Manager - http://cpmteam.github.io/CPM/
 ===
 
 _This is still work-in-progress, and we appreciate any help in implementation of missing features_
