@@ -331,10 +331,7 @@ CONFIG(args...) ;;get/set configuration parameters
         set $property($$$CpmConfig, nameParam) = valueParam
         write !,nameParam, ?14, " = ", $property( $$$CpmConfig, nameParam)
     }
-    if 'getOp && 'setOp {
-        // TODO - show whole configuration
-    } 
-    if debug { 
+    if debug || ('getOp && 'setOp) {
         do $$$CpmConfig.DumpAll()
     }
     quit

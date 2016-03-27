@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.Registry.GitHubApi">
+<IncludeCode>CPM.LIB</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>64004,11169.348775</TimeCreated>
+
+<Parameter name="SslTlsConfig">
+<Default>Twitter</Default>
+</Parameter>
+
+<Parameter name="ApiServer">
+<Default>api.github.com</Default>
+</Parameter>
+
+<Method name="GetCertificate">
+<Description>
+Get SSL Configuration by Server as a name for configuration</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Server:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    new $namespace
+    zn "%SYS" 
+    quit:##class(Security.SSLConfigs).Exists(Server) Server
+
+    do {
+        set tSC=##class(Security.SSLConfigs).Create(Server)
+        $$$ThrowOnError(tSC)
+    } while 0
+    
+    quit Server
+]]></Implementation>
+</Method>
+
+<Method name="SendSimpleHttpRequest">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[server:%String="api.vk.com",location:%String,&responseText:%String(MAXLEN=1000000)]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim req as %Net.HttpRequest = ##class(%Net.HttpRequest).%New()
+    set req.Server = server
+    set req.Https  = 1
+    set req.ContentType = "application/json"
+    set req.AcceptGzip  = 1
+    set req.Timeout     = $$$GetParam(Params,"timeout", 30)
+    set req.SSLConfiguration = ..GetCertificate(server)
+    
+    #dim k as %String = ""
+    #dim v as %String = ""
+    
+    #dim status as %Status = $$$OK
+    set status = req.Get(location)
+
+    if ($$$ISOK(status)) {
+        #dim response as %String = ""
+        #dim res as %Net.HttpResponse = req.HttpResponse
+            
+        #dim responseLength as %Integer = 1000000
+        set response = res.Data.Read(.responseLength)
+        
+        set responseText = response
+    } else {
+        set responseText = ""
+    }
+        
+    quit status
+]]></Implementation>
+</Method>
+
+<Method name="CallApiArgs">
+<Description><![CDATA[
+Call Twitter API given <var>api</var> urls and arguments. Return JSON data into <var>responseText</var>]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>apiServer:%String,api:%String,arrayArgs:%ArrayOfDataTypes,*responseText:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim url As %String = ""
+    
+    if $match(api,"^https?:.*/.*") { // Full URL given in api will override everything
+        // do ..SplitUrl(api, .url, .api)
+        set url = api
+    } else {
+        if $match(apiServer, "^https?:.*") {
+            set url = apiServer
+        } else {
+            set url = "https://" _ apiServer
+        }
+        if $match(api, "^/.*") {
+            set url = url _ api
+        } else {
+            set url = url _ "/" _ api
+        }
+    }
+#if 0
+    /// no need to do any of OAuth tricks
+    #dim authorizer As TWReader.Authorizer = ##class(TWReader.Authorizer).%New()
+    #dim authHeader as %String = authorizer.GetAuthHeader("get", url, arrayArgs)
+#endif
+    set responseText = ""
+    quit ..SendSimpleHttpRequest(apiServer, api, .responseText)
+]]></Implementation>
+</Method>
+
+<Method name="DebugApiCall">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>apiUrl:%String="/rate_limit",apiParams:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim array as %ArrayOfDataTypes = ##class(%ArrayOfDataTypes).%New()
+    #dim param As %String
+    #dim i As %Integer
+    
+    if ($get(apiParams)="") {
+        if $length(apiUrl, "?")>1 {
+            set $lb(apiUrl, apiParams) = $lfs(apiUrl, "?")
+        }
+    }
+    if $get(apiParams,"")'="" {
+        for i=1:1:$length(apiParams,"&") {
+            set param = $piece(apiParams,"&", i)
+            #dim arg As %String     = $piece(param,"=",1)
+            #dim value As %String   = $piece(param,"=",*)
+            do array.SetAt(value, arg)
+        }
+    }
+    #dim jsonContent As %String
+    #dim status As %Status = ..CallApiArgs(..#ApiServer, apiUrl, array, .jsonContent)
+    quit:$$$ISERR(status) status
+
+    // ok - now we have json in text, but it won't be readable much
+    // let's try to parse it to object and then output in readable form
+    #dim proxyObject As %ZEN.proxyObject
+    set status = ##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(jsonContent, ,.proxyObject)
+    quit:$$$ISERR(status) status
+    
+    // write indented (in a readable form) to the screen
+    quit ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(proxyObject)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

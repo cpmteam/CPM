@@ -81,7 +81,9 @@ is used to set the value of an unknown property.</Description>
 </Method>
 
 <Method name="DumpAll">
-<Implementation><![CDATA[    zw @..#STORAGE
+<Implementation><![CDATA[
+    write !
+    zw @..#STORAGE
 ]]></Implementation>
 </Method>
 </Class>

@@ -357,6 +357,15 @@ Is used to get the value of an unknown property.</Description>
 <Value name="12">
 <Value>DirectoryPath</Value>
 </Value>
+<Value name="13">
+<Value>readmeFilename</Value>
+</Value>
+<Value name="14">
+<Value>readmeText</Value>
+</Value>
+<Value name="15">
+<Value>dist-tags</Value>
+</Value>
 </Data>
 </Storage>
 </Class>

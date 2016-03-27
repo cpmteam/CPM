@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
-<Project name="CPM-project" LastModified="2015-11-30 01:51:27.806655" Target="Debug^CPM.CHUI()" TargetType="0">
+<Project name="CPM-project" LastModified="2016-03-27 03:23:02.958875" Target="##class(CPM.Registry.GitHubApi).DebugApiCall()" TargetType="0">
   <Items>
     <ProjectItem name="CPM.CHUI.MAC" type="MAC"></ProjectItem>
     <ProjectItem name="CPM.DataTypes.INC" type="MAC"></ProjectItem>
@@ -41,6 +41,7 @@
   <BreakPoints>
     <BreakPoint Routine="CPM.CHUI.MAC" Offset="50"></BreakPoint>
     <BreakPoint Routine="CPM.CHUI.MAC" Offset="89"></BreakPoint>
+    <BreakPoint Routine="CPM.Registry.GitHubApi.CLS" Offset="DebugApiCall+1"></BreakPoint>
   </BreakPoints>
 </Project>
 </Export>
