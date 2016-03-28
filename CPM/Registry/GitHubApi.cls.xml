@@ -35,7 +35,7 @@ Get SSL Configuration by Server as a name for configuration</Description>
 
 <Method name="SendSimpleHttpRequest">
 <ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[server:%String="api.vk.com",location:%String,&responseText:%String(MAXLEN=1000000)]]></FormalSpec>
+<FormalSpec><![CDATA[server:%String="api.vk.com",location:%String,&responseText:%String(MAXLEN=1000000),authorization:%String=""]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     #dim req as %Net.HttpRequest = ##class(%Net.HttpRequest).%New()
@@ -45,6 +45,9 @@ Get SSL Configuration by Server as a name for configuration</Description>
     set req.AcceptGzip  = 1
     set req.Timeout     = $$$GetParam(Params,"timeout", 30)
     set req.SSLConfiguration = ..GetCertificate(server)
+    if authorization '= "" {
+        set req.Authorization = authorization
+    }
     
     #dim k as %String = ""
     #dim v as %String = ""
@@ -65,6 +68,19 @@ Get SSL Configuration by Server as a name for configuration</Description>
     }
         
     quit status
+]]></Implementation>
+</Method>
+
+<Method name="GetTokenAuthorization">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    #dim token As %String = $$$CpmConfig."GitHub.Token"
+    #dim authorization As %String = ""
+    if token '= "" {
+        set authorization = "token "_token
+    }
+    return authorization
 ]]></Implementation>
 </Method>
 
@@ -96,9 +112,56 @@ Call Twitter API given <var>api</var> urls and arguments. Return JSON data into 
     /// no need to do any of OAuth tricks
     #dim authorizer As TWReader.Authorizer = ##class(TWReader.Authorizer).%New()
     #dim authHeader as %String = authorizer.GetAuthHeader("get", url, arrayArgs)
+#else
+    #dim authHeader As %String = ..GetTokenAuthorization()
 #endif
     set responseText = ""
-    quit ..SendSimpleHttpRequest(apiServer, api, .responseText)
+    quit ..SendSimpleHttpRequest(apiServer, api, .responseText, authHeader)
+]]></Implementation>
+</Method>
+
+<Method name="GetUrl">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>url:%String,*object:%ZEN.proxyObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim jsonContent As %String = ""
+    #dim status As %Status = ..CallApiArgs(..#ApiServer, url, , .jsonContent)
+    quit:$$$ISERR(status) status
+
+    set status = ##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(jsonContent, ,.object)
+    return status
+]]></Implementation>
+</Method>
+
+<Method name="GetUserInfo">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>userName:%String,*object:%ZEN.proxyObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim url As %String = "/users/" _ userName
+    return ..GetUrl(url, .object)
+]]></Implementation>
+</Method>
+
+<Method name="GetRepoInfo">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>repoName:%String,*object:%ZEN.proxyObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim url As %String = "/repos/" _ repoName
+    return ..GetUrl(url, .object)
+]]></Implementation>
+</Method>
+
+<Method name="GetReleaseInfo">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>repoName:%String,releaseName:%String,*object:%ZEN.proxyObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim url As %String = "/repos/" _ repoName _ "/releases/" _ releaseName
+    return ..GetUrl(url, .object)
 ]]></Implementation>
 </Method>
 
