@@ -5,10 +5,6 @@
 <Super>%RegisteredObject</Super>
 <TimeCreated>64004,11169.348775</TimeCreated>
 
-<Parameter name="SslTlsConfig">
-<Default>Twitter</Default>
-</Parameter>
-
 <Parameter name="ApiServer">
 <Default>api.github.com</Default>
 </Parameter>
