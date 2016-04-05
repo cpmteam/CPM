@@ -33,5 +33,7 @@
 #define JsonObject %ZEN.proxyObject
 #define JsonProvider %ZEN.Auxiliary.jsonProvider
 #endif
+
+#define MaxReasonableResponseSize 1000000
 ]]></Routine>
 </Export>

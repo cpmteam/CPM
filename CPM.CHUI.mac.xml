@@ -66,9 +66,9 @@ ERROR   ; handle errors
 
 RetrievePackageArray(&PackageArray) {
     kill PackageArray
-    #dim sql As %String = "select name from CPM_Registry.Package"
+    #dim sqlText As %String = "SELECT %ID FROM CPM_Registry.Package"
     #dim sql As %SQL.Statement = ##class(%SQL.Statement).%New()
-    #dim status As %Status = sql.%Prepare("SELECT %ID FROM CPM_Registry.Package")
+    #dim status As %Status = sql.%Prepare(sqlText)
     quit:'$$$ISOK(status)
 
     #dim index As %Integer = 1
@@ -103,6 +103,7 @@ Debug()  public {
     #dim selected As %Integer = 0
     do RetrievePackageArray(.MenuArray)
     do MENUSELECT(.MenuArray,.selected)
+    //write !,"Selected: ", selected,!
 
     quit
 }

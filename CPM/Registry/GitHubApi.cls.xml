@@ -31,7 +31,7 @@ Get SSL Configuration by Server as a name for configuration</Description>
 
 <Method name="SendSimpleHttpRequest">
 <ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[server:%String="api.vk.com",location:%String,&responseText:%String(MAXLEN=1000000),authorization:%String=""]]></FormalSpec>
+<FormalSpec><![CDATA[server:%String="api.github.com",location:%String,&responseText:%String,authorization:%String=""]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     #dim req as %Net.HttpRequest = ##class(%Net.HttpRequest).%New()
@@ -55,7 +55,7 @@ Get SSL Configuration by Server as a name for configuration</Description>
         #dim response as %String = ""
         #dim res as %Net.HttpResponse = req.HttpResponse
             
-        #dim responseLength as %Integer = 1000000
+        #dim responseLength as %Integer = $$$MaxReasonableResponseSize
         set response = res.Data.Read(.responseLength)
         
         set responseText = response
@@ -82,7 +82,7 @@ Get SSL Configuration by Server as a name for configuration</Description>
 
 <Method name="CallApiArgs">
 <Description><![CDATA[
-Call Twitter API given <var>api</var> urls and arguments. Return JSON data into <var>responseText</var>]]></Description>
+Call GitHub API given <var>api</var> urls and arguments. Return JSON data into <var>responseText</var>]]></Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>apiServer:%String,api:%String,arrayArgs:%ArrayOfDataTypes,*responseText:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
