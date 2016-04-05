@@ -35,18 +35,15 @@ Get SSL Configuration by Server as a name for configuration</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     #dim req as %Net.HttpRequest = ##class(%Net.HttpRequest).%New()
-    set req.Server = server
-    set req.Https  = 1
+    set req.Server      = server
+    set req.Https       = 1
     set req.ContentType = "application/json"
     set req.AcceptGzip  = 1
-    set req.Timeout     = $$$GetParam(Params,"timeout", 30)
+    set req.Timeout     = $$$GetParam(Params, "timeout", 30)
     set req.SSLConfiguration = ..GetCertificate(server)
     if authorization '= "" {
         set req.Authorization = authorization
     }
-    
-    #dim k as %String = ""
-    #dim v as %String = ""
     
     #dim status as %Status = $$$OK
     set status = req.Get(location)
