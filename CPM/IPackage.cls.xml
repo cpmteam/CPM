@@ -24,6 +24,10 @@ package short-name</Description>
 ]]></Implementation>
 </Method>
 
+<Property name="dist-tags">
+<Type>CPM.IPackage.DistTags</Type>
+</Property>
+
 <Property name="author">
 <Type>%String</Type>
 <Parameter name="MAXLEN" value="300"/>
@@ -86,6 +90,14 @@ items defined by this package</Description>
 <Type>%String</Type>
 <Collection>list</Collection>
 <Parameter name="MAXLEN" value="300"/>
+</Property>
+
+<Property name="readmeFilename">
+<Type>%String</Type>
+</Property>
+
+<Property name="readmeText">
+<Type>%Stream.GlobalCharacter</Type>
 </Property>
 
 <Property name="DirectoryPath">

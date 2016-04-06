@@ -66,7 +66,7 @@
     $$$CPMCOMPILELOG(jsonText)
 
     if jsonText'="" {
-        if '##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(jsonText,,.metaInfo) {
+        if '##class($$$JsonProvider).%ConvertJSONToObject(jsonText,,.metaInfo) {
             quit status
         }
         set status = $$$OK
@@ -273,7 +273,7 @@ but we need them in low case eventually</Description>
     open file:"WNS":0 else  quit $$$ERROR($$$FileCanNotOpen,file)
     use file
     if $isobject(o) {
-        Do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(o,,,"aeloqtw") ; remove "c" modifier to avoid _class/_id generation
+        Do ##class($$$JsonProvider).%ObjectToJSON(o,,,"aeloqtw") ; remove "c" modifier to avoid _class/_id generation
     }
     use io
     close file
@@ -356,6 +356,15 @@ Is used to get the value of an unknown property.</Description>
 </Value>
 <Value name="12">
 <Value>DirectoryPath</Value>
+</Value>
+<Value name="13">
+<Value>readmeFilename</Value>
+</Value>
+<Value name="14">
+<Value>readmeText</Value>
+</Value>
+<Value name="15">
+<Value>dist-tags</Value>
 </Value>
 </Data>
 </Storage>

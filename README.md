@@ -18,6 +18,7 @@ _This is still work-in-progress, and we appreciate any help in implementation of
   - [x]   /delete
   - [x]   /from prj | /from xml
   - [X] export /major | /minor
+  - [ ] package /update
   - [ ] package /publish
   - [ ] shell extensions API via extending basic class (_desired for 1.0, but not required_)
 

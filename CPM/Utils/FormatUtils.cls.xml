@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.Utils.FormatUtils">
+<Description>
+Mixin class for use in your hierachy</Description>
+<Super>%RegisteredObject</Super>
+<TimeCreated>63859,67284.882902</TimeCreated>
+
+<Method name="FormatStr">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>fmt,args...</FormalSpec>
+<Implementation><![CDATA[
+    #dim return As %String = ""
+
+    #dim found As %Integer = 0
+    #dim start As %Integer = 0
+    #dim end As %Integer = 0
+    #dim val As %String = ""
+    do 
+    {
+        set found = $locate(fmt,"\$\d+",start,end,val)
+        if found {
+            set return = return _ $extract(fmt, start, found - 1)
+            #dim numVal As %Integer = +$extract(val,2,*)
+            set return = return _ $get(args(numVal))
+            set start = end
+        } else {
+            // save trailing tail
+            set return = return _ $extract(fmt, end, *)
+        }
+    } while found>0
+
+    return return
+]]></Implementation>
+</Method>
+</Class>
+</Export>

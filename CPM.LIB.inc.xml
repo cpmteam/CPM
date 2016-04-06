@@ -19,10 +19,21 @@
 #define UtilMakePath(%dir,%name) ##class(%Library.File).NormalizeFilename(%name,%dir)
 
 #; session global suppose to be not mapped to the central CPM database
-#define CpmSessionGlobal $name(^CPMx.Session)
+#define CpmSessionGlobal $name(^CPM.Session)
 #define CpmLastPkgName @$$$CpmSessionGlobal@("LastPackage")
 #define CpmLastPkgJson @$$$CpmSessionGlobal@("Package.json")
 
 #define CPMCOMPILELOG(%s) set ^cpm.compile.log($increment(^cpm.compile.log)) = ##quote(%s)_"="_%s
+
+#; FIXME - doesn't work yet - return after %ParseJSON  made to work with user types
+#if 0 ;$$$comClassDefined("%Library.Array")
+#define JsonObject %Object
+#define JsonProvider %ZEN.Auxiliary.altJSONProvider
+#else
+#define JsonObject %ZEN.proxyObject
+#define JsonProvider %ZEN.Auxiliary.jsonProvider
+#endif
+
+#define MaxReasonableResponseSize 1000000
 ]]></Routine>
 </Export>

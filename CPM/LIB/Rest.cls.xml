@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.LIB.Rest">
+<IncludeCode>CPM.LIB,%syConfig</IncludeCode>
+<Super>%CSP.REST,CPM.Utils.FormatUtils</Super>
+<TimeCreated>63859,67736.712285</TimeCreated>
+
+<Parameter name="HandleCorsRequest">
+<Type>%Boolean</Type>
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="REGISTRYTABLENAME">
+<Type>%String</Type>
+<Default>CPM_Registry.Package</Default>
+</Parameter>
+
+<XData name="UrlMap">
+<Data><![CDATA[
+<Routes>
+<Route Url="/all" Method="GET" Call="GetAll"/>
+</Routes>
+]]></Data>
+</XData>
+
+<Method name="GetAll">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim status As %Status = $$$OK
+
+    try {
+        #dim sql As %String = ..FormatStr("select name from $1", ..#REGISTRYTABLENAME)
+        #dim stmt As %SQL.Statement = ##class(%SQL.Statement).%New()
+        #dim o As %ZEN.proxyObject = ##class(%ZEN.proxyObject).%New()
+
+        set status = stmt.%Prepare(sql)
+        #dim result As %SQL.StatementResult = stmt.%Execute()
+
+        while result.%Next(.sc) { 
+            //do result.%Print()
+            #dim oName As %String = result.%Get("name")
+            #dim p As CPM.Registry.Package = ##class(CPM.Registry.Package).%OpenId(oName)
+            set $property(o, oName) = p
+        }
+        set o."_updated" = $$$CpmRegistry.Cache."_updated"
+        if ($data(%request)) {
+            Set %response.CharSet     = ##class(%SYS.NLS.Table).GetCSPTable()
+            Set %response.ContentType = "application/json"
+        }
+        do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(o,,1,"aeloqtwu")
+    }
+    catch (e) {
+        Set status = e.AsStatus()
+        //do ..ErrorHandler(status)
+    }
+    quit status
+]]></Implementation>
+</Method>
+
+<Method name="DebugEnable">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+    set $$$CpmConfig."Debug.Rest" = 1
+    #dim servername As %String
+    #dim serverport As %String
+    do 
+    . new $namespace zn "%sys"
+    . set servername = $$$CONFGLO("Startup","WebServerName") 
+    . set:servername="" servername="127.0.0.1"
+    . set serverport = $$$CONFGLO("Startup","WebServerPort")
+    set $$$CpmConfig."Debug.RestAddress" = ..FormatStr("http://$1:$2",servername,serverport) ;"http://localhost:57776"
+]]></Implementation>
+</Method>
+</Class>
+</Export>

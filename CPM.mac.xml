@@ -27,6 +27,7 @@ SHELL
         }
     }
     catch e {
+        do BACK^%ETN
     }
     do fini
     quit
@@ -88,7 +89,7 @@ batch1(command="help", args...)
 ALIASES(aliases)
  ;QUIT;Q
  ;INSTALL;INS;I
- ;HELP;?
+ ;HELP;HLP;H;?
  ;LIST;LIS;LS;L
  ;EXPORT;EXP;EX;E
 #; aliases for commands
@@ -114,9 +115,13 @@ INSTALL(args...) ;;install package
     #dim dryrun As %Boolean = 0
     #dim silent As %Boolean = 0
     #dim verbose As %Boolean = 0
-    do GetOptions(.args, 
-                  "/dryrun|/d", .dryrun,
-                  "/s|/silent", .silent, "/verbose|/v", .verbose)
+    #dim sc As %Status = $$$OK
+    set sc = $$GetOptions(.args, 
+                          "/dryrun|/d", .dryrun,
+                          "/s|/silent", .silent, "/verbose|/v", .verbose)
+    if $$$ISERR(sc) { 
+        quit sc 
+    }
     #; FIXME - create special GetOptions version which will set opts{} directly
     set opts("dryrun") = $get(dryrun)
     set opts("silent") = $get(silent)
@@ -136,15 +141,18 @@ PACKAGE(args...) ;;package creation commands
     #dim pkgLicense As %String = ""
     #dim pkgVersion As %String = ""
     
-    do GetOptions(.args, 
-                  "/debug", .debug,
-                  "/c|/create", .create, "/delete", .delete,
-                  "/prj:|/from:", .prjName, "/autoload", .autoload,
-                  "/author:", .pkgAuthor, "/description:", .pkgDescription,
-                  "/license:", .pkgLicense, "/version:", .pkgVersion)
+    #dim status As %Status = $$$OK
+    set status = $$GetOptions(.args, 
+                              "/debug", .debug,
+                              "/c|/create", .create, "/delete", .delete,
+                              "/prj:|/from:", .prjName, "/autoload", .autoload,
+                              "/author:", .pkgAuthor, "/description:", .pkgDescription,
+                              "/license:", .pkgLicense, "/version:", .pkgVersion)
+    if $$$ISERR(status) { 
+        quit status 
+    }
 
     #dim pkgName As %String = ""
-    #dim status As %Status = $$$OK
 
     if create {
         set pkgName = $$PopArrValue(.args)
@@ -226,8 +234,13 @@ EXPORT(args...) ;;prepare to publish - export package(s)
     #dim verbose As %Boolean = 0
     #dim minor As %Boolean = 0
     #dim major As %Boolean = 0
-    do GetOptions(.args, "/v|/verbose", .verbose, 
-                  "/minor", .minor, "/major", .major)
+    #dim sc As %Status = $$$OK
+    set sc = $$GetOptions(.args, "/v|/verbose", .verbose, 
+                        "/minor", .minor, "/major", .major)
+    if $$$ISERR(sc) { 
+        quit sc 
+    }
+
     for i=1:1:$get(args) {
         #dim packageName As %String = $get(args(i))
         continue:packageName=""
@@ -264,7 +277,11 @@ LIST(args...) ;;list of installed and available packages
     #dim verbose As %Boolean = 0
     #dim local As %Boolean = 1
     #dim remote As %Boolean = 0
-    do GetOptions(.args, "/v|/verbose", .verbose, "/local", .local, "/remote", .remote)
+    #dim sc As %Status = $$$OK
+    set sc = $$GetOptions(.args, "/v|/verbose", .verbose, "/local", .local, "/remote", .remote)
+    if $$$ISERR(sc) { 
+        quit sc 
+    }
 
     #dim sql As %SQL.Statement = ##class(%SQL.Statement).%New()
     #dim tSC As %Status = sql.%Prepare("SELECT %ID, Name, Version, Description FROM CPM_Registry.Package")
@@ -295,7 +312,11 @@ CONFIG(args...) ;;get/set configuration parameters
     #dim debug As %Boolean = 0
     #dim getOp As %Boolean = 0
     #dim setOp As %Boolean = 0
-    do GetOptions(.args, "/g|/get", .getOp, "/s|/set", .setOp, "/debug", .debug)
+    #dim sc As %Status = $$$OK
+    set sc = $$GetOptions(.args, "/g|/get", .getOp, "/s|/set", .setOp, "/debug", .debug)
+    if $$$ISERR(sc) { 
+        quit sc 
+    }
 
     #dim nameParam As %String = ""
     #dim valueParam As %String = ""
@@ -310,19 +331,25 @@ CONFIG(args...) ;;get/set configuration parameters
         set $property($$$CpmConfig, nameParam) = valueParam
         write !,nameParam, ?14, " = ", $property( $$$CpmConfig, nameParam)
     }
-    if 'getOp && 'setOp {
-        // TODO - show whole configuration
-    } 
-    if debug { zw }
+    if debug || ('getOp && 'setOp) {
+        do $$$CpmConfig.DumpAll()
+    }
     quit
 
 HELP(command="",args...) ;;this help
     new (command,args)
+#if 0
     if command'="" {
         set cpm=##class(CPM.Main).%New()
         do cpm.Help(command,args...)
         quit 
     }
+#else
+    if command'="" {
+        do BATCH(command_" /help")
+        quit
+    }
+#endif
     write !,"Caché Package Manager"
     write !!,"Available commands:"
     for i=1:1 {

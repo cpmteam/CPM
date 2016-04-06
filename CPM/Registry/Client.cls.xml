@@ -26,12 +26,13 @@ Client for API of registry</Description>
 Get SSL Configuration by Server as a name for configuration</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Server:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
     new $namespace
     zn "%SYS"
+    quit:##class(Security.SSLConfigs).Exists(Server) Server
+
     do {
-        quit:##class(Security.SSLConfigs).Exists(Server)
-        
         set tSC=##class(Security.SSLConfigs).Create(Server)
         $$$ThrowOnError(tSC)
     } while 0
@@ -43,6 +44,7 @@ Get SSL Configuration by Server as a name for configuration</Description>
 <Internal>1</Internal>
 <ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[Url:%String,&Params]]></FormalSpec>
+<ReturnType>%Net.HttpResponse</ReturnType>
 <Implementation><![CDATA[
     set method=$$$GetParam(Params,"method","GET")
     $$$UrlParser(Url,url)
@@ -71,12 +73,15 @@ Get SSL Configuration by Server as a name for configuration</Description>
     
     quit request.HttpResponse
     
-    set data=request.HttpResponse.Data
-    set data=data.Read(data.Size)
-    set tSC=##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(data,,.parsed)
+#if 0
+    set data = request.HttpResponse.Data
+    set data = data.Read(data.Size)
+    #dim parsed As %RegisteredObject
+    set tSC  = ##class($$$JsonProvider).%ConvertJSONToObject(data,,.parsed)
     $$$ThrowOnError(tSC)
     
     quit parsed
+#endif
 ]]></Implementation>
 </Method>
 
