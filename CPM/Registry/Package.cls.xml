@@ -282,6 +282,57 @@ but we need them in low case eventually</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="ImportFromGitHub">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>repoName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim status As %Status = $$$OK
+    
+    #dim repo As %ZEN.proxyObject = ""
+    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetRepoInfo(repoName, .repo))
+    #dim name As %string = repo.name
+    #dim gitHubUrl As %string = repo."html_url"
+    #dim hasDownloads As %Boolean = repo."has_downloads"
+    #dim forksCount As %Integer = repo."forks_count"
+    #dim description As %String = repo.description
+    #dim createionTime As %DateTime = repo."created_at"
+    #dim modificationTime As %DateTime = repo."pushed_at"
+
+    #dim license As %ZEN.proxyObject = ""
+    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetLicense(repoName, .license))
+    #dim licenseType As %String = license.license.key
+    #dim licenseName As %String = license.license.name
+
+    #dim readme As %ZEN.proxyObject = ""
+    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetReadme(repoName, .readme))
+    #dim readmeEncoding As %Striing = readme.encoding
+    #dim readmeContent As %String = readme.content
+    #dim readmeFilename As %String = readme.path
+    #dim readmeUrl As %String = readme."html_url"
+    //$$$ASSERTOK(readmeEncoding, "base64")
+    #dim readmeText As %string = $system.Encryption.Base64Decode(readmeContent)
+
+    #dim releases As %ListOfObjects = ""
+    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetReleases(repoName, .releases))
+    #dim key As %String = ""
+    do {
+        #dim release As %ZEN.proxyObject = releases.GetNext(.key)
+        if key="" { quit }
+        zw release
+    } while key'=""
+
+    #dim latestRelease As %ZEN.proxyObject = ""
+    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetReleaseInfo(repoName, ,.latestRelease))
+    #dim tag As %String = latestRelease."tag_name"
+    #dim tagName As %String = latestRelease.name
+    #dim tagTime As %DateTime = latestRelease."published_at"
+    #dim tarball As %string = latestRelease."tarball_url"
+    #dim zipball As %String = latestRelease."zipball_url"
+    #dim releaseComments As %String = latestRelease.body
+]]></Implementation>
+</Method>
+
 <Method name="%DispatchSetProperty">
 <Description>
 is used to set the value of an unknown property.</Description>
