@@ -43,7 +43,7 @@ Get SSL Configuration by Server as a name for configuration</Description>
 <Method name="Request">
 <Internal>1</Internal>
 <ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[Url:%String,&Params]]></FormalSpec>
+<FormalSpec><![CDATA[Url:%String,&Params,silent:%Boolean]]></FormalSpec>
 <ReturnType>%Net.HttpResponse</ReturnType>
 <Implementation><![CDATA[
     set method=$$$GetParam(Params,"method","GET")
@@ -68,8 +68,10 @@ Get SSL Configuration by Server as a name for configuration</Description>
     $$$ThrowOnError(tSC)
     
     set statusCode=request.HttpResponse.StatusCode
-    throw:statusCode=404 ##class(%Exception.General).%New("File not found error: "_statusCode)
-    throw:statusCode>=400 ##class(%Exception.General).%New("Server error: "_statusCode)
+    if 'silent {
+    	throw:statusCode=404 ##class(%Exception.General).%New("File not found error: "_statusCode)
+    	throw:statusCode>=400 ##class(%Exception.General).%New("Server error: "_statusCode)
+    }
     
     quit request.HttpResponse
     
@@ -87,12 +89,12 @@ Get SSL Configuration by Server as a name for configuration</Description>
 
 <Method name="Get">
 <ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[Url:%String="",&Params]]></FormalSpec>
+<FormalSpec><![CDATA[Url:%String="",&Params,silent:%Boolean=0]]></FormalSpec>
 <Implementation><![CDATA[
     $$$UrlParser(Url,url)
     throw:($data(url("scheme"),scheme)&&(scheme'?1"http".1"s")) ##class(%Exception.General).%New("registry url must be filled")
     
-    quit ..Request(.Url, .Params)
+    quit ..Request(.Url, .Params, .silent)
 ]]></Implementation>
 </Method>
 </Class>

@@ -140,6 +140,7 @@ PACKAGE(args...) ;;package creation commands
     #dim pkgDescription As %String = ""
     #dim pkgLicense As %String = ""
     #dim pkgVersion As %String = ""
+    #dim import As %String = ""
     
     #dim status As %Status = $$$OK
     set status = $$GetOptions(.args, 
@@ -147,7 +148,8 @@ PACKAGE(args...) ;;package creation commands
                               "/c|/create", .create, "/delete", .delete,
                               "/prj:|/from:", .prjName, "/autoload", .autoload,
                               "/author:", .pkgAuthor, "/description:", .pkgDescription,
-                              "/license:", .pkgLicense, "/version:", .pkgVersion)
+                              "/license:", .pkgLicense, "/version:", .pkgVersion,
+                              "/i:|/import:", .import)
     if $$$ISERR(status) { 
         quit status 
     }
@@ -163,6 +165,16 @@ PACKAGE(args...) ;;package creation commands
         write !, "Deleting package definition: ", pkgName,!
         set status = ##class(CPM.Registry.Package).%DeleteId(pkgName)
 
+        return status
+    }
+    elseif import '= "" {
+        if (import = "all") {
+	        set status = ##class(CPM.Registry.Package).ImportAll("intersystems-ru") ; FIXME - harc-coded
+        } else {	        
+        	write !, "Import from url: ", import,!
+        	set status = ##class(CPM.Registry.Package).ImportFrom(import)
+        }
+        
         return status
     }
     else {
