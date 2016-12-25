@@ -232,42 +232,63 @@ appropriate container</Description>
 	set status = importedPage.%Save()
 	
 	
-		set package  = ##class(%Stream.FileBinary).%New()
-        do ##class(%Library.File).CreateDirectoryChain($$$CpmConfig.tempdir)
-        set package.Filename = $$$UtilMakePath($$$CpmConfig.tempdir, "test.zip")
-        
-         w !, "Downloading package"
-		if (data.message = "Not Found") 
-		{
-			set zipballUrl = "https://github.com"_gitUrl_"/zipball/master/"
-			#dim zipball As %Net.HttpResponse = $$$CpmRegistry.Get(zipballUrl)
-			do package.CopyFromAndSave(zipball.Data)
+	set package  = ##class(%Stream.FileBinary).%New()
+	do ##class(%Library.File).CreateDirectoryChain($$$CpmConfig.tempdir)
+	set package.Filename = $$$UtilMakePath($$$CpmConfig.tempdir, "test.zip")
+
+	write !, "Downloading package"
+	if (data.message = "Not Found") {
+		set zipballUrl = "https://github.com"_gitUrl_"/zipball/master/"
+		#dim zipball As %Net.HttpResponse = $$$CpmRegistry.Get(zipballUrl)
+		do package.CopyFromAndSave(zipball.Data)
+	} else {
+		set myUrl = data.assets.GetAt(1)
+		set latestUrl = myUrl."browser_download_url"
+		#dim latest As %Net.HttpResponse = $$$CpmRegistry.Get(latestUrl)
+		do package.CopyFromAndSave(latest.Data)
+	}
+
+	write !, "Extracting package"
+	set x = $ZF(-1, """C:\Program Files\7-Zip\7z.exe"" x "_$$$CpmConfig.tempdir_"test.zip -o"_$$$CpmConfig.tempdir_"test -y")
+	write $$$CpmConfig.tempdir_"test"
+	if ##class(%Library.File).Exists($$$CpmConfig.tempdir_"test") {
+		#dim list
+		;do $system.OBJ.ImportDir($$$CpmConfig.tempdir_"\test","*.xml","ck",,1,.list)
+		do ..LoadTemporarilyToNS("CPM-D1", $$$CpmConfig.tempdir_"\test", .list)
+		set itemName = ""
+		for {
+	    	set itemName = $order(list(itemName))
+	    	quit:itemName=""
+	    	write ?8,itemName,!
+	    	do importedPage.items.Insert(itemName)
 		}
-		else
-		{
-			set myUrl = data.assets.GetAt(1)
-			set latestUrl = myUrl."browser_download_url"
-			#dim latest As %Net.HttpResponse = $$$CpmRegistry.Get(latestUrl)
-			do package.CopyFromAndSave(latest.Data)
-		}
-        
-        w !, "Extracting package"
-        set x = $ZF(-1, """C:\Program Files\7-Zip\7z.exe"" x "_$$$CpmConfig.tempdir_"test.zip -o"_$$$CpmConfig.tempdir_"test -y")
-		w $$$CpmConfig.tempdir_"test"
-		if ##class(%Library.File).Exists($$$CpmConfig.tempdir_"test") {
-			#dim list
-			do $system.OBJ.ImportDir($$$CpmConfig.tempdir_"\test","*.xml","ck",,1,.list)
-			set itemName = ""
-			for {
-            	set itemName = $order(list(itemName))
-            	quit:itemName=""
-            	write ?8,itemName,!
-            	do importedPage.items.Insert(itemName)
-        	}
-		}
-		do package.%Save()		
+	}
+	do package.%Save()		
 	
 	return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="LoadTemporarilyToNS">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[TempName:%String,TempDir:%String,&ListOfFiles]]></FormalSpec>
+<Implementation><![CDATA[
+	new $namespace
+	zn "%sys"
+	set installer = ##class(%Installer.Installer).%New()
+	do installer.CreateDatabase(TempName, TempName, "overwrite") ; Name, [Subdir] Name
+	do installer.CreateNamespace(TempName, TempName, TempName) ; Namespace, Code DB, Data DB
+	
+	; code
+	; ..AddDirectoryItems will be appropriate
+	; but object will become useless the next moment we leave namespace..
+	; so do the old-school way
+    do $system.OBJ.ImportDir(TempDir,,"ck",,1,.ListOfFiles)
+	
+	if ##class(Config.Namespaces).Exists(TempName) {
+		set sc = ##class(Config.Namespaces).Delete(TempName)
+		set sc = $$DeleteDatabase^%SYS.DATABASE(TempName)
+	}
 ]]></Implementation>
 </Method>
 
@@ -491,34 +512,34 @@ Is used to get the value of an unknown property.</Description>
 <Value>Modified</Value>
 </Value>
 <Value name="3">
-<Value>path</Value>
+<Value>dist-tags</Value>
 </Value>
 <Value name="4">
-<Value>version</Value>
-</Value>
-<Value name="5">
-<Value>license</Value>
-</Value>
-<Value name="6">
-<Value>keywords</Value>
-</Value>
-<Value name="7">
-<Value>description</Value>
-</Value>
-<Value name="8">
-<Value>dependencies</Value>
-</Value>
-<Value name="9">
-<Value>items</Value>
-</Value>
-<Value name="10">
-<Value>maintainers</Value>
-</Value>
-<Value name="11">
 <Value>author</Value>
 </Value>
+<Value name="5">
+<Value>path</Value>
+</Value>
+<Value name="6">
+<Value>version</Value>
+</Value>
+<Value name="7">
+<Value>license</Value>
+</Value>
+<Value name="8">
+<Value>keywords</Value>
+</Value>
+<Value name="9">
+<Value>description</Value>
+</Value>
+<Value name="10">
+<Value>dependencies</Value>
+</Value>
+<Value name="11">
+<Value>items</Value>
+</Value>
 <Value name="12">
-<Value>DirectoryPath</Value>
+<Value>maintainers</Value>
 </Value>
 <Value name="13">
 <Value>readmeFilename</Value>
@@ -527,19 +548,7 @@ Is used to get the value of an unknown property.</Description>
 <Value>readmeText</Value>
 </Value>
 <Value name="15">
-<Value>dist-tags</Value>
-</Value>
-<Value name="16">
-<Value>avatar</Value>
-</Value>
-<Value name="17">
-<Value>authorAvatar</Value>
-</Value>
-<Value name="18">
-<Value>authorUrl</Value>
-</Value>
-<Value name="19">
-<Value>subscribersCount</Value>
+<Value>DirectoryPath</Value>
 </Value>
 </Data>
 </Storage>
