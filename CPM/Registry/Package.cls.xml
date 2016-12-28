@@ -181,9 +181,24 @@ appropriate container</Description>
 ]]></Implementation>
 </Method>
 
+<UDLText name="T">
+<Content><![CDATA[
+// TODO - 
+
+]]></Content>
+</UDLText>
+
+<Method name="NextTempNamespace">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA["CPM-D1"
+]]></Implementation>
+</Method>
+
 <Method name="ImportFrom">
 <ClassMethod>1</ClassMethod>
-<FormalSpec>url:%String</FormalSpec>
+<FormalSpec>url:%String,dryRun:%Boolean=0</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	set gitUrl = $piece(url, "github.com", 2, *)
@@ -221,20 +236,25 @@ appropriate container</Description>
 	set importedPage.version = version
 	set importedPage.readmeText = readme
 	set importedPage.subscribersCount = subCount
-	if (data.message '= "Not Found") 
-	{		
+	if (data.message '= "Not Found") {		
 		set importedPage.version = data."tag_name"
 		set importedPage.author = data.author.login
 		set importedPage.avatar = data.autor."avatar_url"
 		set importedPage.authorUrl = data.author."html_url"
-		
-	}	
-	set status = importedPage.%Save()
-	
+	}
 	
 	set package  = ##class(%Stream.FileBinary).%New()
-	do ##class(%Library.File).CreateDirectoryChain($$$CpmConfig.tempdir)
-	set package.Filename = $$$UtilMakePath($$$CpmConfig.tempdir, "test.zip")
+	#dim tempDirectory As %String = $$$UtilConcatPath($$$CpmConfig.tempdir, ".github")
+	set tempDirectory = $$$UtilConcatPath($$$UtilConcatPath(tempDirectory, author), name)
+	if tempDirectory = "" {
+		write !, "Failed to calculate temporary directory",!!
+		quit '$$$OK
+	}
+	
+	write "Creating temp directory: ", tempDirectory,!
+	do ##class(%Library.File).CreateDirectoryChain(tempDirectory)
+	#dim tempZip As %String = $$$UtilMakePath(tempDirectory, "test.zip")
+	set package.Filename = tempZip
 
 	write !, "Downloading package"
 	if (data.message = "Not Found") {
@@ -248,13 +268,12 @@ appropriate container</Description>
 		do package.CopyFromAndSave(latest.Data)
 	}
 
+	#dim tempOutDir As %String = $$$UtilConcatPath(tempDirectory, "out")
 	write !, "Extracting package"
-	set x = $ZF(-1, """C:\Program Files\7-Zip\7z.exe"" x "_$$$CpmConfig.tempdir_"test.zip -o"_$$$CpmConfig.tempdir_"test -y")
-	write $$$CpmConfig.tempdir_"test"
-	if ##class(%Library.File).Exists($$$CpmConfig.tempdir_"test") {
+	set x = $ZF(-1, """C:\Program Files\7-Zip\7z.exe"" x "_tempZip_" -o"_tempOutDir_" -y")
+	if ##class(%Library.File).Exists(tempOutDir) {
 		#dim list
-		;do $system.OBJ.ImportDir($$$CpmConfig.tempdir_"\test","*.xml","ck",,1,.list)
-		do ..LoadTemporarilyToNS("CPM-D1", $$$CpmConfig.tempdir_"\test", .list)
+		do ..LoadTemporarilyToNS(..NextTempNamespace(), tempOutDir, .list, dryRun)
 		set itemName = ""
 		for {
 	    	set itemName = $order(list(itemName))
@@ -263,6 +282,8 @@ appropriate container</Description>
 	    	do importedPage.items.Insert(itemName)
 		}
 	}
+	do ##class(%Library.File).RemoveDirectory(tempDirectory)
+	set status = importedPage.%Save()
 	do package.%Save()		
 	
 	return $$$OK
@@ -271,7 +292,7 @@ appropriate container</Description>
 
 <Method name="LoadTemporarilyToNS">
 <ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[TempName:%String,TempDir:%String,&ListOfFiles]]></FormalSpec>
+<FormalSpec><![CDATA[TempName:%String,TempDir:%String,&ListOfFiles,dryRun:%Boolean=0]]></FormalSpec>
 <Implementation><![CDATA[
 	new $namespace
 	zn "%sys"
@@ -283,7 +304,8 @@ appropriate container</Description>
 	; ..AddDirectoryItems will be appropriate
 	; but object will become useless the next moment we leave namespace..
 	; so do the old-school way
-    do $system.OBJ.ImportDir(TempDir,,"ck",,1,.ListOfFiles)
+	#dim flags As %String = $select(dryRun:"-d",1:"ck")
+    do $system.OBJ.ImportDir(TempDir,,flags,,1,.ListOfFiles)
 	
 	if ##class(Config.Namespaces).Exists(TempName) {
 		set sc = ##class(Config.Namespaces).Delete(TempName)
@@ -294,9 +316,10 @@ appropriate container</Description>
 
 <Method name="ImportAll">
 <ClassMethod>1</ClassMethod>
-<FormalSpec>name:%String</FormalSpec>
+<FormalSpec>name:%String,dryRun:%Boolean=0</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	#dim max As %Numeric = 20 ; FIXME
 	set newUrl = "https://api.github.com/orgs/"_name_"/repos"
 	
 	#dim response As %Net.HttpResponse = $$$CpmRegistry.Get(.newUrl)
@@ -306,11 +329,13 @@ appropriate container</Description>
 	set tSC = ##class($$$JsonProvider).%ConvertJSONToObject(response.Data,,.data,1)
 	set urlName = ""
 	for i=1:1:data.Count() {
+		if i>max { quit }
 		set urlName = data.GetAt(i)."html_url"
 		quit:urlName=""        
-        write !, "Import from url: ", urlName,!
-        do ..ImportFrom(urlName)
+        write !, i,".", ?4, "Import from url: ", urlName,!
+        do ..ImportFrom(urlName, dryRun)
 	}
+	quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -424,11 +449,16 @@ but we need them in low case eventually</Description>
     
     #dim repo As %ZEN.proxyObject = ""
     $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetRepoInfo(repoName, .repo))
-    #dim name As %string = repo.name
-    #dim gitHubUrl As %string = repo."html_url"
+    #dim name As %String = repo.name
+    #dim avatar As %String = repo.owner."avatar_url"
+	#dim author As %String = repo.owner.login
+	#dim authorUrl As %String = repo."html_url"
+    #dim description As %String = repo.description
+    #dim gitHubUrl As %String = repo."html_url"
+    #dim haswiki As %String = repo."has_wiki"
+	#dim subCount As %String = repo."subscribers_count"
     #dim hasDownloads As %Boolean = repo."has_downloads"
     #dim forksCount As %Integer = repo."forks_count"
-    #dim description As %String = repo.description
     #dim createionTime As %DateTime = repo."created_at"
     #dim modificationTime As %DateTime = repo."pushed_at"
 
@@ -444,7 +474,7 @@ but we need them in low case eventually</Description>
     #dim readmeFilename As %String = readme.path
     #dim readmeUrl As %String = readme."html_url"
     //$$$ASSERTOK(readmeEncoding, "base64")
-    #dim readmeText As %string = $system.Encryption.Base64Decode(readmeContent)
+    #dim readmeText As %String = $system.Encryption.Base64Decode(readmeContent)
 
     #dim releases As %ListOfObjects = ""
     $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetReleases(repoName, .releases))
@@ -460,7 +490,7 @@ but we need them in low case eventually</Description>
     #dim tag As %String = latestRelease."tag_name"
     #dim tagName As %String = latestRelease.name
     #dim tagTime As %DateTime = latestRelease."published_at"
-    #dim tarball As %string = latestRelease."tarball_url"
+    #dim tarball As %String = latestRelease."tarball_url"
     #dim zipball As %String = latestRelease."zipball_url"
     #dim releaseComments As %String = latestRelease.body
 ]]></Implementation>

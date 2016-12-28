@@ -17,6 +17,7 @@
 #define CpmSearch   $$$CpmInstance.search
 
 #define UtilMakePath(%dir,%name) ##class(%Library.File).NormalizeFilename(%name,%dir)
+#define UtilConcatPath(%dir,%name) ##class(%Library.File).SubDirectoryName(%dir,%name)
 
 #; session global suppose to be not mapped to the central CPM database
 #define CpmSessionGlobal $name(^CPM.Session)

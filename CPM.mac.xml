@@ -169,7 +169,7 @@ PACKAGE(args...) ;;package creation commands
     }
     elseif import '= "" {
         if (import = "all") {
-	        set status = ##class(CPM.Registry.Package).ImportAll("intersystems-ru") ; FIXME - hard-coded
+	        set status = ##class(CPM.Registry.Package).ImportAll("intersystems-ru", 0) ; FIXME - hard-coded, not dry run
         } else {	        
         	write !, "Import from url: ", import,!
         	set status = ##class(CPM.Registry.Package).ImportFrom(import)
