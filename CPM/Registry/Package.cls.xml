@@ -222,11 +222,11 @@ appropriate container</Description>
 
 <Method name="CreateTempDir">
 <ClassMethod>1</ClassMethod>
-<FormalSpec>author:%String,name:%String</FormalSpec>
+<FormalSpec>name:%String</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
 	#dim tempDirectory As %String = $$$UtilConcatPath($$$CpmConfig.tempdir, ".github")
-	set tempDirectory = $$$UtilConcatPath($$$UtilConcatPath(tempDirectory, author), name)
+	set tempDirectory = $$$UtilConcatPath(tempDirectory, name)
 	if tempDirectory = "" {
 		write !, "Failed to calculate temporary directory",!!
 		quit '$$$OK
@@ -271,7 +271,9 @@ not found the asked url (license, readme, etc.)</Description>
 <FormalSpec>repoName:%String,dryRun:%Boolean=0,repo:%ZEN.proxyObject,license:%ZEN.proxyObject,readme:%ZEN.proxyObject,release:%ZEN.proxyObject</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    #dim name As %String = repo.name
+    #dim name As %String = repoName ; repo.name ; FIXME
+	do ##class(CPM.Registry.GitHubApi).NormalizeRepoName(.name)
+
     #dim avatar As %String = repo.owner."avatar_url"
 	#dim author As %String = repo.owner.login
 	#dim authorUrl As %String = repo."html_url"
@@ -328,7 +330,7 @@ not found the asked url (license, readme, etc.)</Description>
     	set package."dist-tags" = tag
 	}
 
-	#dim tempDirectory As %String = ..CreateTempDir(author, name)
+	#dim tempDirectory As %String = ..CreateTempDir(name)
 	#dim tempZip As %String = $$$UtilMakePath(tempDirectory, "test.zip")
 	do ..DownloadUrl(tarUrl, tempZip)
 
@@ -346,7 +348,7 @@ not found the asked url (license, readme, etc.)</Description>
 	    	do package.items.Insert(itemName)
 		}
 	}
-	do ##class(%Library.File).RemoveDirectoryTree(tempDirectory)
+	; do ##class(%Library.File).RemoveDirectoryTree(tempDirectory)
 	quit:'dryRun package.%Save()
 	quit $$$OK
 ]]></Implementation>
@@ -358,16 +360,17 @@ not found the asked url (license, readme, etc.)</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     #dim status As %Status = $$$OK
+	#dim githubApi As CPM.Registry.GitHubApi = ##class(CPM.Registry.GitHubApi).%New()
     
     #dim repo As %ZEN.proxyObject = ""
-    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetRepoInfo(repoName, .repo))
+    $$$THROWONERROR(status, githubApi.GetRepoInfo(repoName, .repo))
     #dim license As %ZEN.proxyObject = ""
-    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetLicense(repoName, .license))
+    $$$THROWONERROR(status, githubApi.GetLicense(repoName, .license))
     #dim readme As %ZEN.proxyObject = ""
-    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetReadme(repoName, .readme))
+    $$$THROWONERROR(status, githubApi.GetReadme(repoName, .readme))
 
     #dim releases As %ListOfObjects = ""
-    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetReleases(repoName, .releases))
+    $$$THROWONERROR(status, githubApi.GetReleases(repoName, .releases))
    #if 0
     #dim key As %String = ""
     do {
@@ -377,7 +380,7 @@ not found the asked url (license, readme, etc.)</Description>
     } while key'=""
    #endif
     #dim latestRelease As %ZEN.proxyObject = ""
-    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetReleaseInfo(repoName, ,.latestRelease))
+    $$$THROWONERROR(status, githubApi.GetReleaseInfo(repoName, ,.latestRelease))
 
     quit ..ImportFromObject(repoName, dryRun, repo, license, readme, latestRelease)
 ]]></Implementation>
@@ -385,10 +388,9 @@ not found the asked url (license, readme, etc.)</Description>
 
 <Method name="ImportAll">
 <ClassMethod>1</ClassMethod>
-<FormalSpec>orgName:%String,dryRun:%Boolean=0</FormalSpec>
+<FormalSpec>orgName:%String,dryRun:%Boolean=0,max:%Numeric=100</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	#dim max As %Numeric = 20 ; FIXME
 	#dim githubApi As CPM.Registry.GitHubApi = ##class(CPM.Registry.GitHubApi).%New()
 	#dim data As $$$JsonObject
 	#dim sc As %Status = githubApi.GetRepos(orgName, .data)
@@ -402,20 +404,20 @@ not found the asked url (license, readme, etc.)</Description>
 		if repoObject.private {
 			continue 
 		}
+		// bail out if too much repositories already processed
+		if i>max { quit }
+		
 		// resolve forks
 		if repoObject.fork {
 			#dim repoDetailed 
 			do githubApi.GetRepoInfo(orgName _"/"_ repoName, .repoDetailed)
 			if repoDetailed.parent {
 				; do repoDetailed.parent.%ToJSON()
-				set urlName = repoDetailed."html_url"
+				set urlName = repoDetailed.parent."html_url"
 			}
 		} else {
 			set urlName = repoObject."html_url"
 		}
-		&html<Name: #(repoName)#, 
-		private: #(repoObject.private)#, fork: #(repoObject.fork)#, 
-		html_url: #(repoObject."html_url")# >
 		quit:urlName=""        
         write !, i,".", ?4, "Import from url: ", urlName,!
         do ..ImportFromGitHub(urlName, dryRun)
