@@ -244,16 +244,7 @@ appropriate container</Description>
 	}
 	
 	set package  = ##class(%Stream.FileBinary).%New()
-	#dim tempDirectory As %String = $$$UtilConcatPath($$$CpmConfig.tempdir, ".github")
-	set tempDirectory = $$$UtilConcatPath($$$UtilConcatPath(tempDirectory, author), name)
-	if tempDirectory = "" {
-		write !, "Failed to calculate temporary directory",!!
-		quit '$$$OK
-	}
-	
-	write "Creating temp directory: ", tempDirectory,!
-	do ##class(%Library.File).CreateDirectoryChain(tempDirectory)
-	#dim tempZip As %String = $$$UtilMakePath(tempDirectory, "test.zip")
+	#dim tempZip As %String = $$$UtilMakePath(..CreateTempDir(author, name), "test.zip")
 	set package.Filename = tempZip
 
 	write !, "Downloading package"
@@ -314,7 +305,7 @@ appropriate container</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="ImportAll">
+<Method name="ImportAllOld">
 <ClassMethod>1</ClassMethod>
 <FormalSpec>name:%String,dryRun:%Boolean=0</FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -334,6 +325,210 @@ appropriate container</Description>
 		quit:urlName=""        
         write !, i,".", ?4, "Import from url: ", urlName,!
         do ..ImportFrom(urlName, dryRun)
+	}
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="CreateTempDir">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>author:%String,name:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim tempDirectory As %String = $$$UtilConcatPath($$$CpmConfig.tempdir, ".github")
+	set tempDirectory = $$$UtilConcatPath($$$UtilConcatPath(tempDirectory, author), name)
+	if tempDirectory = "" {
+		write !, "Failed to calculate temporary directory",!!
+		quit '$$$OK
+	}
+	write "Creating temp directory: ", tempDirectory,!
+	do ##class(%Library.File).CreateDirectoryChain(tempDirectory)
+	quit tempDirectory
+]]></Implementation>
+</Method>
+
+<Method name="DownloadUrl">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>url:%String,tempName:%String</FormalSpec>
+<Implementation><![CDATA[
+	#dim archive = ##class(%Stream.FileBinary).%New()
+	set archive.Filename = tempName
+	#dim zipball As %Net.HttpResponse = $$$CpmRegistry.Get(url)
+	do archive.CopyFromAndSave(zipball.Data)
+]]></Implementation>
+</Method>
+
+<Parameter name="ARCHIVER">
+<Type>%String</Type>
+<Default>"C:\Program Files\7-Zip\7z.exe"</Default>
+</Parameter>
+
+<Method name="NotFound">
+<Description>
+not found the asked url (license, readme, etc.)</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec>o:%ZEN.proxyObject</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA['$isobject(o) || (o.message = "Not Found")
+]]></Implementation>
+</Method>
+
+<Method name="ImportFromObject">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>repoName:%String,dryRun:%Boolean=0,repo:%ZEN.proxyObject,license:%ZEN.proxyObject,readme:%ZEN.proxyObject,release:%ZEN.proxyObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim name As %String = repo.name
+    #dim avatar As %String = repo.owner."avatar_url"
+	#dim author As %String = repo.owner.login
+	#dim authorUrl As %String = repo."html_url"
+    #dim description As %String = repo.description
+    #dim gitHubUrl As %String = repo."html_url"
+    #dim haswiki As %String = repo."has_wiki"
+	#dim subCount As %String = repo."subscribers_count"
+    #dim hasDownloads As %Boolean = repo."has_downloads"
+    #dim forksCount As %Integer = repo."forks_count"
+    #dim createionTime As %DateTime = repo."created_at"
+    #dim modificationTime As %DateTime = repo."pushed_at"
+    #dim version As %String = repo."tag_name"
+    
+	#dim package As CPM.Registry.Package = ..CreateOrOpenId(name)
+
+    set package.name = name
+    set package.avatar = avatar
+    set package.description = description
+   	set package.author = author
+	set package.authorUrl = authorUrl
+	set package.version = version
+	set package.subscribersCount = subCount
+
+	if '..NotFound(license) {
+	    #dim licenseType As %String = license.license.key
+	    #dim licenseName As %String = license.license.name
+	}
+
+	if '..NotFound(readme) {
+	    #;dim readmeEncoding As %String = readme.encoding
+	    #dim readmeContent As %String = readme.content
+	    #dim readmeFilename As %String = readme.path
+	    #;dim readmeUrl As %String = readme."html_url"
+	    #dim readmeText As %String = $system.Encryption.Base64Decode(readmeContent)
+
+	    set package.readmeFilename = readmeFilename
+		set package.readmeText = readmeText
+	}
+
+	#dim tarUrl As %String
+	
+	if ..NotFound(release) {
+		// Case #1 - no release yet, the normal source only package
+		set tarUrl = repoName _ "/zipball/master/"
+	} else {
+	    #dim tag As %String = release."tag_name"
+	    #dim tagName As %String = release.name
+	    #dim tagTime As %DateTime = release."published_at"
+	    #dim tarball As %String = release."tarball_url"
+	    #dim zipball As %String = release."zipball_url"
+	    #dim releaseComments As %String = release.body
+	    set tarUrl = zipball
+    	
+    	set package."dist-tags" = tag
+	}
+
+	#dim tempDirectory As %String = ..CreateTempDir(author, name)
+	#dim tempZip As %String = $$$UtilMakePath(tempDirectory, "test.zip")
+	do ..DownloadUrl(tarUrl, tempZip)
+
+	#dim tempOutDir As %String = $$$UtilConcatPath(tempDirectory, "out")
+	write !, "Extracting package into: "_tempOutDir,!
+	set x = $ZF(-1, ..#ARCHIVER_" x "_tempZip_" -o"_tempOutDir_" -y")
+	if ##class(%Library.File).Exists(tempOutDir) {
+		#dim list
+		do ..LoadTemporarilyToNS(..NextTempNamespace(), tempOutDir, .list, dryRun)
+		set itemName = ""
+		for {
+	    	set itemName = $order(list(itemName))
+	    	quit:itemName=""
+	    	write ?8,itemName,!
+	    	do package.items.Insert(itemName)
+		}
+	}
+	do ##class(%Library.File).RemoveDirectoryTree(tempDirectory)
+	quit:'dryRun package.%Save()
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ImportFromGitHub">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>repoName:%String,dryRun:%Boolean=0</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim status As %Status = $$$OK
+    
+    #dim repo As %ZEN.proxyObject = ""
+    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetRepoInfo(repoName, .repo))
+    #dim license As %ZEN.proxyObject = ""
+    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetLicense(repoName, .license))
+    #dim readme As %ZEN.proxyObject = ""
+    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetReadme(repoName, .readme))
+
+    #dim releases As %ListOfObjects = ""
+    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetReleases(repoName, .releases))
+   #if 0
+    #dim key As %String = ""
+    do {
+        #dim release As %ZEN.proxyObject = releases.GetNext(.key)
+        if key="" { quit }
+        ; zw release
+    } while key'=""
+   #endif
+    #dim latestRelease As %ZEN.proxyObject = ""
+    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetReleaseInfo(repoName, ,.latestRelease))
+
+    quit ..ImportFromObject(repoName, dryRun, repo, license, readme, latestRelease)
+]]></Implementation>
+</Method>
+
+<Method name="ImportAll">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>orgName:%String,dryRun:%Boolean=0</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim max As %Numeric = 20 ; FIXME
+	#dim githubApi As CPM.Registry.GitHubApi = ##class(CPM.Registry.GitHubApi).%New()
+	#dim data As $$$JsonObject
+	#dim sc As %Status = githubApi.GetRepos(orgName, .data)
+
+	set urlName = ""
+	for i=1:1:data.Count() {
+		#dim repoObject = data.GetAt(i)
+		#dim repoName = repoObject.name
+		
+		// skip private repositories
+		if repoObject.private {
+			continue 
+		}
+		// resolve forks
+		if repoObject.fork {
+			#dim repoDetailed 
+			do githubApi.GetRepoInfo(orgName _"/"_ repoName, .repoDetailed)
+			if repoDetailed.parent {
+				; do repoDetailed.parent.%ToJSON()
+				set urlName = repoDetailed."html_url"
+			}
+		} else {
+			set urlName = repoObject."html_url"
+		}
+		&html<Name: #(repoName)#, 
+		private: #(repoObject.private)#, fork: #(repoObject.fork)#, 
+		html_url: #(repoObject."html_url")# >
+		quit:urlName=""        
+        write !, i,".", ?4, "Import from url: ", urlName,!
+        do ..ImportFromGitHub(urlName, dryRun)
 	}
 	quit $$$OK
 ]]></Implementation>
@@ -437,62 +632,6 @@ but we need them in low case eventually</Description>
     close file
 
     quit $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="ImportFromGitHub">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>repoName:%String</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-    #dim status As %Status = $$$OK
-    
-    #dim repo As %ZEN.proxyObject = ""
-    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetRepoInfo(repoName, .repo))
-    #dim name As %String = repo.name
-    #dim avatar As %String = repo.owner."avatar_url"
-	#dim author As %String = repo.owner.login
-	#dim authorUrl As %String = repo."html_url"
-    #dim description As %String = repo.description
-    #dim gitHubUrl As %String = repo."html_url"
-    #dim haswiki As %String = repo."has_wiki"
-	#dim subCount As %String = repo."subscribers_count"
-    #dim hasDownloads As %Boolean = repo."has_downloads"
-    #dim forksCount As %Integer = repo."forks_count"
-    #dim createionTime As %DateTime = repo."created_at"
-    #dim modificationTime As %DateTime = repo."pushed_at"
-
-    #dim license As %ZEN.proxyObject = ""
-    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetLicense(repoName, .license))
-    #dim licenseType As %String = license.license.key
-    #dim licenseName As %String = license.license.name
-
-    #dim readme As %ZEN.proxyObject = ""
-    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetReadme(repoName, .readme))
-    #dim readmeEncoding As %Striing = readme.encoding
-    #dim readmeContent As %String = readme.content
-    #dim readmeFilename As %String = readme.path
-    #dim readmeUrl As %String = readme."html_url"
-    //$$$ASSERTOK(readmeEncoding, "base64")
-    #dim readmeText As %String = $system.Encryption.Base64Decode(readmeContent)
-
-    #dim releases As %ListOfObjects = ""
-    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetReleases(repoName, .releases))
-    #dim key As %String = ""
-    do {
-        #dim release As %ZEN.proxyObject = releases.GetNext(.key)
-        if key="" { quit }
-        zw release
-    } while key'=""
-
-    #dim latestRelease As %ZEN.proxyObject = ""
-    $$$THROWONERROR(status, ##class(CPM.Registry.GitHubApi).GetReleaseInfo(repoName, ,.latestRelease))
-    #dim tag As %String = latestRelease."tag_name"
-    #dim tagName As %String = latestRelease.name
-    #dim tagTime As %DateTime = latestRelease."published_at"
-    #dim tarball As %String = latestRelease."tarball_url"
-    #dim zipball As %String = latestRelease."zipball_url"
-    #dim releaseComments As %String = latestRelease.body
 ]]></Implementation>
 </Method>
 
