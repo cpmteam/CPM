@@ -196,91 +196,6 @@ appropriate container</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="ImportFrom">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>url:%String,dryRun:%Boolean=0</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	set gitUrl = $piece(url, "github.com", 2, *)
-	set newUrl = "https://api.github.com/repos"_gitUrl
-
-	//$$$UrlParser(newUrl,newUrl)
-	#dim response As %Net.HttpResponse = $$$CpmRegistry.Get(.newUrl)
-	#dim responseReadme As %Net.HttpResponse = $$$CpmRegistry.Get(newUrl_"/readme")
-	
-	#dim data As $$$JsonObject
-	
-	set tSC = ##class($$$JsonProvider).%ConvertJSONToObject(response.Data,,.data,1)
-	
-	set name = data.name
-	set avatar = data.owner."avatar_url"
-	set description = data.description
-	set haswiki = data."has_wiki"
-	set subCount = data."subscribers_count"
-	set hasDownloads = data."has_downloads"
-	set author = data.owner.login
-	set authorUrl = data."html_url"
-	set version = "0"
-	
-	set tSC = ##class($$$JsonProvider).%ConvertJSONToObject(responseReadme.Data,,.data,1)
-	set readme = $system.Encryption.Base64Decode(data.content)
-	
-	#dim latestReleases As %Net.HttpResponse = $$$CpmRegistry.Get(newUrl_"/releases/latest", , 1)
-	set tSC = ##class($$$JsonProvider).%ConvertJSONToObject(latestReleases.Data,,.data,1)
-	set importedPage = ..%New()
-	set importedPage.name = name
-	set importedPage.avatar = avatar
-	set importedPage.description = description
-	set importedPage.author = author
-	set importedPage.authorUrl = authorUrl
-	set importedPage.version = version
-	set importedPage.readmeText = readme
-	set importedPage.subscribersCount = subCount
-	if (data.message '= "Not Found") {		
-		set importedPage.version = data."tag_name"
-		set importedPage.author = data.author.login
-		set importedPage.avatar = data.autor."avatar_url"
-		set importedPage.authorUrl = data.author."html_url"
-	}
-	
-	set package  = ##class(%Stream.FileBinary).%New()
-	#dim tempZip As %String = $$$UtilMakePath(..CreateTempDir(author, name), "test.zip")
-	set package.Filename = tempZip
-
-	write !, "Downloading package"
-	if (data.message = "Not Found") {
-		set zipballUrl = "https://github.com"_gitUrl_"/zipball/master/"
-		#dim zipball As %Net.HttpResponse = $$$CpmRegistry.Get(zipballUrl)
-		do package.CopyFromAndSave(zipball.Data)
-	} else {
-		set myUrl = data.assets.GetAt(1)
-		set latestUrl = myUrl."browser_download_url"
-		#dim latest As %Net.HttpResponse = $$$CpmRegistry.Get(latestUrl)
-		do package.CopyFromAndSave(latest.Data)
-	}
-
-	#dim tempOutDir As %String = $$$UtilConcatPath(tempDirectory, "out")
-	write !, "Extracting package"
-	set x = $ZF(-1, """C:\Program Files\7-Zip\7z.exe"" x "_tempZip_" -o"_tempOutDir_" -y")
-	if ##class(%Library.File).Exists(tempOutDir) {
-		#dim list
-		do ..LoadTemporarilyToNS(..NextTempNamespace(), tempOutDir, .list, dryRun)
-		set itemName = ""
-		for {
-	    	set itemName = $order(list(itemName))
-	    	quit:itemName=""
-	    	write ?8,itemName,!
-	    	do importedPage.items.Insert(itemName)
-		}
-	}
-	do ##class(%Library.File).RemoveDirectory(tempDirectory)
-	set status = importedPage.%Save()
-	do package.%Save()		
-	
-	return $$$OK
-]]></Implementation>
-</Method>
-
 <Method name="LoadTemporarilyToNS">
 <ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[TempName:%String,TempDir:%String,&ListOfFiles,dryRun:%Boolean=0]]></FormalSpec>
@@ -302,31 +217,6 @@ appropriate container</Description>
 		set sc = ##class(Config.Namespaces).Delete(TempName)
 		set sc = $$DeleteDatabase^%SYS.DATABASE(TempName)
 	}
-]]></Implementation>
-</Method>
-
-<Method name="ImportAllOld">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>name:%String,dryRun:%Boolean=0</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	#dim max As %Numeric = 20 ; FIXME
-	set newUrl = "https://api.github.com/orgs/"_name_"/repos"
-	
-	#dim response As %Net.HttpResponse = $$$CpmRegistry.Get(.newUrl)
-	
-	#dim data As $$$JsonObject
-	
-	set tSC = ##class($$$JsonProvider).%ConvertJSONToObject(response.Data,,.data,1)
-	set urlName = ""
-	for i=1:1:data.Count() {
-		if i>max { quit }
-		set urlName = data.GetAt(i)."html_url"
-		quit:urlName=""        
-        write !, i,".", ?4, "Import from url: ", urlName,!
-        do ..ImportFrom(urlName, dryRun)
-	}
-	quit $$$OK
 ]]></Implementation>
 </Method>
 
