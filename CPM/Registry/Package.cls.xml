@@ -192,7 +192,7 @@ appropriate container</Description>
 <ClassMethod>1</ClassMethod>
 <CodeMode>expression</CodeMode>
 <ReturnType>%String</ReturnType>
-<Implementation><![CDATA["CPM-D1"
+<Implementation><![CDATA["CpmTmp"
 ]]></Implementation>
 </Method>
 
@@ -205,7 +205,20 @@ appropriate container</Description>
 	set installer = ##class(%Installer.Installer).%New()
 	do installer.CreateDatabase(TempName, TempName, "overwrite") ; Name, [Subdir] Name
 	do installer.CreateNamespace(TempName, TempName, TempName) ; Namespace, Code DB, Data DB
-	
+
+	set properties("NameSpace") = TempName
+    set properties("IsNameSpaceDefault") = $$$YES
+    set properties("AutheEnabled") = $$$AutheUnauthenticated
+
+    if ('##class(Security.Applications).Exists(TempName)) {
+        write !, "Creating WEB application " _ TempName _ "..."
+        set st = ##class(Security.Applications).Create(TempName, .properties)
+        write !, "WEB application " _ TempName _ " created."
+    } else {
+	    set st = $$$OK
+        write !, "WEB application " _ TempName _ " already exists, so it is ready to use."
+    }
+
 	; code
 	; ..AddDirectoryItems will be appropriate
 	; but object will become useless the next moment we leave namespace..
@@ -262,6 +275,16 @@ not found the asked url (license, readme, etc.)</Description>
 <FormalSpec>o:%ZEN.proxyObject</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA['$isobject(o) || (o.message = "Not Found")
+]]></Implementation>
+</Method>
+
+<Method name="Debug">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	#dim tempZip As %String = "C:\InterSystems\cache\.cpm\.github\intersystems-ru\cache-run-cmd\test.zip"
+	#dim tempDir As %String = "C:\InterSystems\cache\.cpm\.github\intersystems-ru\cache-run-cmd\out2"
+	set p = ..%New()
+	do p.ProcessDirectoryNS(tempZip, tempDir, 1)
 ]]></Implementation>
 </Method>
 
