@@ -265,6 +265,27 @@ not found the asked url (license, readme, etc.)</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="ProcessDirectoryNS">
+<Internal>1</Internal>
+<FormalSpec>tempZip:%String,tempOutDir:%String,dryRun:%Boolean=0</FormalSpec>
+<Implementation><![CDATA[
+	write !, "Extracting package into: "_tempOutDir,!
+	set x = $ZF(-1, ..#ARCHIVER_" x "_tempZip_" -o"_tempOutDir_" -y")
+	if ##class(%Library.File).Exists(tempOutDir) {
+		#dim list
+		do ..LoadTemporarilyToNS(..NextTempNamespace(), tempOutDir, .list, dryRun)
+		#dim itemName As %String = ""
+		for {
+	    	set itemName = $order(list(itemName))
+	    	quit:itemName=""
+	    	write ?8,itemName,!
+	    	do ..items.Insert(itemName)
+		}
+	}
+	; do ##class(%Library.File).RemoveDirectoryTree(tempDirectory)
+]]></Implementation>
+</Method>
+
 <Method name="ImportFromObject">
 <Internal>1</Internal>
 <ClassMethod>1</ClassMethod>
@@ -335,20 +356,7 @@ not found the asked url (license, readme, etc.)</Description>
 	do ..DownloadUrl(tarUrl, tempZip)
 
 	#dim tempOutDir As %String = $$$UtilConcatPath(tempDirectory, "out")
-	write !, "Extracting package into: "_tempOutDir,!
-	set x = $ZF(-1, ..#ARCHIVER_" x "_tempZip_" -o"_tempOutDir_" -y")
-	if ##class(%Library.File).Exists(tempOutDir) {
-		#dim list
-		do ..LoadTemporarilyToNS(..NextTempNamespace(), tempOutDir, .list, dryRun)
-		set itemName = ""
-		for {
-	    	set itemName = $order(list(itemName))
-	    	quit:itemName=""
-	    	write ?8,itemName,!
-	    	do package.items.Insert(itemName)
-		}
-	}
-	; do ##class(%Library.File).RemoveDirectoryTree(tempDirectory)
+	do package.ProcessDirectoryNS(tempZip, tempOutDir)
 	quit:'dryRun package.%Save()
 	quit $$$OK
 ]]></Implementation>

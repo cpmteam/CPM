@@ -306,8 +306,10 @@ LIST(args...) ;;list of installed and available packages
             #dim o As CPM.Registry.Package = ##class(CPM.Registry.Package).%OpenId(tRS.ID)
             #dim items As list of %String = o.items
             #dim i As %Integer
-            for i=1:1:items.Count() {
-                write !,?10,items.GetAt(i)
+            if $isobject(items) {
+	            for i=1:1:items.Count() {
+	                write !,?10,items.GetAt(i)
+	            }
             }
             write !
         }
