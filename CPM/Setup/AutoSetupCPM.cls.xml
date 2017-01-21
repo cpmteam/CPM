@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.Setup.AutoSetupCPM">
+<Super>CPM.Setup.Utils,%Projection.AbstractProjection</Super>
+<TimeCreated>64304,68783.112221</TimeCreated>
+
+<Projection name="SelfReference">
+<Type>CPM.Setup.AutoSetupCPM</Type>
+</Projection>
+
+<Method name="CreateProjection">
+<Description>
+This method is invoked when a class is compiled.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[cls:%String,&params]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	write !, ": CreateProjection started",!
+	#dim ns As %String = $namespace
+    do ..CreatePercentAll() ; Create %ALL namespace for global mapping
+    
+    write !, "Mapping CPM into all namespaces:"
+    #dim mapPattern As %ListOfDataTypes = $listbuild("%CPM", "CPM") 
+    #dim ptr As %Binary = 0
+    #dim st As %Status = $$$OK
+    while $listnext(mapPattern, ptr, pattern) {
+	    set st = ..CreateSystemMapping(ns, pattern, pattern)
+	    if ($$$ISERR(st)) {
+	        do $System.Status.DisplayError(st)
+	    } else {
+		    write !, "CPM successfully mapped into all namespaces."
+	    }
+    }
+	write !, ": CreateProjection ended",!
+    
+    quit st
+]]></Implementation>
+</Method>
+
+<Method name="RemoveProjection">
+<Description>
+This method is invoked when a class is 'uncompiled'.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[cls:%String,&params,recompile:%Boolean]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim ns As %String = $namespace
+	write !, ": RemoveProjection started",!
+    write !, "Delete global mapping of CPM from all namespaces:"
+    #dim mapPattern As %ListOfDataTypes = $listbuild("%CPM", "CPM") 
+    #dim ptr As %Binary = 0
+    #dim st As %Status = $$$OK
+    while $listnext(mapPattern, ptr, pattern) {
+		set st = ..DeleteSystemMapping(ns, pattern, pattern)
+	    if ($$$ISERR(st)) {
+	        do $System.Status.DisplayError(st)
+	    } else {
+		    write !, "Unmapping complete."
+	    }
+    }
+	write !, ": RemoveProjection ended",!
+  
+    quit st
+]]></Implementation>
+</Method>
+</Class>
+</Export>

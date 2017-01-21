@@ -203,23 +203,25 @@ appropriate container</Description>
 	new $namespace
 	zn "%sys"
 	set installer = ##class(%Installer.Installer).%New()
+	; create both database and namespace to have the common name @TempName
 	do installer.CreateDatabase(TempName, TempName, "overwrite") ; Name, [Subdir] Name
 	do installer.CreateNamespace(TempName, TempName, TempName) ; Namespace, Code DB, Data DB
 
 	set properties("NameSpace") = TempName
     set properties("IsNameSpaceDefault") = $$$YES
     set properties("AutheEnabled") = $$$AutheUnauthenticated
+    #dim cspTempName As %String = "/csp/" _ $zcvt(TempName,"l")
 
-    if ('##class(Security.Applications).Exists(TempName)) {
-        write !, "Creating WEB application " _ TempName _ "..."
-        set st = ##class(Security.Applications).Create(TempName, .properties)
-        write !, "WEB application " _ TempName _ " created."
+    if ('##class(Security.Applications).Exists(cspTempName)) {
+        write !, "Creating WEB application " _ cspTempName _ "..."
+        set st = ##class(Security.Applications).Create(cspTempName, .properties)
+        write !, "WEB application " _ cspTempName _ " created."
     } else {
 	    set st = $$$OK
-        write !, "WEB application " _ TempName _ " already exists, so it is ready to use."
+        write !, "WEB application " _ cspTempName _ " already exists, so it is ready to use."
     }
 
-	; code
+	zn TempName
 	; ..AddDirectoryItems will be appropriate
 	; but object will become useless the next moment we leave namespace..
 	; so do the old-school way
