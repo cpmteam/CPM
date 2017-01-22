@@ -26,10 +26,9 @@ This method is invoked when a class is compiled.</Description>
 	    set st = ..CreateSystemMapping(ns, pattern, pattern)
 	    if ($$$ISERR(st)) {
 	        do $System.Status.DisplayError(st)
-	    } else {
-		    write !, "CPM successfully mapped into all namespaces."
 	    }
     }
+    write !, "CPM global mappings to ", ns, " namespace introduced."
     quit st
 ]]></Implementation>
 </Method>
@@ -50,10 +49,9 @@ This method is invoked when a class is 'uncompiled'.</Description>
 		set st = ..DeleteSystemMapping(ns, pattern, pattern)
 	    if ($$$ISERR(st)) {
 	        do $System.Status.DisplayError(st)
-	    } else {
-		    write !, "Unmapping complete."
 	    }
     }
+    write !, "CPM mappings from ", ns, " namespace removed."
     quit st
 ]]></Implementation>
 </Method>

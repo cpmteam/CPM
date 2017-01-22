@@ -100,7 +100,6 @@
     #dim ptr As %Binary = 0
     while $listnext(mapTo, ptr, namespace) {
         continue:(fromNS = namespace)
-        write " ", namespace
         if ('##Class(Config.MapPackages).Exists(namespace, PackagePattern)) {
         	set st = ##Class(Config.MapPackages).Create(namespace, PackagePattern, .Properties)
         } else {
@@ -138,7 +137,6 @@
 
     while $listnext(mapTo, ptr, namespace) {
 	    continue:(fromNS = namespace)
-        write " ", namespace
         if (##Class(Config.MapPackages).Exists(namespace, PackagePattern)) {
         	set st = ##Class(Config.MapPackages).Delete(namespace, PackagePattern, .Properties)
         }
