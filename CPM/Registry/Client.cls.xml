@@ -74,16 +74,6 @@ Get SSL Configuration by Server as a name for configuration</Description>
     }
     
     quit request.HttpResponse
-    
-#if 0
-    set data = request.HttpResponse.Data
-    set data = data.Read(data.Size)
-    #dim parsed As %RegisteredObject
-    set tSC  = ##class($$$JsonProvider).%ConvertJSONToObject(data,,.parsed)
-    $$$ThrowOnError(tSC)
-    
-    quit parsed
-#endif
 ]]></Implementation>
 </Method>
 

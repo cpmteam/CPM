@@ -214,7 +214,7 @@ appropriate container</Description>
 
 <Method name="LoadTemporarilyToNS">
 <ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[TempName:%String,TempDir:%String,&ListOfFiles,dryRun:%Boolean=0]]></FormalSpec>
+<FormalSpec><![CDATA[TempName:%String,TempDir:%String,&ListOfFiles,&errors,dryRun:%Boolean=0,useReleaseAsset:%Boolean=0]]></FormalSpec>
 <Implementation><![CDATA[
 	new $namespace
 	zn "%sys"
@@ -242,7 +242,14 @@ appropriate container</Description>
 	; but object will become useless the next moment we leave namespace..
 	; so do the old-school way
 	#dim flags As %String = $select(dryRun:"-d",1:"ck")
-    do $system.OBJ.ImportDir(TempDir,,flags,,1,.ListOfFiles)
+	; load single file
+	if useReleaseAsset {
+	    do $system.OBJ.Load(TempDir,flags,.errors,.ListOfFiles)
+	}
+	; use whole directory
+	else {
+	    do $system.OBJ.ImportDir(TempDir,,flags,.errors,1,.ListOfFiles)
+	}
 
 	zn "%sys"	
 	if ##class(Config.Namespaces).Exists(TempName) {
@@ -264,6 +271,7 @@ appropriate container</Description>
 		quit '$$$OK
 	}
 	write "Creating temp directory: ", tempDirectory,!
+	do ##class(%Library.File).RemoveDirectoryTree(tempDirectory)
 	do ##class(%Library.File).CreateDirectoryChain(tempDirectory)
 	quit tempDirectory
 ]]></Implementation>
@@ -307,22 +315,80 @@ not found the asked url (license, readme, etc.)</Description>
 ]]></Implementation>
 </Method>
 
+<Parameter name="IgnoreList">
+<Type>%String</Type>
+<Default>.gitignore;.gitattributes;sc-list.txt;LICENSE;LICENSE.md;README.md;README.txt;readme.txt;readme.md</Default>
+</Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ОШИБКА #5840: Невозможно импортировать файл 'C:\InterSystems\...\out\intersystems-ru-Cache-MDX2JSON-c8cc37d\.gitignore', т.к. этот тип не поддерживается.
+
+]]></Content>
+</UDLText>
+
+<Method name="ExtractFileFromMessage">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec>message:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[##class(%File).GetFilename($piece(message, "'", 2))
+]]></Implementation>
+</Method>
+
+<Method name="CouldbeSafelyIgnored">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>message:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	#dim fileName As %String = ..ExtractFileFromMessage(message)
+	#dim fileVariant As %String
+	#dim list As %Binary = $listfromstring(..#IgnoreList,";")
+    #dim ptr As %Binary = 0
+    while $listnext(list, ptr, fileVariant) {
+		if fileVariant = fileName {
+			return 1
+		}
+	}
+	return 0
+]]></Implementation>
+</Method>
+
 <Method name="ProcessDirectoryNS">
 <Internal>1</Internal>
-<FormalSpec>tempZip:%String,tempOutDir:%String,dryRun:%Boolean=0</FormalSpec>
+<FormalSpec>tempZip:%String,tempOutDir:%String,dryRun:%Boolean=0,useReleaseAsset:%Boolean=0</FormalSpec>
 <Implementation><![CDATA[
-	write !, "Extracting package into: "_tempOutDir,!
-	set x = $ZF(-1, ..#ARCHIVER_" x "_tempZip_" -o"_tempOutDir_" -y")
+	; downloaded zip file - deal with whole directory
+	if 'useReleaseAsset{ ;  $piece(##class(%File).GetFilename(tempZip),".",*) = "zip" {
+		write !, "Extracting package into: "_tempOutDir,!
+		set x = $ZF(-1, ..#ARCHIVER_" x "_tempZip_" -o"_tempOutDir_" -y")
+	}
+	; downloaded single release archive - deal with single file
+	else {
+		set tempOutDir = tempZip
+	}
 	if ##class(%Library.File).Exists(tempOutDir) {
 		#dim list
-		do ..LoadTemporarilyToNS(..NextTempNamespace(), tempOutDir, .list, dryRun)
+		do ..LoadTemporarilyToNS(..NextTempNamespace(), tempOutDir, .list, .errors, dryRun, useReleaseAsset)
 		#dim itemName As %String = ""
+		#dim filesN As %Numeric = 0
 		for {
 	    	set itemName = $order(list(itemName))
 	    	quit:itemName=""
+	    	set filesN = filesN + 1
 	    	write ?8,itemName,!
 	    	do ..items.Insert(itemName)
 		}
+		#dim errorsN As %Numeric = $get(errors)
+		#dim ignoredN As %Numeric = 0
+		for i=1:1:errorsN {
+			if ..CouldbeSafelyIgnored($g(errors(i))) {
+				set ignoredN = ignoredN + 1
+			}
+		}
+		&html< file(s): #(filesN)# error(s): #(errorsN)# / ignored: #(ignoredN)# >
 	}
 	; do ##class(%Library.File).RemoveDirectoryTree(tempDirectory)
 ]]></Implementation>
@@ -378,9 +444,14 @@ not found the asked url (license, readme, etc.)</Description>
 
 	#dim tarUrl As %String
 	
+	#dim tempDirectory As %String = ..CreateTempDir(name)
+	#dim tempZip As %String = ""
+	#dim useReleaseAsset As %Boolean = 0
+
 	if ..NotFound(release) {
 		// Case #1 - no release yet, the normal source only package
 		set tarUrl = repoName _ "/zipball/master/"
+		set tempZip = $$$UtilMakePath(tempDirectory, "test.zip")
 	} else {
 	    #dim tag As %String = release."tag_name"
 	    #dim tagName As %String = release.name
@@ -389,17 +460,21 @@ not found the asked url (license, readme, etc.)</Description>
 	    #dim zipball As %String = release."zipball_url"
 	    #dim releaseComments As %String = release.body
 	    #dim browserDownloadsUri As %String = release.assets.GetAt(1)."browser_download_url"
-	    set tarUrl = $select(browserDownloadsUri:browserDownloadsUri, 1:zipball)
-    	
+	    if browserDownloadsUri '= "" {
+		    set tarUrl = browserDownloadsUri
+			set tempZip = $$$UtilMakePath(tempDirectory, ##class(%File).GetFilename(tarUrl))
+			set useReleaseAsset = 1
+	    } else {
+		    set tarUrl = zipball
+			set tempZip = $$$UtilMakePath(tempDirectory, "test.zip")
+	    }
     	set package."dist-tags" = tag
 	}
 
-	#dim tempDirectory As %String = ..CreateTempDir(name)
-	#dim tempZip As %String = $$$UtilMakePath(tempDirectory, "test.zip")
 	do ..DownloadUrl(tarUrl, tempZip)
 
 	#dim tempOutDir As %String = $$$UtilConcatPath(tempDirectory, "out")
-	do package.ProcessDirectoryNS(tempZip, tempOutDir)
+	do package.ProcessDirectoryNS(tempZip, tempOutDir, dryRun, useReleaseAsset)
 	quit:'dryRun package.%Save()
 	quit $$$OK
 ]]></Implementation>
@@ -422,14 +497,7 @@ not found the asked url (license, readme, etc.)</Description>
 
     #dim releases As %ListOfObjects = ""
     $$$THROWONERROR(status, githubApi.GetReleases(repoName, .releases))
-   #if 0
-    #dim key As %String = ""
-    do {
-        #dim release As %ZEN.proxyObject = releases.GetNext(.key)
-        if key="" { quit }
-        ; zw release
-    } while key'=""
-   #endif
+
     #dim latestRelease As %ZEN.proxyObject = ""
     $$$THROWONERROR(status, githubApi.GetReleaseInfo(repoName, ,.latestRelease))
 
