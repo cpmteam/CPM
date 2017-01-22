@@ -15,7 +15,6 @@ This method is invoked when a class is compiled.</Description>
 <FormalSpec><![CDATA[cls:%String,&params]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	write !, ": CreateProjection started",!
 	#dim ns As %String = $namespace
     do ..CreatePercentAll() ; Create %ALL namespace for global mapping
     
@@ -31,8 +30,6 @@ This method is invoked when a class is compiled.</Description>
 		    write !, "CPM successfully mapped into all namespaces."
 	    }
     }
-	write !, ": CreateProjection ended",!
-    
     quit st
 ]]></Implementation>
 </Method>
@@ -45,7 +42,6 @@ This method is invoked when a class is 'uncompiled'.</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     #dim ns As %String = $namespace
-	write !, ": RemoveProjection started",!
     write !, "Delete global mapping of CPM from all namespaces:"
     #dim mapPattern As %ListOfDataTypes = $listbuild("%CPM", "CPM") 
     #dim ptr As %Binary = 0
@@ -58,8 +54,6 @@ This method is invoked when a class is 'uncompiled'.</Description>
 		    write !, "Unmapping complete."
 	    }
     }
-	write !, ": RemoveProjection ended",!
-  
     quit st
 ]]></Implementation>
 </Method>
