@@ -14,6 +14,22 @@
 <Type>%TimeStamp</Type>
 </Property>
 
+<Property name="GlobalInstall">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="TargetNamespace">
+<Type>%String</Type>
+</Property>
+
+<Property name="PostInstall">
+<Type>%String</Type>
+</Property>
+
+<Property name="PreInstall">
+<Type>%String</Type>
+</Property>
+
 <Index name="byKeywords">
 <Properties>keywords(ELEMENTS)</Properties>
 </Index>
@@ -227,7 +243,8 @@ appropriate container</Description>
 	; so do the old-school way
 	#dim flags As %String = $select(dryRun:"-d",1:"ck")
     do $system.OBJ.ImportDir(TempDir,,flags,,1,.ListOfFiles)
-	
+
+	zn "%sys"	
 	if ##class(Config.Namespaces).Exists(TempName) {
 		set sc = ##class(Config.Namespaces).Delete(TempName)
 		set sc = $$DeleteDatabase^%SYS.DATABASE(TempName)
@@ -371,7 +388,8 @@ not found the asked url (license, readme, etc.)</Description>
 	    #dim tarball As %String = release."tarball_url"
 	    #dim zipball As %String = release."zipball_url"
 	    #dim releaseComments As %String = release.body
-	    set tarUrl = zipball
+	    #dim browserDownloadsUri As %String = release.assets.GetAt(1)."browser_download_url"
+	    set tarUrl = $select(browserDownloadsUri:browserDownloadsUri, 1:zipball)
     	
     	set package."dist-tags" = tag
 	}
@@ -643,6 +661,21 @@ Is used to get the value of an unknown property.</Description>
 </Value>
 <Value name="15">
 <Value>DirectoryPath</Value>
+</Value>
+<Value name="16">
+<Value>GlobalInstall</Value>
+</Value>
+<Value name="17">
+<Value>TargetNamespace</Value>
+</Value>
+<Value name="18">
+<Value>Postinstall</Value>
+</Value>
+<Value name="19">
+<Value>PreInstall</Value>
+</Value>
+<Value name="20">
+<Value>PostInstall</Value>
 </Value>
 </Data>
 </Storage>
