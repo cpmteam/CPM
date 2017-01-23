@@ -166,6 +166,29 @@
 ]]></Implementation>
 </Method>
 
+<Method name="ExportReadme">
+<FormalSpec>DirectoryName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim readmeStream As %Stream.FileBinary = ##class(%Stream.FileBinary).%New()
+    #dim fileName As %String = $$$UtilConcatPath(DirectoryName,..readmeFilename)
+	set readmeStream.Filename = fileName
+	do ..readmeText.Rewind()
+	do readmeStream.Write(..readmeText.Read())
+	do readmeStream.%Save()
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ExportableName">
+<Internal>1</Internal>
+<CodeMode>expression</CodeMode>
+<FormalSpec>name:%String=..name</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[$tr(..name,"/\;:","----")
+]]></Implementation>
+</Method>
+
 <Method name="Export">
 <Description>
 common method for exporting package to the staging area
@@ -175,36 +198,35 @@ appropriate container</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     #dim status As %Status = $$$OK
-    #dim DirectoryName As %String = $$$UtilMakePath($$$CpmConfig.tempdir,..name)
+    #dim DirectoryName As %String = $$$UtilConcatPath($$$CpmConfig.tempdir,..ExportableName())
+	do ##class(%Library.File).RemoveDirectoryTree(DirectoryName)
     do ##class(%Library.File).CreateDirectoryChain(DirectoryName)
     write !, "Exporting package files to: ", DirectoryName, !
-    do ##class(%Library.File).ComplexDelete(DirectoryName_"/*.*")
-    write "Deleted all files in the directory:",!
     
-    #dim fileName As %String = $$$UtilMakePath(DirectoryName,"package.json")
+    #dim fileName As %String = $$$UtilConcatPath(DirectoryName,"package.json")
     // 1. export/generate metainfo
-    #dim containerName As %String = ..path
+    #dim containerName As %String = ..ExportableName(..path) _ ".xml" ; FIXME
     if containerName="" {
-        set containerName = ..name_".xml"
+        set containerName = ..ExportableName()_".xml"
     }
     set ..path = containerName
     do ..ExportJSON(fileName, $this) // FIXME - attribute case
     // 2. export container
     // FIXME - at the moment exporting only using XML
-    set fileName = $$$UtilMakePath(DirectoryName,containerName)
+    set fileName = $$$UtilConcatPath(DirectoryName,containerName)
     #dim listItems = $lts(..items.Serialize(),",")
+    #dim CpmTempNS As %String = ..NextTempNamespace()
+    new $namespace
+    zn CpmTempNS
     do $system.OBJ.Export(listItems,fileName)
+    do ..ExportReadme(DirectoryName)
+    quit $$$OK
 ]]></Implementation>
 </Method>
 
-<UDLText name="T">
-<Content><![CDATA[
-// TODO - 
-
-]]></Content>
-</UDLText>
-
 <Method name="NextTempNamespace">
+<Description>
+TODO - isolated installation</Description>
 <ClassMethod>1</ClassMethod>
 <CodeMode>expression</CodeMode>
 <ReturnType>%String</ReturnType>
@@ -217,6 +239,7 @@ appropriate container</Description>
 <FormalSpec><![CDATA[TempName:%String,TempDir:%String,&ListOfFiles,&errors,dryRun:%Boolean=0,useReleaseAsset:%Boolean=0]]></FormalSpec>
 <Implementation><![CDATA[
 	new $namespace
+	; FIXME - isolated namespaces
 	zn "%sys"
 	set installer = ##class(%Installer.Installer).%New()
 	; create both database and namespace to have the common name @TempName
@@ -241,7 +264,7 @@ appropriate container</Description>
 	; ..AddDirectoryItems will be appropriate
 	; but object will become useless the next moment we leave namespace..
 	; so do the old-school way
-	#dim flags As %String = $select(dryRun:"-d",1:"ck")
+	#dim flags As %String = $select(dryRun:"-d",1:"ck-l")
 	; load single file
 	if useReleaseAsset {
 	    do $system.OBJ.Load(TempDir,flags,.errors,.ListOfFiles)
@@ -251,11 +274,13 @@ appropriate container</Description>
 	    do $system.OBJ.ImportDir(TempDir,,flags,.errors,1,.ListOfFiles)
 	}
 
+#if 0
 	zn "%sys"	
 	if ##class(Config.Namespaces).Exists(TempName) {
 		set sc = ##class(Config.Namespaces).Delete(TempName)
 		set sc = $$DeleteDatabase^%SYS.DATABASE(TempName)
 	}
+#endif
 ]]></Implementation>
 </Method>
 
@@ -302,16 +327,6 @@ not found the asked url (license, readme, etc.)</Description>
 <FormalSpec>o:%ZEN.proxyObject</FormalSpec>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA['$isobject(o) || (o.message = "Not Found")
-]]></Implementation>
-</Method>
-
-<Method name="Debug">
-<ClassMethod>1</ClassMethod>
-<Implementation><![CDATA[
-	#dim tempZip As %String = "C:\InterSystems\cache\.cpm\.github\intersystems-ru\cache-run-cmd\test.zip"
-	#dim tempDir As %String = "C:\InterSystems\cache\.cpm\.github\intersystems-ru\cache-run-cmd\out2"
-	set p = ..%New()
-	do p.ProcessDirectoryNS(tempZip, tempDir, 1)
 ]]></Implementation>
 </Method>
 
@@ -374,6 +389,7 @@ not found the asked url (license, readme, etc.)</Description>
 		do ..LoadTemporarilyToNS(..NextTempNamespace(), tempOutDir, .list, .errors, dryRun, useReleaseAsset)
 		#dim itemName As %String = ""
 		#dim filesN As %Numeric = 0
+		do ..items.Clear()
 		for {
 	    	set itemName = $order(list(itemName))
 	    	quit:itemName=""
@@ -439,7 +455,8 @@ not found the asked url (license, readme, etc.)</Description>
 	    #dim readmeText As %String = $system.Encryption.Base64Decode(readmeContent)
 
 	    set package.readmeFilename = readmeFilename
-		set package.readmeText = readmeText
+	    do package.readmeText.Clear()
+		do package.readmeText.Write(readmeText)
 	}
 
 	#dim tarUrl As %String
@@ -460,9 +477,12 @@ not found the asked url (license, readme, etc.)</Description>
 	    #dim zipball As %String = release."zipball_url"
 	    #dim releaseComments As %String = release.body
 	    #dim browserDownloadsUri As %String = release.assets.GetAt(1)."browser_download_url"
+	    set package.path = ""
 	    if browserDownloadsUri '= "" {
 		    set tarUrl = browserDownloadsUri
-			set tempZip = $$$UtilMakePath(tempDirectory, ##class(%File).GetFilename(tarUrl))
+		    #dim assetName As %String = ##class(%File).GetFilename(tarUrl)
+		    set tempZip = $$$UtilMakePath(tempDirectory, assetName)
+		    set package.path = assetName
 			set useReleaseAsset = 1
 	    } else {
 		    set tarUrl = zipball
@@ -480,7 +500,7 @@ not found the asked url (license, readme, etc.)</Description>
 ]]></Implementation>
 </Method>
 
-<Method name="ImportFromGitHub">
+<Method name="ImportFrom">
 <ClassMethod>1</ClassMethod>
 <FormalSpec>repoName:%String,dryRun:%Boolean=0</FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -539,7 +559,7 @@ not found the asked url (license, readme, etc.)</Description>
 		}
 		quit:urlName=""        
         write !, i,".", ?4, "Import from url: ", urlName,!
-        do ..ImportFromGitHub(urlName, dryRun)
+        do ..ImportFrom(urlName, dryRun)
 	}
 	quit $$$OK
 ]]></Implementation>
