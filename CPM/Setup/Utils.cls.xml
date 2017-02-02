@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="CPM.Setup.Utils">
+<Super>%RegisteredObject</Super>
+<TimeCreated>64304,66181.842453</TimeCreated>
+
+<Method name="RegisterWebApplication">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[name:%String,&specs]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    new $Namespace
+    set $Namespace = "%SYS"
+    set st = $$$OK
+    if ('##class(Security.Applications).Exists(name)) {
+        write !,"Creating WEB application """_name_"""..."
+        set st = ##class(Security.Applications).Create(name, .specs)
+        write !, "WEB application """_name_""" is created."
+    } else {
+        do ##class(Security.Applications).Get(name, .props)
+        write !, "WEB application """_name_""" already exists, and is ready to use."
+    }
+    return st
+]]></Implementation>
+</Method>
+
+<Method name="RemoveWebApplication">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>name:%String</FormalSpec>
+<Implementation><![CDATA[
+    new $Namespace
+    set $Namespace = "%SYS"
+    if (##class(Security.Applications).Exists(name)) {
+        write !, "Deleting WEB application """_name_"""..."
+        do ##class(Security.Applications).Delete(name)
+        write !, "WEB application """_name_""" was successfully deleted."
+    }
+]]></Implementation>
+</Method>
+
+<Method name="GetDBRole">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>directory:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	quit:'$d(directory) ""
+	new $Namespace
+	set $Namespace = "%SYS"
+	#dim db As SYS.Database
+	set db=##class(SYS.Database).%OpenId(directory)
+	if $Isobject(db) {
+		set resource = db.ResourceName
+		set role = resource // I'm assuming that default role exists
+	} else {
+		set role = ""
+	}
+	quit role
+]]></Implementation>
+</Method>
+
+<Method name="CreatePercentAll">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	new $Namespace
+    set $Namespace = "%SYS"
+	set ns = "%All"
+	set st = $$$OK
+	if ('##Class(Config.Namespaces).Exists(ns)) {
+		set Properties("Globals") = "CACHETEMP"
+		set Properties("Library") = "CACHELIB"
+		set Properties("Routines") = "CACHETEMP"
+		set Properties("SysGlobals") = "CACHESYS"
+		set Properties("SysRoutines") = "CACHESYS"
+		set Properties("TempGlobals") = "CACHETEMP"
+		set st = ##Class(Config.Namespaces).Create(ns, .Properties)
+		if ($$$ISERR(st)) {
+        	do $System.Status.DisplayError(st)
+    	} else {
+        	write !, "%All namespace is created."
+    	}
+	}
+	return st
+]]></Implementation>
+</Method>
+
+<Method name="CreateSystemMapping">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>fromNS="",PackagePattern:%String,GlobalPattern:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	new $Namespace
+    set $Namespace = "%SYS"
+    #dim sc As %Status = $$$OK
+
+    #dim mapTo As %ListOfDataTypes = $listbuild("%All") ; FIXME - Should global mapping affect SAMPLES and DOCBOOK as well?
+
+    do ##Class(Config.Namespaces).Get(fromNS, .InstallNSProps)
+    set Properties("Database") = $get(InstallNSProps("Routines"))
+    #dim ptr As %Binary = 0
+    while $listnext(mapTo, ptr, namespace) {
+        continue:(fromNS = namespace)
+        if ('##Class(Config.MapPackages).Exists(namespace, PackagePattern)) {
+        	set st = ##Class(Config.MapPackages).Create(namespace, PackagePattern, .Properties)
+        } else {
+        	set st = ##Class(Config.MapPackages).Modify(namespace, PackagePattern, .Properties)
+        }
+        set sc = $$$ADDSC(sc, $get(st, $$$OK))
+        if ('##Class(Config.MapRoutines).Exists(namespace, GlobalPattern)) {
+	        set st = ##Class(Config.MapRoutines).Create(namespace, GlobalPattern, .Properties)
+        } else {
+	        set st = ##Class(Config.MapRoutines).Modify(namespace, GlobalPattern, .Properties)
+        }
+        set sc = $$$ADDSC(sc, $get(st, $$$OK))
+        if ('##Class(Config.MapGlobals).Exists(namespace, GlobalPattern)) {
+	        set st = ##Class(Config.MapGlobals).Create(namespace, GlobalPattern, .Properties)
+        } else {
+	        set st = ##Class(Config.MapGlobals).Modify(namespace, GlobalPattern, .Properties)
+        }
+        set sc = $$$ADDSC(sc, $get(st, $$$OK))
+    }
+    quit sc
+]]></Implementation>
+</Method>
+
+<Method name="DeleteSystemMapping">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>fromNS:%String,PackagePattern:%String,GlobalPattern:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	new $Namespace
+    set $Namespace = "%SYS"
+    #dim sc As %Status = $$$OK
+    
+    #dim mapTo As %ListOfDataTypes = $listbuild("%All") ; FIXME - Should global mapping affect SAMPLES and DOCBOOK as well?
+    #dim ptr As %Binary = 0
+
+    while $listnext(mapTo, ptr, namespace) {
+	    continue:(fromNS = namespace)
+        if (##Class(Config.MapPackages).Exists(namespace, PackagePattern)) {
+        	set st = ##Class(Config.MapPackages).Delete(namespace, PackagePattern, .Properties)
+        }
+        set sc = $$$ADDSC(sc, $get(st, $$$OK))
+        if (##Class(Config.MapRoutines).Exists(namespace, GlobalPattern)) {
+	        set st = ##Class(Config.MapRoutines).Delete(namespace, GlobalPattern, .Properties)
+        }
+        set sc = $$$ADDSC(sc, $get(st, $$$OK))
+        if (##Class(Config.MapGlobals).Exists(namespace, GlobalPattern)) {
+	        set st = ##Class(Config.MapGlobals).Delete(namespace, GlobalPattern, .Properties)
+        }
+        set sc = $$$ADDSC(sc, $get(st, $$$OK))
+    }
+    quit sc
+]]></Implementation>
+</Method>
+</Class>
+</Export>

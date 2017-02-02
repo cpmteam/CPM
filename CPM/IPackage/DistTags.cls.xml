@@ -8,5 +8,18 @@
 <Type>%String</Type>
 <InitialExpression>"0.0.1"</InitialExpression>
 </Property>
+
+<Storage name="Default">
+<Type>%Library.CacheSerialState</Type>
+<State>DistTagsState</State>
+<StreamLocation>^CPM.IPackage.DistTagsS</StreamLocation>
+<Data name="DistTagsState">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>latest</Value>
+</Value>
+</Data>
+</Storage>
 </Class>
 </Export>

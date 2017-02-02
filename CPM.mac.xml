@@ -63,6 +63,10 @@ BATCH(line)
     do batch1(command, args...)
     quit
     
+error(sc) {
+	write !,"Error occured: ", $$DisplayError^%apiOBJ(sc)
+	quit 
+}
 #; actual batch entry-point with command and arguments given
 batch1(command="help", args...)
     ; load aliases
@@ -77,12 +81,15 @@ batch1(command="help", args...)
         write !,"Unrecognized command: ",command,!
         quit
     }
+    new sc
     ; call this COMMAND^CPM routine with arguments args...
     try {
-        set command=command_"(args...)"
-        do @command
-    } catch {
-        write !,"Error occured: ",$zerror
+        set @("sc = $$" _ command _ "(args...)")
+        if $$$ISERR(sc) {
+	        do error(sc)
+        }
+    } catch ex {
+        do error(ex.AsStatus())
     }
     quit
 
@@ -127,7 +134,7 @@ INSTALL(args...) ;;install package
     set opts("silent") = $get(silent)
     set opts("verbose") = $get(verbose)
     do $$$CpmInstance.Install(.opts,args...)
-    quit
+    quit $$$OK
 
 PACKAGE(args...) ;;package creation commands
     new (args)
@@ -140,6 +147,7 @@ PACKAGE(args...) ;;package creation commands
     #dim pkgDescription As %String = ""
     #dim pkgLicense As %String = ""
     #dim pkgVersion As %String = ""
+    #dim import As %String = ""
     
     #dim status As %Status = $$$OK
     set status = $$GetOptions(.args, 
@@ -147,7 +155,8 @@ PACKAGE(args...) ;;package creation commands
                               "/c|/create", .create, "/delete", .delete,
                               "/prj:|/from:", .prjName, "/autoload", .autoload,
                               "/author:", .pkgAuthor, "/description:", .pkgDescription,
-                              "/license:", .pkgLicense, "/version:", .pkgVersion)
+                              "/license:", .pkgLicense, "/version:", .pkgVersion,
+                              "/i:|/import:", .import)
     if $$$ISERR(status) { 
         quit status 
     }
@@ -163,6 +172,16 @@ PACKAGE(args...) ;;package creation commands
         write !, "Deleting package definition: ", pkgName,!
         set status = ##class(CPM.Registry.Package).%DeleteId(pkgName)
 
+        return status
+    }
+    elseif import '= "" {
+        if (import = "all") {
+	        set status = ##class(CPM.Registry.Package).ImportAll("intersystems-ru", 0) ; FIXME - hard-coded, not dry run
+        } else {	        
+        	write !, "Import from url: ", import,!
+        	set status = ##class(CPM.Registry.Package).ImportFrom(import)
+        }
+        
         return status
     }
     else {
@@ -266,11 +285,11 @@ EXPORT(args...) ;;prepare to publish - export package(s)
             }
         }
     }
-    quit
+    quit $$$OK
 
 SEARCH(terms...) ;;search packages
     do $$$CpmInstance.Search(terms...)
-    quit
+    quit $$$OK
 
 LIST(args...) ;;list of installed and available packages
     new (args)
@@ -285,7 +304,7 @@ LIST(args...) ;;list of installed and available packages
 
     #dim sql As %SQL.Statement = ##class(%SQL.Statement).%New()
     #dim tSC As %Status = sql.%Prepare("SELECT %ID, Name, Version, Description FROM CPM_Registry.Package")
-    quit:'$$$ISOK(tSC)
+    if $$$ISERR(tSC) { quit tSC }
 
     #dim tRS As %SQL.StatementResult = sql.%Execute()
     while tRS.%Next() {
@@ -294,18 +313,20 @@ LIST(args...) ;;list of installed and available packages
             #dim o As CPM.Registry.Package = ##class(CPM.Registry.Package).%OpenId(tRS.ID)
             #dim items As list of %String = o.items
             #dim i As %Integer
-            for i=1:1:items.Count() {
-                write !,?10,items.GetAt(i)
+            if $isobject(items) {
+	            for i=1:1:items.Count() {
+	                write !,?10,items.GetAt(i)
+	            }
             }
             write !
         }
     }
-    quit
+    quit $$$OK
 
 PURGE(args...) ;;purge all installed packages
     ;FIXME - do uninstall
     do ##class(CPM.Registry.Package).%DeleteExtent()
-    quit
+    quit $$$OK
     
 CONFIG(args...) ;;get/set configuration parameters
     new (args)
@@ -334,7 +355,7 @@ CONFIG(args...) ;;get/set configuration parameters
     if debug || ('getOp && 'setOp) {
         do $$$CpmConfig.DumpAll()
     }
-    quit
+    quit $$$OK
 
 HELP(command="",args...) ;;this help
     new (command,args)
@@ -342,12 +363,12 @@ HELP(command="",args...) ;;this help
     if command'="" {
         set cpm=##class(CPM.Main).%New()
         do cpm.Help(command,args...)
-        quit 
+        quit $$$OK
     }
 #else
     if command'="" {
         do BATCH(command_" /help")
-        quit
+        quit $$$OK
     }
 #endif
     write !,"Caché Package Manager"
@@ -364,7 +385,7 @@ HELP(command="",args...) ;;this help
     }
     write !?3,"quit",?15,"quit from shell"
     write !
-    quit
+    quit $$$OK
     
 
 ]]></Routine>

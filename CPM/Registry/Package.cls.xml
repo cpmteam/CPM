@@ -14,6 +14,22 @@
 <Type>%TimeStamp</Type>
 </Property>
 
+<Property name="GlobalInstall">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="TargetNamespace">
+<Type>%String</Type>
+</Property>
+
+<Property name="PostInstall">
+<Type>%String</Type>
+</Property>
+
+<Property name="PreInstall">
+<Type>%String</Type>
+</Property>
+
 <Index name="byKeywords">
 <Properties>keywords(ELEMENTS)</Properties>
 </Index>
@@ -150,6 +166,29 @@
 ]]></Implementation>
 </Method>
 
+<Method name="ExportReadme">
+<FormalSpec>DirectoryName:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim readmeStream As %Stream.FileBinary = ##class(%Stream.FileBinary).%New()
+    #dim fileName As %String = $$$UtilConcatPath(DirectoryName,..readmeFilename)
+	set readmeStream.Filename = fileName
+	do ..readmeText.Rewind()
+	do readmeStream.Write(..readmeText.Read())
+	do readmeStream.%Save()
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ExportableName">
+<Internal>1</Internal>
+<CodeMode>expression</CodeMode>
+<FormalSpec>name:%String=..name</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[$tr(..name,"/\;:","----")
+]]></Implementation>
+</Method>
+
 <Method name="Export">
 <Description>
 common method for exporting package to the staging area
@@ -159,25 +198,386 @@ appropriate container</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
     #dim status As %Status = $$$OK
-    #dim DirectoryName As %String = $$$UtilMakePath($$$CpmConfig.tempdir,..name)
+    #dim DirectoryName As %String = $$$UtilConcatPath($$$CpmConfig.tempdir,..ExportableName())
+	do ##class(%Library.File).RemoveDirectoryTree(DirectoryName)
     do ##class(%Library.File).CreateDirectoryChain(DirectoryName)
     write !, "Exporting package files to: ", DirectoryName, !
-    do ##class(%Library.File).ComplexDelete(DirectoryName_"/*.*")
-    write "Deleted all files in the directory:",!
     
-    #dim fileName As %String = $$$UtilMakePath(DirectoryName,"package.json")
+    #dim fileName As %String = $$$UtilConcatPath(DirectoryName,"package.json")
     // 1. export/generate metainfo
-    #dim containerName As %String = ..path
+    #dim containerName As %String = ..ExportableName(..path) _ ".xml" ; FIXME
     if containerName="" {
-        set containerName = ..name_".xml"
+        set containerName = ..ExportableName()_".xml"
     }
     set ..path = containerName
     do ..ExportJSON(fileName, $this) // FIXME - attribute case
     // 2. export container
     // FIXME - at the moment exporting only using XML
-    set fileName = $$$UtilMakePath(DirectoryName,containerName)
+    set fileName = $$$UtilConcatPath(DirectoryName,containerName)
     #dim listItems = $lts(..items.Serialize(),",")
+    #dim CpmTempNS As %String = ..NextTempNamespace()
+    new $namespace
+    zn CpmTempNS
     do $system.OBJ.Export(listItems,fileName)
+    do ..ExportReadme(DirectoryName)
+    quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="NextTempNamespace">
+<Description>
+TODO - isolated installation</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA["CpmTmp"
+]]></Implementation>
+</Method>
+
+<Method name="LoadTemporarilyToNS">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[TempName:%String,TempDir:%String,&ListOfFiles,&errors,dryRun:%Boolean=0,useReleaseAsset:%Boolean=0]]></FormalSpec>
+<Implementation><![CDATA[
+	new $namespace
+	; FIXME - isolated namespaces
+	zn "%sys"
+	set installer = ##class(%Installer.Installer).%New()
+	; create both database and namespace to have the common name @TempName
+	do installer.CreateDatabase(TempName, TempName, "overwrite") ; Name, [Subdir] Name
+	do installer.CreateNamespace(TempName, TempName, TempName) ; Namespace, Code DB, Data DB
+
+	set properties("NameSpace") = TempName
+    set properties("IsNameSpaceDefault") = $$$YES
+    set properties("AutheEnabled") = $$$AutheUnauthenticated
+    #dim cspTempName As %String = "/csp/" _ $zcvt(TempName,"l")
+
+    if ('##class(Security.Applications).Exists(cspTempName)) {
+        write !, "Creating WEB application " _ cspTempName _ "..."
+        set st = ##class(Security.Applications).Create(cspTempName, .properties)
+        write !, "WEB application " _ cspTempName _ " created."
+    } else {
+	    set st = $$$OK
+        write !, "WEB application " _ cspTempName _ " already exists, so it is ready to use."
+    }
+
+	zn TempName
+	; ..AddDirectoryItems will be appropriate
+	; but object will become useless the next moment we leave namespace..
+	; so do the old-school way
+	#dim flags As %String = $select(dryRun:"-d",1:"ck-l")
+	; load single file
+	if useReleaseAsset {
+	    do $system.OBJ.Load(TempDir,flags,.errors,.ListOfFiles)
+	}
+	; use whole directory
+	else {
+	    do $system.OBJ.ImportDir(TempDir,,flags,.errors,1,.ListOfFiles)
+	}
+
+#if 0
+	zn "%sys"	
+	if ##class(Config.Namespaces).Exists(TempName) {
+		set sc = ##class(Config.Namespaces).Delete(TempName)
+		set sc = $$DeleteDatabase^%SYS.DATABASE(TempName)
+	}
+#endif
+]]></Implementation>
+</Method>
+
+<Method name="CreateTempDir">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>name:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim tempDirectory As %String = $$$UtilConcatPath($$$CpmConfig.tempdir, ".github")
+	set tempDirectory = $$$UtilConcatPath(tempDirectory, name)
+	if tempDirectory = "" {
+		write !, "Failed to calculate temporary directory",!!
+		quit '$$$OK
+	}
+	write "Creating temp directory: ", tempDirectory,!
+	do ##class(%Library.File).RemoveDirectoryTree(tempDirectory)
+	do ##class(%Library.File).CreateDirectoryChain(tempDirectory)
+	quit tempDirectory
+]]></Implementation>
+</Method>
+
+<Method name="FullUrl">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>url:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim fullUrl As %String
+    if $match(url, "^https?:.*github.com.*") {
+	    set fullUrl = url
+    } else {
+	    set fullUrl = "https://github.com/"_url
+    }
+    return fullUrl
+]]></Implementation>
+</Method>
+
+<Method name="DownloadUrl">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>url:%String,tempName:%String</FormalSpec>
+<Implementation><![CDATA[
+	#dim archive = ##class(%Stream.FileBinary).%New()
+	set archive.Filename = tempName
+	#dim zipball As %Net.HttpResponse = $$$CpmRegistry.Get(..FullUrl(url))
+	do archive.CopyFromAndSave(zipball.Data)
+]]></Implementation>
+</Method>
+
+<Parameter name="ARCHIVER">
+<Type>%String</Type>
+<Default>"C:\Program Files\7-Zip\7z.exe"</Default>
+</Parameter>
+
+<Method name="NotFound">
+<Description>
+not found the asked url (license, readme, etc.)</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec>o:%ZEN.proxyObject</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA['$isobject(o) || (o.message = "Not Found")
+]]></Implementation>
+</Method>
+
+<Parameter name="IgnoreList">
+<Type>%String</Type>
+<Default>.gitignore;.gitattributes;sc-list.txt;LICENSE;LICENSE.md;README.md;README.txt;readme.txt;readme.md</Default>
+</Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+// ОШИБКА #5840: Невозможно импортировать файл 'C:\InterSystems\...\out\intersystems-ru-Cache-MDX2JSON-c8cc37d\.gitignore', т.к. этот тип не поддерживается.
+
+]]></Content>
+</UDLText>
+
+<Method name="ExtractFileFromMessage">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec>message:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[##class(%File).GetFilename($piece(message, "'", 2))
+]]></Implementation>
+</Method>
+
+<Method name="CouldbeSafelyIgnored">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>message:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	#dim fileName As %String = ..ExtractFileFromMessage(message)
+	#dim fileVariant As %String
+	#dim list As %Binary = $listfromstring(..#IgnoreList,";")
+    #dim ptr As %Binary = 0
+    while $listnext(list, ptr, fileVariant) {
+		if fileVariant = fileName {
+			return 1
+		}
+	}
+	return 0
+]]></Implementation>
+</Method>
+
+<Method name="ProcessDirectoryNS">
+<Internal>1</Internal>
+<FormalSpec>tempZip:%String,tempOutDir:%String,dryRun:%Boolean=0,useReleaseAsset:%Boolean=0</FormalSpec>
+<Implementation><![CDATA[
+	; downloaded zip file - deal with whole directory
+	if 'useReleaseAsset{ ;  $piece(##class(%File).GetFilename(tempZip),".",*) = "zip" {
+		write !, "Extracting package into: "_tempOutDir,!
+		set x = $ZF(-1, ..#ARCHIVER_" x "_tempZip_" -o"_tempOutDir_" -y")
+	}
+	; downloaded single release archive - deal with single file
+	else {
+		set tempOutDir = tempZip
+	}
+	if ##class(%Library.File).Exists(tempOutDir) {
+		#dim list
+		do ..LoadTemporarilyToNS(..NextTempNamespace(), tempOutDir, .list, .errors, dryRun, useReleaseAsset)
+		#dim itemName As %String = ""
+		#dim filesN As %Numeric = 0
+		do ..items.Clear()
+		for {
+	    	set itemName = $order(list(itemName))
+	    	quit:itemName=""
+	    	set filesN = filesN + 1
+	    	write ?8,itemName,!
+	    	do ..items.Insert(itemName)
+		}
+		#dim errorsN As %Numeric = $get(errors)
+		#dim ignoredN As %Numeric = 0
+		for i=1:1:errorsN {
+			if ..CouldbeSafelyIgnored($g(errors(i))) {
+				set ignoredN = ignoredN + 1
+			}
+		}
+		&html< file(s): #(filesN)# error(s): #(errorsN)# / ignored: #(ignoredN)# >
+	}
+	; do ##class(%Library.File).RemoveDirectoryTree(tempDirectory)
+]]></Implementation>
+</Method>
+
+<Method name="ImportFromObject">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>repoName:%String,dryRun:%Boolean=0,repo:%ZEN.proxyObject,license:%ZEN.proxyObject,readme:%ZEN.proxyObject,release:%ZEN.proxyObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim name As %String = repoName ; repo.name ; FIXME
+	do ##class(CPM.Registry.GitHubApi).NormalizeRepoName(.name)
+
+    #dim avatar As %String = repo.owner."avatar_url"
+	#dim author As %String = repo.owner.login
+	#dim authorUrl As %String = repo."html_url"
+    #dim description As %String = repo.description
+    #dim gitHubUrl As %String = repo."html_url"
+    #dim haswiki As %String = repo."has_wiki"
+	#dim subCount As %String = repo."subscribers_count"
+    #dim hasDownloads As %Boolean = repo."has_downloads"
+    #dim forksCount As %Integer = repo."forks_count"
+    #dim createionTime As %DateTime = repo."created_at"
+    #dim modificationTime As %DateTime = repo."pushed_at"
+    #dim version As %String = repo."tag_name"
+    
+	#dim package As CPM.Registry.Package = ..CreateOrOpenId(name)
+
+    set package.name = name
+    set package.avatar = avatar
+    set package.description = description
+   	set package.author = author
+	set package.authorUrl = authorUrl
+	set package.version = version
+	set package.subscribersCount = subCount
+
+	if '..NotFound(license) {
+	    #dim licenseType As %String = license.license.key
+	    #dim licenseName As %String = license.license.name
+	}
+
+	if '..NotFound(readme) {
+	    #;dim readmeEncoding As %String = readme.encoding
+	    #dim readmeContent As %String = readme.content
+	    #dim readmeFilename As %String = readme.path
+	    #;dim readmeUrl As %String = readme."html_url"
+	    #dim readmeText As %String = $system.Encryption.Base64Decode(readmeContent)
+
+	    set package.readmeFilename = readmeFilename
+	    do package.readmeText.Clear()
+		do package.readmeText.Write(readmeText)
+	}
+
+	#dim tarUrl As %String
+	
+	#dim tempDirectory As %String = ..CreateTempDir(name)
+	#dim tempZip As %String = ""
+	#dim useReleaseAsset As %Boolean = 0
+
+	if ..NotFound(release) {
+		// Case #1 - no release yet, the normal source only package
+		set tarUrl = repoName _ "/zipball/master/"
+		set tempZip = $$$UtilMakePath(tempDirectory, "test.zip")
+	} else {
+	    #dim tag As %String = release."tag_name"
+	    #dim tagName As %String = release.name
+	    #dim tagTime As %DateTime = release."published_at"
+	    #dim tarball As %String = release."tarball_url"
+	    #dim zipball As %String = release."zipball_url"
+	    #dim releaseComments As %String = release.body
+	    #dim browserDownloadsUri As %String = release.assets.GetAt(1)."browser_download_url"
+	    set package.path = ""
+	    if browserDownloadsUri '= "" {
+		    set tarUrl = browserDownloadsUri
+		    #dim assetName As %String = ##class(%File).GetFilename(tarUrl)
+		    set tempZip = $$$UtilMakePath(tempDirectory, assetName)
+		    set package.path = assetName
+			set useReleaseAsset = 1
+	    } else {
+		    set tarUrl = zipball
+			set tempZip = $$$UtilMakePath(tempDirectory, "test.zip")
+	    }
+    	set package."dist-tags" = tag
+	}
+
+	do ..DownloadUrl(tarUrl, tempZip)
+
+	#dim tempOutDir As %String = $$$UtilConcatPath(tempDirectory, "out")
+	do package.ProcessDirectoryNS(tempZip, tempOutDir, dryRun, useReleaseAsset)
+	quit:'dryRun package.%Save()
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ImportFrom">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>repoName:%String,dryRun:%Boolean=0</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim status As %Status = $$$OK
+	#dim githubApi As CPM.Registry.GitHubApi = ##class(CPM.Registry.GitHubApi).%New()
+    
+    #dim repo As %ZEN.proxyObject = ""
+    $$$THROWONERROR(status, githubApi.GetRepoInfo(repoName, .repo))
+    #dim license As %ZEN.proxyObject = ""
+    $$$THROWONERROR(status, githubApi.GetLicense(repoName, .license))
+    #dim readme As %ZEN.proxyObject = ""
+    $$$THROWONERROR(status, githubApi.GetReadme(repoName, .readme))
+
+    #dim releases As %ListOfObjects = ""
+    $$$THROWONERROR(status, githubApi.GetReleases(repoName, .releases))
+
+    #dim latestRelease As %ZEN.proxyObject = ""
+    $$$THROWONERROR(status, githubApi.GetReleaseInfo(repoName, ,.latestRelease))
+
+    quit ..ImportFromObject(repoName, dryRun, repo, license, readme, latestRelease)
+]]></Implementation>
+</Method>
+
+<Method name="ImportAll">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>orgName:%String,dryRun:%Boolean=0,max:%Numeric=100</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim githubApi As CPM.Registry.GitHubApi = ##class(CPM.Registry.GitHubApi).%New()
+	#dim data As $$$JsonObject
+	#dim sc As %Status = githubApi.GetRepos(orgName, .data)
+
+	set urlName = ""
+	for i=1:1:data.Count() {
+		#dim repoObject = data.GetAt(i)
+		#dim repoName = repoObject.name
+		
+		// skip private repositories
+		if repoObject.private {
+			continue 
+		}
+		// bail out if too much repositories already processed
+		if i>max { quit }
+		
+		// resolve forks
+		if repoObject.fork {
+			#dim repoDetailed 
+			do githubApi.GetRepoInfo(orgName _"/"_ repoName, .repoDetailed)
+			if repoDetailed.parent {
+				; do repoDetailed.parent.%ToJSON()
+				set urlName = repoDetailed.parent."html_url"
+			}
+		} else {
+			set urlName = repoObject."html_url"
+		}
+		quit:urlName=""        
+        write !, i,".", ?4, "Import from url: ", urlName,!
+        do ..ImportFrom(urlName, dryRun)
+	}
+	quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -328,34 +728,34 @@ Is used to get the value of an unknown property.</Description>
 <Value>Modified</Value>
 </Value>
 <Value name="3">
-<Value>path</Value>
+<Value>dist-tags</Value>
 </Value>
 <Value name="4">
-<Value>version</Value>
-</Value>
-<Value name="5">
-<Value>license</Value>
-</Value>
-<Value name="6">
-<Value>keywords</Value>
-</Value>
-<Value name="7">
-<Value>description</Value>
-</Value>
-<Value name="8">
-<Value>dependencies</Value>
-</Value>
-<Value name="9">
-<Value>items</Value>
-</Value>
-<Value name="10">
-<Value>maintainers</Value>
-</Value>
-<Value name="11">
 <Value>author</Value>
 </Value>
+<Value name="5">
+<Value>path</Value>
+</Value>
+<Value name="6">
+<Value>version</Value>
+</Value>
+<Value name="7">
+<Value>license</Value>
+</Value>
+<Value name="8">
+<Value>keywords</Value>
+</Value>
+<Value name="9">
+<Value>description</Value>
+</Value>
+<Value name="10">
+<Value>dependencies</Value>
+</Value>
+<Value name="11">
+<Value>items</Value>
+</Value>
 <Value name="12">
-<Value>DirectoryPath</Value>
+<Value>maintainers</Value>
 </Value>
 <Value name="13">
 <Value>readmeFilename</Value>
@@ -364,7 +764,22 @@ Is used to get the value of an unknown property.</Description>
 <Value>readmeText</Value>
 </Value>
 <Value name="15">
-<Value>dist-tags</Value>
+<Value>DirectoryPath</Value>
+</Value>
+<Value name="16">
+<Value>GlobalInstall</Value>
+</Value>
+<Value name="17">
+<Value>TargetNamespace</Value>
+</Value>
+<Value name="18">
+<Value>Postinstall</Value>
+</Value>
+<Value name="19">
+<Value>PreInstall</Value>
+</Value>
+<Value name="20">
+<Value>PostInstall</Value>
 </Value>
 </Data>
 </Storage>

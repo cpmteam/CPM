@@ -30,7 +30,7 @@
 
 <Method name="GetMeta">
 <Description>
-getting met informationfor package, i.e. package.json</Description>
+getting meta information for a package, i.e. package.json content</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Package:%String</FormalSpec>
 <ReturnType>%ArrayOfDataTypes</ReturnType>

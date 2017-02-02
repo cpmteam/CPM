@@ -101,15 +101,21 @@ Call GitHub API given <var>api</var> urls and arguments. Return JSON data into <
             set url = url _ "/" _ api
         }
     }
-#if 0
-    /// no need to do any of OAuth tricks
-    #dim authorizer As TWReader.Authorizer = ##class(TWReader.Authorizer).%New()
-    #dim authHeader as %String = authorizer.GetAuthHeader("get", url, arrayArgs)
-#else
     #dim authHeader As %String = ..GetTokenAuthorization()
-#endif
+
     set responseText = ""
     quit ..SendSimpleHttpRequest(apiServer, api, .responseText, authHeader)
+]]></Implementation>
+</Method>
+
+<Method name="NormalizeRepoName">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*repoName:%String</FormalSpec>
+<Implementation><![CDATA[
+	if $match(repoName, ".*github.com/.*") {
+		set repoName = $piece(repoName, "github.com/", 2, *)
+	}
 ]]></Implementation>
 </Method>
 
@@ -138,21 +144,66 @@ Call GitHub API given <var>api</var> urls and arguments. Return JSON data into <
 ]]></Implementation>
 </Method>
 
+<Method name="GetRepos">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>orgName:%String,*object:%ZEN.proxyObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #dim url As %String = "/orgs/" _ orgName _ "/repos"
+    return ..GetUrl(url, .object)
+]]></Implementation>
+</Method>
+
 <Method name="GetRepoInfo">
 <ClassMethod>1</ClassMethod>
 <FormalSpec>repoName:%String,*object:%ZEN.proxyObject</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	do ..NormalizeRepoName(.repoName)
     #dim url As %String = "/repos/" _ repoName
+    return ..GetUrl(url, .object)
+]]></Implementation>
+</Method>
+
+<Method name="GetReleases">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>repoName:%String,*list:%ListOfObjects</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	do ..NormalizeRepoName(.repoName)
+    #dim url As %String = "/repos/" _ repoName _ "/releases"
+    return ..GetUrl(url, .list)
+]]></Implementation>
+</Method>
+
+<Method name="GetLicense">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>repoName:%String,*object:%ZEN.proxyObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	do ..NormalizeRepoName(.repoName)
+    #dim url As %String = "/repos/" _ repoName _ "/license"
+    return ..GetUrl(url, .object)
+]]></Implementation>
+</Method>
+
+<Method name="GetReadme">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>repoName:%String,*object:%ZEN.proxyObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	do ..NormalizeRepoName(.repoName)
+    #dim url As %String = "/repos/" _ repoName _ "/readme"
     return ..GetUrl(url, .object)
 ]]></Implementation>
 </Method>
 
 <Method name="GetReleaseInfo">
 <ClassMethod>1</ClassMethod>
-<FormalSpec>repoName:%String,releaseName:%String,*object:%ZEN.proxyObject</FormalSpec>
+<FormalSpec>repoName:%String,releaseName:%String="latest",*object:%ZEN.proxyObject</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	do ..NormalizeRepoName(.repoName)
     #dim url As %String = "/repos/" _ repoName _ "/releases/" _ releaseName
     return ..GetUrl(url, .object)
 ]]></Implementation>
@@ -167,6 +218,7 @@ Call GitHub API given <var>api</var> urls and arguments. Return JSON data into <
     #dim param As %String
     #dim i As %Integer
     
+	do ..NormalizeRepoName(.apiUrl)
     if ($get(apiParams)="") {
         if $length(apiUrl, "?")>1 {
             set $lb(apiUrl, apiParams) = $lfs(apiUrl, "?")
