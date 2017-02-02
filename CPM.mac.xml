@@ -69,8 +69,6 @@ error(sc) {
 }
 #; actual batch entry-point with command and arguments given
 batch1(command="help", args...)
-	new $namespace 	; FIXME
-	ZN "CPM"		; FIXME - fix all SQL mapping problems and get rid of it
     ; load aliases
     do ALIASES(.aliases)
     ; convert to upper case

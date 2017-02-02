@@ -302,13 +302,29 @@ TODO - isolated installation</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="FullUrl">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>url:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim fullUrl As %String
+    if $match(url, "^https?:.*github.com.*") {
+	    set fullUrl = url
+    } else {
+	    set fullUrl = "https://github.com/"_url
+    }
+    return fullUrl
+]]></Implementation>
+</Method>
+
 <Method name="DownloadUrl">
 <ClassMethod>1</ClassMethod>
 <FormalSpec>url:%String,tempName:%String</FormalSpec>
 <Implementation><![CDATA[
 	#dim archive = ##class(%Stream.FileBinary).%New()
 	set archive.Filename = tempName
-	#dim zipball As %Net.HttpResponse = $$$CpmRegistry.Get(url)
+	#dim zipball As %Net.HttpResponse = $$$CpmRegistry.Get(..FullUrl(url))
 	do archive.CopyFromAndSave(zipball.Data)
 ]]></Implementation>
 </Method>
