@@ -53,3 +53,8 @@ _This is still work-in-progress, and we appreciate any help in implementation of
   - [ ]  Atom-COS-Studio - mixed (*bad*);
   - [ ]  CNA - binary (*bad*)
 
+Original announcement has been done on the [InterSystems Developer Community](https://community.intersystems.com/post/part-ii-%E2%80%93-making-community-package-manager) you could join the original discussion, or better yet - go and directly submit [GitHub Issues](https://github.com/cpmteam/CPM/issues)
+
+There is [GitHub project](https://github.com/orgs/cpmteam/projects/1) created, which is covering all the problems we want to address since original announcement and before release 1.0, if you have some spare time, and desire - please select any opened issue you like and try to fix it.
+
+Thanks!
